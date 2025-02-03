@@ -1,7 +1,7 @@
 # Antminer_L3plus-v1.8
 
-==Tasks: 
-#Make a new flasher image with following requirements:
+## Tasks
+### 1. Make a new flasher image with following requirements:
   - Make the size smaller by removing unused software on it
   - Make it interactive:
     - ask to approve flashing the coresponding nand
