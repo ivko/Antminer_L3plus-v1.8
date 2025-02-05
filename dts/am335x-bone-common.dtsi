@@ -101,7 +101,7 @@
 
 	bone_capemgr {
 		compatible = "ti,bone-capemgr";
-		status = "okay";
+		status = "disabled";
 
 		eeprom = <&baseboard_eeprom>;
 
@@ -213,13 +213,13 @@
 
 			/* Beaglebone black has it soldered on */
 			 slot@100 {
-			 	ti,cape-override;
+				ti,cape-override;
 				priority = <1>;
-			 	compatible = "ti,beaglebone-black";
-			 	board-name = "Bone-LT-eMMC-2G";
-			 	version = "00A0";
-			 	manufacturer = "Texas Instruments";
-			 	part-number = "BB-BONE-EMMC-2G";
+				compatible = "ti,beaglebone-black";
+				board-name = "Bone-LT-eMMC-2G";
+				version = "00A0";
+				manufacturer = "Texas Instruments";
+				part-number = "BB-BONE-EMMC-2G";
 			 };
 
 			/* Beaglebone black has it soldered on */
@@ -247,7 +247,7 @@
 			};
 */
 		};
-									  
+
 		/* mapping between board names and dtb objects */
 		capemaps {
 			/* DVI cape */
@@ -311,6 +311,10 @@
 					version = "00A0";
 					dtbo = "cape-bone-weather-00A0.dtbo";
 				};
+				version@00B0 {
+					version = "00B0";
+					dtbo = "cape-bone-weather-00B0.dtbo";
+				};
 			};
 
 			/* beaglebone black hdmi on board */
@@ -370,7 +374,7 @@
 					dtbo = "cape-bone-exptest-00A0.dtbo";
 				};
 			};
- 			cape@12 {
+			cape@12 {
 				part-number = "BB-BONE-RS232-01";
 				version@00A0 {
 					version = "00A0";
@@ -406,6 +410,15 @@
 				};
 			};
 
+			/* LOGIBONE cape */
+			cape@16 {
+				part-number = "BB-BONE-LOGIBONE";
+				version@00R1 {
+					version = "00R1";
+					dtbo = "BB-BONE-LOGIBONE-00R1.dtbo";
+				};
+			};
+
 		};
 	};
 
@@ -419,7 +432,7 @@
 };
 
 &i2c0 {
-	status = "okay";
+	status = "disabled";
 	clock-frequency = <400000>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&i2c0_pins>;
@@ -525,6 +538,7 @@
 &mmc1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&mmc1_pins>;
+	bus-width = <0x4>;
 	cd-gpios = <&gpio1 6 0>; /* gpio1 is misnamed, 0 == GPIO_ACTIVE_HIGH */
 	cd-inverted;
 	status = "okay";
