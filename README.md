@@ -15,6 +15,8 @@ Linux version 3.8.13 (xxl@armdev01) (gcc version 4.7.4 20130626 (prerelease) (Li
 ##  Pin Mux Modes: 
 - https://www.ofitselfso.com/BeagleNotes/BeagleboneBlackPinMuxModes.php
 
+##  GPIOs:
+- https://vadl.github.io/beagleboneblack/2016/07/29/setting-up-bbb-gpio
 ## Bitmianer recipe:
 - https://github.com/ivko/Antminer_firmware/blob/master/sources/meta-antminer/recipes-bitmianer/dtb/bitmainer-dtb-1.0/am335x-boneblack.dts
 
