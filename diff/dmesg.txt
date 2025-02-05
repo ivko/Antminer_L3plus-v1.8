@@ -1,0 +1,301 @@
+root@antMiner:/media/card/dts# dmesg
+[    0.000000] Booting Linux on physical CPU 0x0
+[    0.000000] Initializing cgroup subsys cpu
+[    0.000000] Linux version 3.8.13 (xxl@armdev01) (gcc version 4.7.4 20130626 (prerelease) (Linaro GCC 4.7-2013.07) ) #22 SMP Tue Dec 2 15:26:11 CST 2014
+[    0.000000] CPU: ARMv7 Processor [413fc082] revision 2 (ARMv7), cr=50c5387d
+[    0.000000] CPU: PIPT / VIPT nonaliasing data cache, VIPT aliasing instruction cache
+[    0.000000] Machine: Generic AM33XX (Flattened Device Tree), model: TI AM335x BeagleBone
+[    0.000000] Memory policy: ECC disabled, Data cache writeback
+[    0.000000] On node 0 totalpages: 65280
+[    0.000000] free_area_init_node: node 0, pgdat c06cb100, node_mem_map c0726000
+[    0.000000]   Normal zone: 512 pages used for memmap
+[    0.000000]   Normal zone: 0 pages reserved
+[    0.000000]   Normal zone: 64768 pages, LIFO batch:15
+[    0.000000] AM335X ES1.0 (neon )
+[    0.000000] PERCPU: Embedded 8 pages/cpu @c0934000 s9408 r8192 d15168 u32768
+[    0.000000] pcpu-alloc: s9408 r8192 d15168 u32768 alloc=8*4096
+[    0.000000] pcpu-alloc: [0] 0
+[    0.000000] Built 1 zonelists in Zone order, mobility grouping on.  Total pages: 64768
+[    0.000000] Kernel command line: console=ttyO0,115200n8 init=/sbin/init
+[    0.000000] PID hash table entries: 1024 (order: 0, 4096 bytes)
+[    0.000000] Dentry cache hash table entries: 32768 (order: 5, 131072 bytes)
+[    0.000000] Inode-cache hash table entries: 16384 (order: 4, 65536 bytes)
+[    0.000000] __ex_table already sorted, skipping sort
+[    0.000000] allocated 524288 bytes of page_cgroup
+[    0.000000] please try 'cgroup_disable=memory' option if you don't want memory cgroups
+[    0.000000] Memory: 255MB = 255MB total
+[    0.000000] Memory: 236412k/236412k available, 25732k reserved, 0K highmem
+[    0.000000] Virtual kernel memory layout:
+[    0.000000]     vector  : 0xffff0000 - 0xffff1000   (   4 kB)
+[    0.000000]     fixmap  : 0xfff00000 - 0xfffe0000   ( 896 kB)
+[    0.000000]     vmalloc : 0xd0800000 - 0xff000000   ( 744 MB)
+[    0.000000]     lowmem  : 0xc0000000 - 0xd0000000   ( 256 MB)
+[    0.000000]     pkmap   : 0xbfe00000 - 0xc0000000   (   2 MB)
+[    0.000000]     modules : 0xbf800000 - 0xbfe00000   (   6 MB)
+[    0.000000]       .text : 0xc0008000 - 0xc0612cf0   (6188 kB)
+[    0.000000]       .init : 0xc0613000 - 0xc06554c0   ( 266 kB)
+[    0.000000]       .data : 0xc0656000 - 0xc06cc020   ( 473 kB)
+[    0.000000]        .bss : 0xc06cc020 - 0xc0725e3c   ( 360 kB)
+[    0.000000] Hierarchical RCU implementation.
+[    0.000000]  RCU restricting CPUs from NR_CPUS=4 to nr_cpu_ids=1.
+[    0.000000] NR_IRQS:16 nr_irqs:16 16
+[    0.000000] IRQ: Found an INTC at 0xfa200000 (revision 5.0) with 128 interrupts
+[    0.000000] Total of 128 interrupts on 1 active controller
+[    0.000000] OMAP clockevent source: GPTIMER1 at 24000000 Hz
+[    0.000000] sched_clock: 32 bits at 24MHz, resolution 41ns, wraps every 178956ms
+[    0.000000] OMAP clocksource: GPTIMER2 at 24000000 Hz
+[    0.000000] Console: colour dummy device 80x30
+[    0.000353] Calibrating delay loop... 545.07 BogoMIPS (lpj=531968)
+[    0.015429] pid_max: default: 32768 minimum: 301
+[    0.015660] Security Framework initialized
+[    0.015756] Mount-cache hash table entries: 512
+[    0.025504] Initializing cgroup subsys cpuacct
+[    0.025536] Initializing cgroup subsys memory
+[    0.025600] Initializing cgroup subsys blkio
+[    0.025743] CPU: Testing write buffer coherency: ok
+[    0.026280] CPU0: thread -1, cpu 0, socket -1, mpidr 0
+[    0.026356] Setting up static identity map for 0x8038c820 - 0x8038c86c
+[    0.027742] Brought up 1 CPUs
+[    0.027766] SMP: Total of 1 processors activated (545.07 BogoMIPS).
+[    0.028965] devtmpfs: initialized
+[    0.093615] pinctrl core: initialized pinctrl subsystem
+[    0.093829] rstctl core: initialized rstctl subsystem
+[    0.094320] regulator-dummy: no parameters
+[    0.094833] NET: Registered protocol family 16
+[    0.095585] DMA: preallocated 256 KiB pool for atomic coherent allocations
+[    0.105568] pinctrl-single 44e10800.pinmux: 142 pins at pa f9e10800 size 568
+[    0.106339] platform 49000000.edma: alias fck already exists
+[    0.106371] platform 49000000.edma: alias fck already exists
+[    0.106400] platform 49000000.edma: alias fck already exists
+[    0.107604] gpiochip_add: registered GPIOs 0 to 31 on device: gpio
+[    0.107788] OMAP GPIO hardware version 0.1
+[    0.109131] gpiochip_add: registered GPIOs 32 to 63 on device: gpio
+[    0.110451] gpiochip_add: registered GPIOs 64 to 95 on device: gpio
+[    0.111930] gpiochip_add: registered GPIOs 96 to 127 on device: gpio
+[    0.112459] of_get_named_gpio_flags exited with status 52
+[    0.112490] gpio-rctrl rstctl.4: loaded OK
+[    0.131245] omap_hwmod: pruss: failed to hardreset
+[    0.132847] omap-gpmc 50000000.gpmc: GPMC revision 6.0
+[    0.136106] hw-breakpoint: debug architecture 0x4 unsupported.
+[    0.138292] cpsw.0: No hwaddr in dt. Using c4:f3:12:73:1c:92 from efuse
+[    0.138325] cpsw.1: No hwaddr in dt. Using c4:f3:12:73:1c:94 from efuse
+[    0.153832] bio: create slab <bio-0> at 0
+[    0.166011] edma-dma-engine edma-dma-engine.0: TI EDMA DMA engine driver
+[    0.166249] of_get_named_gpio_flags: can't parse gpios property
+[    0.166463] vmmcsd_fixed: 3300 mV
+[    0.169509] SCSI subsystem initialized
+[    0.169993] usbcore: registered new interface driver usbfs
+[    0.170128] usbcore: registered new interface driver hub
+[    0.170403] usbcore: registered new device driver usb
+[    0.172478] omap_i2c 44e0b000.i2c: bus 0 rev0.11 at 400 kHz
+[    0.174000] input: tps65217_pwr_but as /devices/ocp.3/44e0b000.i2c/i2c-0/0-0024/input/input0
+[    0.176228] DCDC1: at 1500 mV
+[    0.177365] vdd_mpu: 925 <--> 1325 mV at 1100 mV
+[    0.178555] vdd_core: 925 <--> 1150 mV at 1100 mV
+[    0.179707] LDO1: at 1800 mV
+[    0.180784] LDO2: at 3300 mV
+[    0.182761] LDO3: 1800 mV
+[    0.183924] LDO4: at 3300 mV
+[    0.184916] tps65217 0-0024: TPS65217 ID 0xe version 1.2
+[    0.185673] omap_i2c 44e0b000.i2c: unable to select pin group
+[    0.186384] omap_i2c 4819c000.i2c: bus 1 rev0.11 at 100 kHz
+[    0.188721] omap_i2c 4819c000.i2c: unable to select pin group
+[    0.188953] media: Linux media interface: v0.10
+[    0.189056] Linux video capture interface: v2.00
+[    0.189178] pps_core: LinuxPPS API ver. 1 registered
+[    0.189194] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.190013] Advanced Linux Sound Architecture Driver Initialized.
+[    0.191169] Switching to clocksource gp_timer
+[    0.209490] NET: Registered protocol family 2
+[    0.210503] TCP established hash table entries: 2048 (order: 2, 16384 bytes)
+[    0.210592] TCP bind hash table entries: 2048 (order: 3, 40960 bytes)
+[    0.210683] TCP: Hash tables configured (established 2048 bind 2048)
+[    0.210777] TCP: reno registered
+[    0.210804] UDP hash table entries: 256 (order: 1, 12288 bytes)
+[    0.210918] UDP-Lite hash table entries: 256 (order: 1, 12288 bytes)
+[    0.211344] NET: Registered protocol family 1
+[    0.211905] RPC: Registered named UNIX socket transport module.
+[    0.211926] RPC: Registered udp transport module.
+[    0.211939] RPC: Registered tcp transport module.
+[    0.211954] RPC: Registered tcp NFSv4.1 backchannel transport module.
+[    0.212333] Trying to unpack rootfs image as initramfs...
+[    2.794920] Freeing initrd memory: 14496K
+[    2.795241] hw perfevents: enabled with ARMv7 Cortex-A8 PMU driver, 5 counters available
+[    2.795696] CPU PMU: attempt to register multiple PMU devices!
+[    2.795735] arm-pmu: probe of arm-pmu failed with error -28
+[    2.796202] omap2_mbox_probe: platform not supported
+[    2.800125] VFS: Disk quotas dquot_6.5.2
+[    2.800362] Dquot-cache hash table entries: 1024 (order 0, 4096 bytes)
+[    2.801788] NFS: Registering the id_resolver key type
+[    2.801881] Key type id_resolver registered
+[    2.801898] Key type id_legacy registered
+[    2.801963] jffs2: version 2.2. (NAND) (SUMMARY)  © 2001-2006 Red Hat, Inc.
+[    2.802418] msgmni has been set to 490
+[    2.805280] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 249)
+[    2.805308] io scheduler noop registered
+[    2.805323] io scheduler deadline registered
+[    2.805377] io scheduler cfq registered (default)
+[    2.807224] tps65217-bl tps65217-bl: no platform data provided
+[    2.807265] tps65217-bl: probe of tps65217-bl failed with error -22
+[    2.808147] Serial: 8250/16550 driver, 4 ports, IRQ sharing enabled
+[    2.810928] omap_uart 44e09000.serial: did not get pins for uart0 error: -19
+[    2.811211] 44e09000.serial: ttyO0 at MMIO 0x44e09000 (irq = 88) is a OMAP UART0
+[    3.541083] console [ttyO0] enabled
+[    3.545949] [drm] Initialized drm 1.1.0 20060810
+[    3.564577] brd: module loaded
+[    3.574838] loop: module loaded
+[    3.578293] at24 0-0050: 32768 byte 24c256 EEPROM, writable, 1 bytes/write
+[    3.585576] at24 1-0054: 32768 byte 24c256 EEPROM, writable, 1 bytes/write
+[    3.592848] at24 1-0055: 32768 byte 24c256 EEPROM, writable, 1 bytes/write
+[    3.600118] at24 1-0056: 32768 byte 24c256 EEPROM, writable, 1 bytes/write
+[    3.607386] at24 1-0057: 32768 byte 24c256 EEPROM, writable, 1 bytes/write
+[    3.646425] bone-capemgr bone_capemgr.9: bone: scan failed (1 time)
+[    4.185488] bone-capemgr bone_capemgr.9: bone: scan failed (2 time)
+[    4.724543] bone-capemgr bone_capemgr.9: bone: scan failed (3 time)
+[    5.263606] bone-capemgr bone_capemgr.9: bone: scan failed (4 time)
+[    5.802668] bone-capemgr bone_capemgr.9: bone: scan failed (5 time)
+[    6.341733] bone-capemgr bone_capemgr.9: bone: scan failed (6 time)
+[    6.880793] bone-capemgr bone_capemgr.9: bone: scan failed (7 time)
+[    7.419856] bone-capemgr bone_capemgr.9: bone: scan failed (8 time)
+[    7.958918] bone-capemgr bone_capemgr.9: bone: scan failed (9 time)
+[    8.497981] bone-capemgr bone_capemgr.9: bone: scan failed (10 time)
+[    9.005805] bone-capemgr bone_capemgr.9: Failed to scan baseboard eeprom
+[    9.012861] bone-capemgr: probe of bone_capemgr.9 failed with error -110
+[    9.022697] nand_get_flash_type: 2c,da against 2c,da
+[    9.028229] ONFI param page 0 valid
+[    9.031902] ONFI flash detected
+[    9.035221] NAND device: Manufacturer ID: 0x2c, Chip ID: 0xda (Micron MT29F2G08ABAEAWP), 256MiB, page size: 2048, OOB size: 64
+[    9.047132] omap2-nand: detected x8 NAND flash
+[    9.051795] nand: using OMAP_ECC_BCH8_CODE_HW ECC scheme
+[    9.057399] omap2-nand: using custom ecc layout
+[    9.062237] 10 ofpart partitions found on MTD device omap2-nand.0
+[    9.068628] Creating 10 MTD partitions on "omap2-nand.0":
+[    9.074301] 0x000000000000-0x000000020000 : "spl"
+[    9.081169] 0x000000020000-0x000000040000 : "spl_backup1"
+[    9.088615] 0x000000040000-0x000000060000 : "spl_backup2"
+[    9.096028] 0x000000060000-0x000000080000 : "spl_backup3"
+[    9.103326] 0x000000080000-0x000000240000 : "u-boot"
+[    9.111570] 0x000000240000-0x000000260000 : "bootenv"
+[    9.118520] 0x000000260000-0x000000280000 : "fdt"
+[    9.125141] 0x000000280000-0x000000780000 : "kernel"
+[    9.136124] 0x000000800000-0x000001c00000 : "root"
+[    9.159635] 0x000001c00000-0x000003000000 : "config"
+[    9.183412] OneNAND driver initializing
+[    9.189080] usbcore: registered new interface driver asix
+[    9.194887] usbcore: registered new interface driver cdc_ether
+[    9.201166] usbcore: registered new interface driver smsc95xx
+[    9.207279] usbcore: registered new interface driver net1080
+[    9.213299] usbcore: registered new interface driver cdc_subset
+[    9.219587] usbcore: registered new interface driver zaurus
+[    9.225589] usbcore: registered new interface driver cdc_ncm
+[    9.232350] usbcore: registered new interface driver cdc_acm
+[    9.238292] cdc_acm: USB Abstract Control Model driver for USB modems and ISDN adapters
+[    9.246669] Initializing USB Mass Storage driver...
+[    9.251951] usbcore: registered new interface driver usb-storage
+[    9.258248] USB Mass Storage support registered.
+[    9.263279] musb-hdrc: version 6.0, ?dma?, otg (peripheral+host)
+[    9.269973] musb-hdrc musb-hdrc.0.auto: pdev->id = 0
+[    9.275213] musb-hdrc musb-hdrc.0.auto: drivers/usb/musb/musb_dsps.c:468 dsps_musb_init: OK
+[    9.283979] musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, bulk combine, bulk split, HB-ISO Rx, HB-ISO Tx, SoftConn)
+[    9.284001] musb-hdrc: MHDRC RTL version 2.0
+[    9.284016] musb-hdrc: setup fifo_mode 4
+[    9.284044] musb-hdrc: 28/31 max ep, 16384/16384 memory
+[    9.284191] musb-hdrc musb-hdrc.0.auto: *** mode=3
+[    9.289235] musb-hdrc musb-hdrc.0.auto: *** power=250
+[    9.295262] musb-hdrc musb-hdrc.1.auto: pdev->id = 1
+[    9.300510] musb-hdrc musb-hdrc.1.auto: drivers/usb/musb/musb_dsps.c:468 dsps_musb_init: OK
+[    9.309274] musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, bulk combine, bulk split, HB-ISO Rx, HB-ISO Tx, SoftConn)
+[    9.309295] musb-hdrc: MHDRC RTL version 2.0
+[    9.309308] musb-hdrc: setup fifo_mode 4
+[    9.309331] musb-hdrc: 28/31 max ep, 16384/16384 memory
+[    9.309449] musb-hdrc musb-hdrc.1.auto: *** mode=1
+[    9.314489] musb-hdrc musb-hdrc.1.auto: *** power=250
+[    9.319796] musb-hdrc musb-hdrc.1.auto: MUSB HDRC host driver
+[    9.326185] musb-hdrc musb-hdrc.1.auto: new USB bus registered, assigned bus number 1
+[    9.334413] musb-hdrc musb-hdrc.1.auto: supports USB remote wakeup
+[    9.334516] usb usb1: default language 0x0409
+[    9.334574] usb usb1: udev 1, busnum 1, minor = 0
+[    9.334597] usb usb1: New USB device found, idVendor=1d6b, idProduct=0002
+[    9.341723] usb usb1: New USB device strings: Mfr=3, Product=2, SerialNumber=1
+[    9.349295] usb usb1: Product: MUSB HDRC host driver
+[    9.354509] usb usb1: Manufacturer: Linux 3.8.13 musb-hcd
+[    9.360175] usb usb1: SerialNumber: musb-hdrc.1.auto
+[    9.366064] usb usb1: usb_probe_device
+[    9.366091] usb usb1: configuration #1 chosen from 1 choice
+[    9.366157] usb usb1: adding 1-0:1.0 (config #1, interface 0)
+[    9.366364] hub 1-0:1.0: usb_probe_interface
+[    9.366387] hub 1-0:1.0: usb_probe_interface - got id
+[    9.366414] hub 1-0:1.0: USB hub found
+[    9.370458] hub 1-0:1.0: 1 port detected
+[    9.374624] hub 1-0:1.0: standalone hub
+[    9.374644] hub 1-0:1.0: individual port power switching
+[    9.374662] hub 1-0:1.0: no over-current protection
+[    9.374679] hub 1-0:1.0: Single TT
+[    9.374701] hub 1-0:1.0: TT requires at most 8 FS bit times (666 ns)
+[    9.374720] hub 1-0:1.0: power on to power good time: 10ms
+[    9.374764] hub 1-0:1.0: local power source is good
+[    9.374867] hub 1-0:1.0: enabling power on all ports
+[    9.375985] mousedev: PS/2 mouse device common for all mice
+[    9.384310] omap_rtc 44e3e000.rtc: rtc core: registered 44e3e000.rtc as rtc0
+[    9.392070] i2c /dev entries driver
+[    9.397487] pps_ldisc: PPS line discipline registered
+[    9.402953] Driver for 1-wire Dallas network protocol.
+[    9.410249] omap_wdt: OMAP Watchdog Timer Rev 0x01: initial timeout 60 sec
+[    9.417802] cpuidle: using governor ladder
+[    9.422126] cpuidle: using governor menu
+[    9.426653] of_get_named_gpio_flags exited with status 6
+[    9.426673] of_get_named_gpio_flags: can't parse gpios property
+[    9.426689] of_get_named_gpio_flags: can't parse gpios property
+[    9.426726] omap_hsmmc mmc.5: of_parse_phandle_with_args of 'reset' failed
+[    9.433962] omap_hsmmc mmc.5: Failed to get rstctl; not using any
+[    9.440745] edma-dma-engine edma-dma-engine.0: allocated channel for 0:25
+[    9.447953] edma-dma-engine edma-dma-engine.0: allocated channel for 0:24
+[    9.455313] mmc.5 supply vmmc_aux not found, using dummy regulator
+[    9.462266] omap_hsmmc mmc.5: pins are not configured from the driver
+[    9.476625] hub 1-0:1.0: state 7 ports 1 chg 0000 evt 0000
+[    9.496539] pinctrl-single 44e10800.pinmux: pin 44e10854 already requested by 44e10800.pinmux; cannot claim for gpio-leds.8
+[    9.508230] pinctrl-single 44e10800.pinmux: pin-21 (gpio-leds.8) status -22
+[    9.515534] pinctrl-single 44e10800.pinmux: could not request pin 21 on device pinctrl-single
+[    9.524513] leds-gpio gpio-leds.8: pins are not configured from the driver
+[    9.531773] of_get_named_gpio_flags exited with status 53
+[    9.531796] of_get_named_gpio_flags exited with status 54
+[    9.531818] of_get_named_gpio_flags exited with status 55
+[    9.531838] of_get_named_gpio_flags exited with status 56
+[    9.531891] of_get_named_gpio_flags exited with status 53
+[    9.532189] of_get_named_gpio_flags exited with status 54
+[    9.532419] of_get_named_gpio_flags exited with status 55
+[    9.532608] of_get_named_gpio_flags exited with status 56
+[    9.533192] ledtrig-cpu: registered to indicate activity on CPUs
+[    9.539900] edma-dma-engine edma-dma-engine.0: allocated channel for 0:36
+[    9.547090] omap-sham 53100000.sham: hw accel on OMAP rev 4.3
+[    9.555230] omap-aes 53500000.aes: OMAP AES hw accel rev: 3.2
+[    9.561516] edma-dma-engine edma-dma-engine.0: allocated channel for 0:5
+[    9.568721] edma-dma-engine edma-dma-engine.0: allocated channel for 0:6
+[    9.581159] usbcore: registered new interface driver usbhid
+[    9.587067] usbhid: USB HID core driver
+[    9.593961] TCP: cubic registered
+[    9.597475] Initializing XFRM netlink socket
+[    9.602041] NET: Registered protocol family 17
+[    9.606864] NET: Registered protocol family 15
+[    9.611718] Key type dns_resolver registered
+[    9.616362] VFP support v0.3: implementor 41 architecture 3 part 30 variant c rev 3
+[    9.624473] ThumbEE CPU extension supported.
+[    9.629081] Registering SWP/SWPB emulation handler
+[    9.635147] registered taskstats version 1
+[    9.691360] davinci_mdio 4a101000.mdio: davinci mdio revision 1.6
+[    9.697775] davinci_mdio 4a101000.mdio: detected phy mask fffffffe
+[    9.712240] libphy: 4a101000.mdio: probed
+[    9.716550] davinci_mdio 4a101000.mdio: phy[0]: device 4a101000.mdio:00, driver SMSC LAN8710/LAN8720
+[    9.726428] Detected MACID = c4:f3:12:73:1c:92
+[    9.731105] cpsw 4a100000.ethernet: NAPI disabled
+[    9.737728] omap_rtc 44e3e000.rtc: setting system clock to 2000-01-01 00:00:00 UTC (946684800)
+[    9.753947] ALSA device list:
+[    9.757076]   No soundcards found.
+[    9.761262] Freeing init memory: 264K
+[    9.765181] Failed to execute /init
+[   10.547529] jffs2: notice: (134) jffs2_build_xattr_subsystem: complete building xattr subsystem, 0 of xdatum (0 unchecked, 0 orphan) and 0 of xref (0 dead, 0 orphan) found.
+[   11.398130] net eth0: initializing cpsw version 1.12 (0)
+[   11.406520] net eth0: phy found : id is : 0x7c0f1
+[   11.411697] libphy: PHY 4a101000.mdio:01 not found
+[   11.416753] net eth0: phy 4a101000.mdio:01 not found on slave 1
+[   14.482845] libphy: 4a101000.mdio:00 - Link is Up - 100/Full

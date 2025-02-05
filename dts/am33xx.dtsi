@@ -48,6 +48,11 @@
 		};
 	};
 
+	pmu {
+		compatible = "arm,cortex-a8-pmu";
+		interrupts = <3>;
+	};
+
 	/*
 	 * The soc node represents the soc top level view. It is uses for IPs
 	 * that are not memory mapped in the MPU view or for the MPU itself.
@@ -224,16 +229,6 @@
 			status = "disabled";
 		};
 
-		i2c2: i2c@4819c000 {
-			compatible = "ti,omap4-i2c";
-			#address-cells = <1>;
-			#size-cells = <0>;
-			ti,hwmods = "i2c3";	/* TODO: Fix hwmod */
-			reg = <0x4819c000 0x1000>;
-			interrupts = <30>;
-			status = "disabled";
-		};
-
 		i2c1: i2c@4802a000 {
 			compatible = "ti,omap4-i2c";
 			#address-cells = <1>;
@@ -241,6 +236,16 @@
 			ti,hwmods = "i2c2";	/* TODO: Fix hwmod */
 			reg = <0x4802a000 0x1000>;
 			interrupts = <71>;
+			status = "disabled";
+		};
+
+		i2c2: i2c@4819c000 {
+			compatible = "ti,omap4-i2c";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			ti,hwmods = "i2c3";	/* TODO: Fix hwmod */
+			reg = <0x4819c000 0x1000>;
+			interrupts = <30>;
 			status = "disabled";
 		};
 
@@ -371,21 +376,21 @@
 			ti,hwmods = "rtc";
 		};
 
-                spi0: spi@48030000 {
-                        compatible = "ti,omap4-mcspi";
-                        #address-cells = <1>;
-                        #size-cells = <0>;
-                        reg = <0x48030000 0x400>;
-                        interrupt = <65>;
-                        ti,spi-num-cs = <2>;
-                        ti,hwmods = "spi0";
-                        dmas = <&edma 16
-                                &edma 17
-                                &edma 18
-                                &edma 19>;
-                        dma-names = "tx0", "rx0", "tx1", "rx1";
-                        status = "disabled";
-                };
+		spi0: spi@48030000 {
+			compatible = "ti,omap4-mcspi";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <0x48030000 0x400>;
+			interrupt = <65>;
+			ti,spi-num-cs = <2>;
+			ti,hwmods = "spi0";
+			dmas = <&edma 16
+				&edma 17
+				&edma 18
+				&edma 19>;
+			dma-names = "tx0", "rx0", "tx1", "rx1";
+			status = "disabled";
+		};
 
 		spi1: spi@481a0000 {
 			compatible = "ti,omap4-mcspi";
@@ -534,6 +539,15 @@
 				ti,hwmods = "ehrpwm0";
 				status = "disabled";
 			};
+
+			eqep0: eqep@0x48300180 {
+				compatible = "ti,am33xx-eqep";
+				reg = <0x48300180 0x80>;
+				interrupt-parent = <&intc>;
+				interrupts = <79>;
+				ti,hwmods = "eqep0";
+				status = "disabled";
+			};
 		};
 
 		epwmss1: epwmss@48302000 {
@@ -562,6 +576,15 @@
 				ti,hwmods = "ehrpwm1";
 				status = "disabled";
 			};
+
+			eqep1: eqep@0x48302180 {
+				compatible = "ti,am33xx-eqep";
+				reg = <0x48302180 0x80>;
+				interrupt-parent = <&intc>;
+				interrupts = <88>;
+				ti,hwmods = "eqep1";
+				status = "disabled";
+			};
 		};
 
 		epwmss2: epwmss@48304000 {
@@ -588,6 +611,15 @@
 				#pwm-cells = <3>;
 				reg = <0x48304200 0x80>;
 				ti,hwmods = "ehrpwm2";
+				status = "disabled";
+			};
+
+			eqep2: eqep@0x48304180 {
+				compatible = "ti,am33xx-eqep";
+				reg = <0x48304180 0x80>;
+				interrupt-parent = <&intc>;
+				interrupts = <89>;
+				ti,hwmods = "eqep2";
 				status = "disabled";
 			};
 		};

@@ -5,21 +5,20 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
-/dts-v1/;
 
 /include/ "am33xx.dtsi"
 
 /include/ "am335x-bone-common.dtsi"
 
-/include/ "am335x-bone-btm.dtsi"
-
 &am33xx_pinmux {
+	
 	rstctl_pins: pinmux_rstctl_pins {
 		pinctrl-single,pins = <
 			/* eMMC_RSTn */
 			0x50 0x17	/* gpmc_a4.gpio1_20, OUTPUT | MODE7 | PULLUP */
 		>;
 	};
+
 	hd_ver_pins: pinmux_hd_ver_pins {
 		pinctrl-single,pins = <			
 			0xa4 0x37	/* gpmc_a4.gpio3_19, PIN_INPUT_PULLUP | MODE7 */
@@ -27,6 +26,7 @@
 			0x48 0x37	/* gpmc_a4.gpio1_18, PIN_INPUT_PULLUP | MODE7*/
 		>;
 	};
+	
 	 nandflash_pins_s0: nandflash_pins_s0 {
 		pinctrl-single,pins = <
 			0x0   0x30 /*(PIN_INPUT_PULLUP | MUX_MODE0)	 gpmc_ad0.gpmc_ad0 */
@@ -107,14 +107,14 @@
 	*/			
 };
 &ocp {
-elm: elm@48080000 {
-	compatible = "ti,am3352-elm";
-	reg = <0x48080000 0x2000>;
-	interrupts = <4>;
-	ti,hwmods = "elm";
-	//clocks = <&l4ls_gclk>;
-	clock-names = "fck";
-	status = "okay";
+	elm: elm@48080000 {
+		compatible = "ti,am3352-elm";
+		reg = <0x48080000 0x2000>;
+		interrupts = <4>;
+		ti,hwmods = "elm";
+		//clocks = <&l4ls_gclk>;
+		clock-names = "fck";
+		status = "okay";
 	};
 };
 
@@ -152,57 +152,6 @@ elm: elm@48080000 {
         gpmc,wait-monitoring-ns = <0>;
         gpmc,wr-access-ns = <40>;
         gpmc,wr-data-mux-bus-ns = <0>;
-        
-        /*
-        gpmc,sync-clk-ps = <0>;
-        gpmc,cs-on-ns = <0>;
-        gpmc,cs-rd-off-ns = <44>;
-        gpmc,cs-wr-off-ns = <44>;
-        gpmc,adv-on-ns = <10>;     
-        gpmc,adv-rd-off-ns = <44>;
-        gpmc,adv-wr-off-ns = <44>;
-        gpmc,we-on-ns = <5>;
-        gpmc,we-off-ns = <30>;
-        gpmc,oe-on-ns = <5>;
-        gpmc,oe-off-ns = <25>;
-        gpmc,access-ns = <30>;
-        gpmc,rd-cycle-ns = <50>;
-        gpmc,wr-cycle-ns = <50>;
-        gpmc,wait-on-read = "true";
-        gpmc,wait-on-write = "true";
-        gpmc,bus-turnaround-ns = <0>;
-        gpmc,cycle2cycle-delay-ns = <20>;
-        gpmc,cycle2cycle-samecsen = "true";
-        gpmc,clk-activation-ns = <0>;
-        gpmc,wait-monitoring-ns = <0>;
-        gpmc,wr-access-ns = <40>;
-        gpmc,wr-data-mux-bus-ns = <0>;
-        */
-        /*
-		gpmc,sync-clk-ps = <0>;
-        gpmc,cs-on-ns = <0>;
-        gpmc,cs-rd-off-ns = <88>;
-        gpmc,cs-wr-off-ns = <88>;
-        gpmc,adv-on-ns = <10>;     
-        gpmc,adv-rd-off-ns = <88>;
-        gpmc,adv-wr-off-ns = <88>;
-        gpmc,we-on-ns = <10>;
-        gpmc,we-off-ns = <60>;
-        gpmc,oe-on-ns = <10>;
-        gpmc,oe-off-ns = <50>;
-        gpmc,access-ns = <60>;
-        gpmc,rd-cycle-ns = <100>;
-        gpmc,wr-cycle-ns = <100>;
-        gpmc,wait-on-read = "true";
-        gpmc,wait-on-write = "true";
-        gpmc,bus-turnaround-ns = <0>;
-        gpmc,cycle2cycle-delay-ns = <40>;
-        gpmc,cycle2cycle-samecsen = "true";
-        gpmc,clk-activation-ns = <0>;
-        gpmc,wait-monitoring-ns = <0>;
-        gpmc,wr-access-ns = <40>;
-        gpmc,wr-data-mux-bus-ns = <0>;
-		*/
         ti,nand-ecc-opt= "bch8";
         ti,elm-id = <&elm>;
 		#address-cells = <1>;
