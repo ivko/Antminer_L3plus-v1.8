@@ -22,3 +22,6 @@ Linux version 3.8.13 (xxl@armdev01) (gcc version 4.7.4 20130626 (prerelease) (Li
 
 ## links:
 - https://github.com/RobertCNelson/bb.org-overlays/blob/master/src/arm/cape-CBB-Serial-r01.dts
+
+## Notes
+opkg update && opkg install update-alternatives eglibc-staticdev module-init-tools kernel-module-iio-trig-sysfs kernel-module-iio-trig-gpio
