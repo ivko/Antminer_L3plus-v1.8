@@ -11,7 +11,8 @@ Linux version 3.8.13 (xxl@armdev01) (gcc version 4.7.4 20130626 (prerelease) (Li
 - Make a repo with "new-files" to save space in the repo. Leave just one .SD image file as a source (initramfs.bin.SD-fixed)
 - Make one dtd with UART1 enabled and all GPIOs enabled (testing libmodbus).
 - Build libmodbus.apk with required dependencies.
-
+## Login
+- root:admin
 ##  Pin Mux Modes: 
 - https://www.ofitselfso.com/BeagleNotes/BeagleboneBlackPinMuxModes.php
 
