@@ -6,3 +6,6 @@ __pycache__/
 hardware/breakout/out/
 *.lck
 *-backups/
+*.kicad_prl
+.history/
+fp-info-cache
