@@ -1,17 +1,15 @@
-## uEnv.txt for the first mainline-kernel boot from microSD (FAT partition 1).
-## Read by the Bitmain U-Boot 2013.04 (bootcmd -> loadbootenv/importbootenv -> uenvcmd).
-## Files expected next to this one: uImage.bin, am335x-antminer.dtb, initramfs.bin.SD
+## uEnv.txt for booting the Yocto image from microSD (FAT32, partition 1).
+## Read by the Bitmain U-Boot 2013.04: bootcmd -> mmc rescan -> loadbootenv/importbootenv ->
+## uenvcmd. Only this file and the three images below are needed on the card; NAND is untouched.
+## Files next to this one (copy them from repo/mainline/out/):
+##   uImage-yocto.bin, am335x-antminer-breakout.dtb (or another profile), antminer-image.cpio.gz.u-boot
 ##
-## Memory map (256 MiB = 0x80000000..0x8FFFFFFF):
-##   0x80008000  kernel decompress target (zImage relocates itself; up to ~16 MiB)
-##   0x82000000  uImage load address (32 MiB in, clear of the decompressed kernel)
-##   0x88000000  DTB
-##   0x88100000  initramfs (~15 MiB)
-## bootm relocates DTB and initramfs to the top of RAM itself.
+## Memory map (same as tools/netboot.ps1, proven): uImage at 0x82000000, DTB 0x88000000,
+## initramfs 0x88100000; bootm relocates DTB and initramfs itself.
 
-bootfile=uImage.bin
-fdtfile=am335x-antminer.dtb
-initramfsfile=initramfs.bin.SD
+bootfile=uImage-yocto.bin
+fdtfile=am335x-antminer-breakout.dtb
+initramfsfile=antminer-image.cpio.gz.u-boot
 mmcpart=1
 
 loadaddr=0x82000000
@@ -20,15 +18,11 @@ initramfsaddr=0x88100000
 
 ## mainline: OMAP UARTs are 8250 -> ttyS0 (the old env has ttyO0)
 console=ttyS0,115200n8
-optargs=earlycon
+optargs=
 
-## First boot: drop straight into a shell. The old inittab spawns getty on
-## ttyO0, which no longer exists, so a normal init would give no login prompt.
-## Once the initramfs is fixed (inittab -> ttyS0) switch to init=/sbin/init.
-initramfsargs=setenv bootargs console=${console} ${optargs} init=/bin/sh
-
+sdargs=setenv bootargs console=${console} ${optargs} init=/sbin/init
 loadfdt=load mmc ${mmcdev}:${mmcpart} ${fdtaddr} ${fdtfile}
 loadinitramfs=load mmc ${mmcdev}:${mmcpart} ${initramfsaddr} ${initramfsfile}
 loaduimage=load mmc ${mmcdev}:${mmcpart} ${loadaddr} ${bootfile}
-bootinitramfs=bootm ${loadaddr} ${initramfsaddr} ${fdtaddr}
-uenvcmd=run loadfdt loadinitramfs loaduimage initramfsargs bootinitramfs
+bootsd=bootm ${loadaddr} ${initramfsaddr} ${fdtaddr}
+uenvcmd=echo Booting Yocto image from SD; run loadfdt loadinitramfs loaduimage sdargs bootsd

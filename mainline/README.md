@@ -179,6 +179,25 @@ Per-board профилите дават `out/am335x-antminer-<name>.dtb`, кой
 задават изрично в reset състояние (GPIO вход pulldown), иначе топъл рестарт пази стари стойности.
 Per-board hostname е от MAC, override в /config/hostname; SSH ключ в /config/ssh.
 
+## Boot ред на ROM-а и microSD слотът, 2026-10-06
+
+SYSBOOT пиновете се четат от CONTROL_STATUS (`devmem 0x44E10040`). Тестовата платка дава
+`0x00420313` → SYSBOOT[4:0] = 10011 = **NAND, NANDI2C, MMC0, UART0**: докато SPL-ът в NAND е
+валиден, ROM-ът никога не стига до SD карта; U-Boot от NAND обаче пробва SD първи (`bootcmd`).
+Платката от `logs/nand-write-1kom.txt` е `0x00420317` → 10111 = **MMC0, SPI0, UART0, USB0**
+(само SD, NAND го няма в списъка) – хардуерна разлика в резистора на SYSBOOT2 (= lcd_data2 =
+P8.43). Т.е. "вкарвам SD и boot-ва от нея" важи за платките с 0x17, не за тази.
+
+microSD слотът на тестовата платка работи само в 1-bit режим: Linux sdhci-omap с
+`bus-width = <1>` чете картата без грешка дори на 50 MHz, а с 4-bit (и на 400 kHz) всяко
+четене дава `I/O error` / "Got data interrupt ... no data operation" – DAT1..3 са прекъснати
+някъде между слота и процесора. Bitmain U-Boot ползва 4-bit и затова "чете" само боклук
+(`mmc read` връща OK, без да пипне буфера). Логове: `device-dump/netboot-22..25-sd-*.log`,
+`uboot-sdcard-0*.log`. Кернелът вече има MMC/SDHCI_OMAP/VFAT вградени (+93 KB) за диагностика
+и за SD като носител; `sdcard/uEnv.txt` е готов за платки с работещ слот (FAT32, дял 1).
+Другите платки: проверка със същия тест (`netboot.ps1 -Dtb am335x-antminer-mmc1bit-fast.dtb`
+срещу стандартното DTB) преди да се разчита на SD за recovery.
+
 ## Следващи стъпки
 
 - Старите sysfs GPIO номера не важат в 6.12, всичко е през libgpiod по `gpio-line-names`.
