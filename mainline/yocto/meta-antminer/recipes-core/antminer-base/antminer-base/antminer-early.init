@@ -1,0 +1,31 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          antminer-early
+# Default-Start:     S
+# Short-Description: volatile dirs + AM335x hardware watchdog (no reset button on this board)
+### END INIT INFO
+case "$1" in
+  start)
+    # /var/volatile is a tmpfs that mountall.sh (S03) mounts; make sure the dirs the
+    # volatiles config expects are there even if populate-volatile.sh (S37) has issues
+    mkdir -p /var/volatile/tmp /var/volatile/log
+
+    # -T 60: hardware timeout 60 s, -t 10: feed every 10 s. Once opened the OMAP watchdog
+    # cannot be stopped; killing the daemon reboots the board after 60 s. That is intended.
+    if [ -c /dev/watchdog ]; then
+        echo "Starting hardware watchdog (60 s)"
+        /sbin/watchdog -T 60 -t 10 /dev/watchdog
+    fi
+    ;;
+  stop)
+    echo "watchdog: cannot be stopped on this hardware (board would reboot); leaving it running"
+    ;;
+  status)
+    pidof watchdog >/dev/null && echo "watchdog running" || echo "watchdog not running"
+    ;;
+  *)
+    echo "Usage: $0 {start|status}"
+    exit 1
+    ;;
+esac
+exit 0

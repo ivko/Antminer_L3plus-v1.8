@@ -1,0 +1,3 @@
+# Antminer BB-Black V1.8 NAND partitions (see repo/mainline/dts/am335x-antminer.dts)
+# config: 20 MiB jffs2, per-board settings. data: 208 MiB UBIFS, opkg/overlay (step 5), not auto-mounted yet.
+/dev/mtdblock9  /config  jffs2  defaults,noatime  0  0
