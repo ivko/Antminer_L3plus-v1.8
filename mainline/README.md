@@ -170,8 +170,10 @@ Hostname е `antminer-<последните 3 байта от MAC>`, override п
 Виж `pinmux/README.md`. `dts/am335x-antminer-base.dtsi` е фиксираната част, `dts/am335x-antminer.dts`
 се ГЕНЕРИРА от `pinmux/boards/default.yaml` с `pinmux/gen-dts.py` (не се редактира на ръка).
 Per-board профилите дават `out/am335x-antminer-<name>.dtb`, който `tools/deploy-dtb.ps1` записва
-в mtd6 (или пробва от RAM с `-NetbootOnly`). Проверено на платката с `default` и
-`example-modbus-rtu` (RS485_DE0..3, DI0/1, hog ALIVE, 4 UART, ADC): имена в gpioinfo, pad
+в mtd6 (или пробва от RAM с `-NetbootOnly`). Проверено на платката с `default`,
+`example-modbus-rtu` (RS485_DE0..3, DI0/1, hog ALIVE, 4 UART, ADC) и `breakout` (профилът на
+тестовата платка `hardware/breakout`, с I2C child възли; флашнат в mtd6 на тестовата платка на
+2026-10-06, OpenPLC заема Q0..Q7/I0..I7 след boot): имена в gpioinfo, pad
 регистри точно по генератора, gpioset/gpioget работят. Всички свободни pad-ове извън профила се
 задават изрично в reset състояние (GPIO вход pulldown), иначе топъл рестарт пази стари стойности.
 Per-board hostname е от MAC, override в /config/hostname; SSH ключ в /config/ssh.
