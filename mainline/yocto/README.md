@@ -76,6 +76,10 @@ openplc/openplc, качва (`--program x.st`, двустъпков upload ка�
 Проверено 2026-10-06 с `../openplc/examples/gpio-echo.st`: Q0 "out hi" и Q1 мига на 1 Hz в
 `/sys/kernel/debug/gpio`, I0..I3 се четат като discrete inputs, AIN0 се копира в holding 0.
 matiec не допуска `AT %..` и обикновени променливи в един VAR блок.
+`openplc-test.py <ip> --autostart on --only-settings` включва "Start OpenPLC in RUN mode":
+след reboot runtime-ът сам стартира активната програма (проверено, nandboot-11-autostart.log).
+Настройките (settings POST) трябва да се пращат целите: липсващо поле за порт изключва този
+сървър, а друг device_hostname кара сървъра да вика hostnamectl, който го няма на платката.
 Feed-ът се пълни чрез `antminer-feed-image` (фиктивен image), защото bitbake на
 packagegroup не записва ipk на runtime зависимостите. Flask login cookie-то изисква верен
 часовник (RTC без батерия → 2018 → login мълчаливо не работи): `antminer-base-ntp` пуска
