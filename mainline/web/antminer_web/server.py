@@ -1,10 +1,11 @@
 """Flask routes. Pages: board, nand, pinmux, services, log. Long operations run as jobs."""
+import hashlib
 import os
 import re
-import shlex
+import secrets
 import subprocess
 
-from flask import Flask, abort, jsonify, redirect, render_template, request, url_for
+from flask import Flask, Response, abort, jsonify, redirect, render_template, request, url_for
 
 from . import __version__, board
 from .jobs import run_quick, runner
@@ -12,15 +13,46 @@ from .jobs import run_quick, runner
 FLASH = "/usr/sbin/antminer-flash-nand"
 DTB = "/usr/sbin/antminer-dtb"
 SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,40}$")
+PASSWORD_FILE = os.path.join(board.CONFIG_DIR, "web-password")   # "sha256$<salt>$<hex>"
+
+
+def password_set():
+    return os.path.exists(PASSWORD_FILE) and os.path.getsize(PASSWORD_FILE) > 0
+
+
+def password_ok(pw):
+    try:
+        algo, salt, digest = board.read(PASSWORD_FILE).split("$")
+    except ValueError:
+        return False
+    return algo == "sha256" and hashlib.sha256((salt + pw).encode()).hexdigest() == digest
+
+
+def password_store(pw):
+    salt = secrets.token_hex(8)
+    with open(PASSWORD_FILE, "w") as fh:
+        fh.write(f"sha256${salt}${hashlib.sha256((salt + pw).encode()).hexdigest()}\n")
 
 
 def create_app():
     app = Flask(__name__)
     app.config["MAX_CONTENT_LENGTH"] = 2 << 20
 
+    @app.before_request
+    def auth():
+        """HTTP basic auth (user: admin) once a password is stored in /config/web-password.
+        Without one (the provisioning card) the UI is open: the card is in your hand."""
+        if not password_set() or request.path.startswith("/static/"):
+            return None
+        a = request.authorization
+        if a and a.type == "basic" and password_ok(a.password or ""):
+            return None
+        return Response("login required", 401, {"WWW-Authenticate": 'Basic realm="Antminer I/O module"'})
+
     @app.context_processor
     def inject():
-        return {"version": __version__, "busy": runner.busy(), "current_job": runner.current}
+        return {"version": __version__, "busy": runner.busy(), "current_job": runner.current,
+                "password_set": password_set()}
 
     # ---- board ------------------------------------------------------------------------
     @app.route("/")
@@ -117,7 +149,8 @@ def create_app():
         else:
             text = board.read(path) if os.path.exists(path) else f"name: {name}\n\npins:\n\nadc: []\n"
         return render_template("pinmux_edit.html", name=name, text=text, result=result,
-                               origin="local" if path == local else ("shipped" if os.path.exists(shipped) else "new"))
+                               origin="local" if path == local else ("shipped" if os.path.exists(shipped) else "new"),
+                               pads=[r for r in _pad_rows() if r["state"] == "free"], current=_current_pins(text))
 
     # ---- services ---------------------------------------------------------------------
     @app.route("/services", methods=["GET", "POST"])
@@ -136,6 +169,11 @@ def create_app():
             else:
                 _write_or_remove(os.path.join(cfg, "network"), "")
             _write_or_remove(os.path.join(cfg, "ssh", "authorized_keys"), request.form.get("authorized_keys", "").replace("\r\n", "\n"))
+            pw = request.form.get("web_password", "")
+            if request.form.get("web_password_clear"):
+                _write_or_remove(PASSWORD_FILE, "")
+            elif pw:
+                password_store(pw)
             run_quick(["sync"])
             msg = "Saved to /config. Hostname and network apply at the next boot (or: /etc/init.d/antminer-config start)."
         return render_template("services.html", c=board.config_values(), msg=msg)
@@ -179,6 +217,11 @@ def _write_or_remove(path, text):
         os.unlink(path)
 
 
+# functions the generator knows how to wire up (periph_of in gen-dts.py) + plain gpio
+FUNC_RE = re.compile(r"^(uart\d_(rxd|txd|ctsn|rtsn)|i2c\d_(sda|scl)|spi\d_(sclk|d0|d1|cs\d)|ehrpwm\d[ab]|"
+                     r"ecap\d_in_pwm\d_out|dcan\d_(rx|tx)|eqep\d\w*|timer\d)$")
+
+
 def _pad_rows():
     """P8/P9 table: pad, modes, gpio, reserved reason (from gen-dts.py's RESERVED map)"""
     import importlib.util
@@ -192,12 +235,34 @@ def _pad_rows():
     for pin, e in db.items():
         off = e.get("offset")
         if off is None:
-            rows.append({"pin": pin, "name": e.get("name"), "modes": "", "gpio": "", "state": "power"})
+            rows.append({"pin": pin, "name": e.get("name"), "modes": "", "gpio": "", "state": "power", "funcs": []})
             continue
         offv = int(off, 16) if isinstance(off, str) else off
         why = g.RESERVED.get(offv) if isinstance(g.RESERVED, dict) else ("reserved" if offv in g.RESERVED else None)
-        modes = ", ".join(m for m in (e.get("modes") or []) if m)
-        rows.append({"pin": pin, "name": e.get("name"), "pad": f"0x{offv:03x}", "modes": modes,
-                     "gpio": e.get("gpio") or "", "state": why or "free"})
+        all_modes = [m for m in (e.get("modes") or []) if m]
+        funcs = [m for m in all_modes if FUNC_RE.match(m)]
+        if any(m.startswith("gpio") for m in all_modes):
+            funcs.append("gpio")
+        rows.append({"pin": pin, "name": e.get("name"), "pad": f"0x{offv:03x}", "modes": ", ".join(all_modes),
+                     "gpio": e.get("gpio") or "", "state": why or "free", "funcs": funcs})
     rows.sort(key=lambda r: (r["pin"].split(".")[0], int(r["pin"].split(".")[1])))
     return rows
+
+
+def _current_pins(text):
+    """pins: section of a profile -> {pin: {func, dir, pull, init, name, hog}} for the table"""
+    try:
+        import yaml
+        doc = yaml.safe_load(text) or {}
+    except Exception:  # noqa: BLE001
+        return {}
+    out = {}
+    for pin, spec in (doc.get("pins") or {}).items():
+        if isinstance(spec, str):
+            spec = {"func": spec}
+        if not isinstance(spec, dict):
+            continue
+        out[str(pin)] = {"func": str(spec.get("func", "")), "dir": str(spec.get("dir", "in")),
+                         "pull": str(spec.get("pull", "")), "init": str(spec.get("init", "0")),
+                         "name": str(spec.get("name", "")), "hog": bool(spec.get("hog", False))}
+    return out

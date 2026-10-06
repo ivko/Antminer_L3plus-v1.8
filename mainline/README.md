@@ -216,7 +216,12 @@ Web UI (Flask, порт 80, `mainline/web/`): платка/SYSBOOT, NAND (съд
 data дял), pinmux (редактор на YAML, build, запис в mtd6, таблица на пиновете), услуги
 (hostname, NTP, статичен IP, SSH ключове в /config), лог. `antminer-config` вече чете
 `/config/network` (MODE=static ADDRESS NETMASK GATEWAY DNS) и линква `/config/ssh/authorized_keys`.
-Тест на хоста: `python3 web/test_smoke.py`.
+Тест на хоста: `python3 web/test_smoke.py`. UI-ят е отворен, докато няма парола; парола
+(HTTP basic, потребител `admin`) се слага от страница Services и живее в `/config/web-password`.
+
+Внимание: картата се вади **след** reboot/изключване, не докато системата работи от нея
+(root-ът изчезва, нищо не може да се изпълни). Ако се случи: `echo b > /proc/sysrq-trigger`
+от shell-а (builtin echo) рестартира; проверено 2026-10-06.
 
 ## Следващи стъпки
 
