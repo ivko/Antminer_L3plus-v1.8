@@ -110,7 +110,8 @@ BCH8/ELM в DTS са верни и NAND е безопасен за писане 
 - UART номерацията е mainline: hwmod uartN на 3.8 е `&uart(N-1)`. Конзолата е ttyS0.
 - i2c0 с TPS65217 е включен (bone-common). Старият DTB го изключваше, но U-Boot говори с
   PMIC-а на 0x24, така че той съществува. Без него няма poweroff и cpufreq.
-- `baseboard_eeprom` е disabled, няма EEPROM на 0x50.
+- `baseboard_eeprom` (i2c0 0x50) и `cape_eeprom0..3` (i2c2 0x54..0x57) от bone-common са
+  изтрити с `/delete-node/`: няма EEPROM-и на платката, i2c2 показва само това, което профилът добавя.
 - `pruss_tm` е disabled, AM3352 няма PRU-ICSS. bone-common го включва за AM3358.
 - LED-овете на платката са четирите BeagleBone user LED-а (gpio1 21..24, heartbeat на usr0),
   проверено с мигане. RED=gpio45 и GREEN=gpio23 от Bitmain скриптовете са за LED панел с IP
