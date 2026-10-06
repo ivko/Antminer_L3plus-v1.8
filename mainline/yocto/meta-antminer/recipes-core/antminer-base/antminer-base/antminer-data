@@ -1,0 +1,76 @@
+#!/bin/sh
+# antminer-data: manage the NAND "data" partition (UBIFS) and the persistent root overlay.
+#
+#   antminer-data init      format the data partition as UBI with one volume "data" (DESTROYS its contents)
+#   antminer-data enable    use /data/overlay as persistent upper layer of / from the next boot
+#   antminer-data disable   back to the plain ramfs boot from the next boot (data kept)
+#   antminer-data status
+#   antminer-data mount     attach + mount /data when running in plain mode (to inspect/clean it)
+#   antminer-data wipe      remove the overlay upper layer (fresh image state), keep the volume
+set -e
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+MTD=$(grep '"data"' /proc/mtd | cut -d: -f1 | sed 's/^mtd//')
+[ -n "$MTD" ] || { echo "no 'data' partition in /proc/mtd"; exit 1; }
+
+mounted() { grep -qs ' /data ' /proc/mounts; }
+attach_mount() {
+    mounted && return 0
+    ubiattach -p "/dev/mtd$MTD" >/dev/null 2>&1 || ubinfo -d 0 >/dev/null 2>&1 || return 1
+    mkdir -p /data
+    mount -t ubifs -o noatime ubi0:data /data
+}
+
+case "$1" in
+  init)
+    if mounted; then echo "/data is mounted (overlay active?) - disable, reboot, then init"; exit 1; fi
+    echo ">> ubiformat /dev/mtd$MTD (erases the data partition)"
+    ubiformat -y -q "/dev/mtd$MTD"
+    ubiattach -p "/dev/mtd$MTD"
+    ubimkvol /dev/ubi0 -N data -m
+    mkdir -p /data
+    mount -t ubifs -o noatime ubi0:data /data
+    mkdir -p /data/overlay/upper /data/overlay/work
+    echo 0 > /data/overlay/.boot_attempts
+    df -h /data | tail -n 1
+    echo ">> done. 'antminer-data enable' + reboot to start using the overlay."
+    ;;
+  enable)
+    attach_mount || { echo "data partition not initialised (antminer-data init)"; exit 1; }
+    mkdir -p /data/overlay/upper /data/overlay/work
+    echo 0 > /data/overlay/.boot_attempts
+    touch /data/overlay/.enabled
+    sync
+    echo "overlay enabled, takes effect at next boot"
+    ;;
+  disable)
+    attach_mount || { echo "data partition not initialised"; exit 1; }
+    rm -f /data/overlay/.enabled
+    sync
+    echo "overlay disabled, next boot is plain ramfs (data kept)"
+    ;;
+  wipe)
+    attach_mount || { echo "data partition not initialised"; exit 1; }
+    if grep -qs 'overlay / ' /proc/mounts; then echo "overlay is active: disable, reboot, then wipe"; exit 1; fi
+    rm -rf /data/overlay/upper /data/overlay/work
+    mkdir -p /data/overlay/upper /data/overlay/work
+    echo 0 > /data/overlay/.boot_attempts
+    sync
+    echo "overlay upper layer wiped"
+    ;;
+  mount)
+    attach_mount && df -h /data | tail -n 1
+    ;;
+  status)
+    if grep -qs 'overlay / ' /proc/mounts; then echo "root: overlay on ubi0:data"; else echo "root: plain ramfs"; fi
+    if mounted; then
+        df -h /data | tail -n 1
+        [ -f /data/overlay/.enabled ] && echo "overlay: enabled" || echo "overlay: disabled"
+        echo "boot attempts counter: $(cat /data/overlay/.boot_attempts 2>/dev/null || echo -)"
+        [ -d /data/overlay/upper ] && echo "upper layer: $(du -sh /data/overlay/upper 2>/dev/null | cut -f1)"
+    else
+        echo "/data not mounted (antminer-data mount)"
+    fi
+    ;;
+  *)
+    echo "usage: antminer-data {init|enable|disable|wipe|mount|status}"; exit 1 ;;
+esac

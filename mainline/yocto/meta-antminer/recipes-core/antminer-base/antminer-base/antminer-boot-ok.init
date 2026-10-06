@@ -1,0 +1,15 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          antminer-boot-ok
+# Default-Start:     5
+# Short-Description: mark the boot as successful (resets the overlay boot-attempt counter)
+### END INIT INFO
+case "$1" in
+  start)
+    if [ -f /data/overlay/.boot_attempts ]; then
+        echo 0 > /data/overlay/.boot_attempts
+        sync
+    fi
+    ;;
+esac
+exit 0

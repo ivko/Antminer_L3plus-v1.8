@@ -13,15 +13,16 @@ set +u; source poky/oe-init-build-env build >/dev/null; set -u
 
 case "${1:-}" in
     status)
-        if pgrep -f 'bitbake' >/dev/null; then echo "bitbake: RUNNING"; else echo "bitbake: not running"; fi
+        if pgrep -f 'bin/bitbake ' >/dev/null; then echo "bitbake: RUNNING"; else echo "bitbake: not running"; fi
         tail -n 20 "$LOG" 2>/dev/null
         ;;
     fg)
-        bitbake antminer-image && bitbake package-index
+        bitbake antminer-image antminer-feed-image && bitbake package-index
         ;;
     "")
-        if pgrep -f 'bitbake antminer-image' >/dev/null; then echo "already running"; exit 0; fi
-        nohup bash -c "bitbake antminer-image && bitbake package-index; echo BITBAKE_EXIT=\$?" > "$LOG" 2>&1 &
+        if pgrep -f 'bin/bitbake ' >/dev/null; then echo "a bitbake is already running"; exit 0; fi
+        # antminer-feed-image exists only to get the feed packages written as ipk (see its recipe)
+        nohup bash -c "bitbake antminer-image antminer-feed-image && bitbake package-index; echo BITBAKE_EXIT=\$?" > "$LOG" 2>&1 &
         echo "started in background, pid $!, log $LOG"
         ;;
     *)

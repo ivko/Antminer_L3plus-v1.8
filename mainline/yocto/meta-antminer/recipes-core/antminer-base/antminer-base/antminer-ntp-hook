@@ -1,0 +1,7 @@
+#!/bin/sh
+# busybox ntpd -S hook: called with "step" / "stratum" / "periodic" / "unsync" events.
+# Save a good time to the RTC so the next boot starts close to real time even before ntp.
+case "$1" in
+  step|stratum|periodic) hwclock -w 2>/dev/null ;;
+esac
+exit 0

@@ -179,5 +179,9 @@ Per-board hostname е от MAC, override в /config/hostname; SSH ключ в /c
 ## Следващи стъпки
 
 - Старите sysfs GPIO номера не важат в 6.12, всичко е през libgpiod по `gpio-line-names`.
-- Стъпка 5: UBIFS на `data` + overlayfs за платките с по-тежък софтуер, OpenPLC като ipk.
-- Modbus TCP slave daemon върху libgpiod/libmodbus като пакет в образа.
+- Стъпка 5 (готова, виж `yocto/README.md`): UBIFS на `data` + overlayfs (`antminer-data`),
+  OpenPLC като ipk с hardware layer за I*/Q*/ADC линиите. Пример: `openplc/examples/gpio-echo.st`.
+- Непроверено: fallback-ът на boot брояча (3 неуспешни boot-а → overlay off); `debug-tweaks`
+  (root без парола) е още в образа.
+- Modbus TCP slave daemon върху libgpiod/libmodbus като по-лек заместител на OpenPLC в initramfs-а.
+- OpenPLC web UI показва слоя като "Blank Linux"; собствен запис в списъка на hardware слоевете.
