@@ -6,6 +6,7 @@ login, compile a program, start the PLC, then talk Modbus TCP to it.
     python openplc-test.py 192.168.200.105 --program my.st      # upload + compile my.st first
     python openplc-test.py 192.168.200.105 --no-compile         # just start + Modbus read
     python openplc-test.py 192.168.200.105 --write-coil 0 1     # set %QX0.0
+    python openplc-test.py 192.168.200.105 --autostart on --only-settings   # run the program at boot
 
 Only the standard library is used (urllib + raw Modbus TCP frames). Default credentials
 openplc/openplc, web on :8080, Modbus on :502.
@@ -98,6 +99,32 @@ class Web:
     def stop(self):
         self.get("/stop_plc")
 
+    def set_autostart(self, enable):
+        """Settings -> 'Start OpenPLC in RUN mode' (the runtime starts the active program at boot).
+        The form must be posted whole: a missing port field disables that server, and a
+        device_hostname different from the current one makes the server call hostnamectl."""
+        html = self.get("/settings")
+
+        def checked(id_):
+            m = re.search(rf"""<input[^>]*id=['"]{id_}['"][^>]*>""", html, re.I)
+            return bool(m and "checked" in m.group(0))
+
+        form = {"device_hostname": hidden_field(html, "device_hostname"),
+                "auto_run_text": "true" if enable else "false",
+                "snap7_run_text": hidden_field(html, "snap7_run_text") or "false",
+                "slave_polling_period": hidden_field(html, "slave_polling_period") or "100",
+                "slave_timeout": hidden_field(html, "slave_timeout") or "1000"}
+        for box, field in (("modbus_server", "modbus_server_port"), ("dnp3_server", "dnp3_server_port"),
+                           ("enip_server", "enip_server_port"), ("pstorage_thread", "pstorage_thread_poll")):
+            if checked(box):
+                form[field] = hidden_field(html, field)
+        self.post("/settings", form)
+        html = self.get("/settings")
+        state = hidden_field(html, "auto_run_text")
+        print(f"web: start in run mode = {state}")
+        if state != ("true" if enable else "false"):
+            raise SystemExit("settings did not change")
+
 
 class Modbus:
     def __init__(self, host, port=502, unit=1):
@@ -151,10 +178,16 @@ def main():
     ap.add_argument("--no-start", action="store_true")
     ap.add_argument("--write-coil", nargs=2, type=int, metavar=("ADDR", "VAL"))
     ap.add_argument("--write-holding", nargs=2, type=int, metavar=("ADDR", "VAL"))
+    ap.add_argument("--autostart", choices=("on", "off"), help="start the active program at boot (Settings)")
+    ap.add_argument("--only-settings", action="store_true", help="change settings and exit")
     a = ap.parse_args()
 
     w = Web(a.host)
     w.login()
+    if a.autostart:
+        w.set_autostart(a.autostart == "on")
+        if a.only_settings:
+            return
     st = a.st_name
     if a.program:
         with open(a.program, "rb") as f:
