@@ -24,10 +24,12 @@ IMAGE_FSTYPES = "ext4 wic"
 # found via the layer's wic/ directory (BBPATH)
 WKS_FILE = "antminer-sd.wks"
 
-# files of the FAT boot partition: Bitmain bootloader + our kernel, DTBs and the standard initramfs
+# files of the FAT boot partition: Bitmain bootloader + our kernel, the default DTB (what
+# uEnv.txt boots), one DTB per shipped pinmux profile (antminer-pinmux deploys them) and the
+# standard initramfs. These are also the NAND payload the web UI offers.
 IMAGE_BOOT_FILES = " \
     MLO u-boot.img uEnv-sd.txt;uEnv.txt \
-    uImage am335x-antminer.dtb \
+    uImage am335x-antminer.dtb profile-*.dtb \
     antminer-image-antminer-bbb.rootfs.cpio.gz.u-boot;initramfs.cpio.gz.u-boot \
     "
-do_image_wic[depends] += "antminer-sd-boot:do_deploy virtual/kernel:do_deploy antminer-image:do_image_complete"
+do_image_wic[depends] += "antminer-sd-boot:do_deploy virtual/kernel:do_deploy antminer-pinmux:do_deploy antminer-image:do_image_complete"
