@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Antminer I/O module{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<nav>
+  <a class="brand" href="{{ url_for('index') }}">Antminer I/O</a>
+  <a href="{{ url_for('nand') }}">NAND</a>
+  <a href="{{ url_for('pinmux') }}">Pinmux</a>
+  <a href="{{ url_for('services') }}">Services</a>
+  <a href="{{ url_for('log') }}">Log</a>
+  {% if busy %}<a class="busy" href="{{ url_for('job', job_id=current_job.id) }}">&#9679; {{ current_job.title }}</a>{% endif %}
+  <span class="ver">v{{ version }}</span>
+</nav>
+<main>
+{% block content %}{% endblock %}
+</main>
+</body>
+</html>

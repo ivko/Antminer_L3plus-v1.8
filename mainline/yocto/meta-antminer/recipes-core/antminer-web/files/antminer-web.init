@@ -1,0 +1,23 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          antminer-web
+# Required-Start:    networking
+# Default-Start:     5
+# Short-Description: Antminer provisioning / configuration web UI (port 80)
+### END INIT INFO
+PIDFILE=/var/run/antminer-web.pid
+LOG=/var/log/antminer-web.log
+PORT=${ANTMINER_WEB_PORT:-80}
+case "$1" in
+  start)
+    echo "Starting Antminer web UI on port $PORT"
+    start-stop-daemon -S -b -m -p "$PIDFILE" -x /usr/bin/python3 -- /usr/share/antminer/web/run.py --port "$PORT" >>"$LOG" 2>&1
+    ;;
+  stop)
+    start-stop-daemon -K -p "$PIDFILE" 2>/dev/null; rm -f "$PIDFILE"
+    ;;
+  restart) $0 stop; sleep 1; $0 start ;;
+  status) [ -f "$PIDFILE" ] && kill -0 "$(cat $PIDFILE)" 2>/dev/null && echo running || echo stopped ;;
+  *) echo "Usage: $0 {start|stop|restart|status}"; exit 1 ;;
+esac
+exit 0

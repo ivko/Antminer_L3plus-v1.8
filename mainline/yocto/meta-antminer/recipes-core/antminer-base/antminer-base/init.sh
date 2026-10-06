@@ -29,6 +29,26 @@ plain() {
     exec /sbin/init
 }
 
+# --- provisioning SD card: "antminer.root=sd" (uEnv.txt) -> root = ext4 partition 2 ------
+# The same kernel + initramfs boot from NAND or from the card; only this bootarg differs.
+# The card's rootfs (antminer-provision-image) carries the web UI, dtc, the pinmux generator
+# and the NAND payload. NAND is not touched here at all.
+case " $(cat /proc/cmdline) " in
+*" antminer.root=sd "*|*" antminer.root=sd:"*)
+    DEV=$(sed -n 's/.*antminer\.root=sd:\([^ ]*\).*/\1/p' /proc/cmdline)
+    DEV=${DEV:-/dev/mmcblk0p2}
+    for i in $(seq 1 50); do [ -b "$DEV" ] && break; sleep 0.2; done
+    [ -b "$DEV" ] || plain "SD root requested but $DEV never appeared"
+    mkdir -p /newroot
+    if ! mount -t ext4 -o noatime "$DEV" /newroot 2>/dev/null; then
+        plain "cannot mount $DEV (ext4)"
+    fi
+    [ -x /newroot/sbin/init ] || { umount /newroot; plain "$DEV has no /sbin/init"; }
+    log "root on SD card $DEV"
+    exec switch_root /newroot /sbin/init
+    ;;
+esac
+
 MTD=$(grep '"data"' /proc/mtd | cut -d: -f1 | sed 's/^mtd//')
 [ -n "$MTD" ] || plain "no data partition"
 grep -q 'overlay' /proc/filesystems || plain "no overlayfs in kernel"

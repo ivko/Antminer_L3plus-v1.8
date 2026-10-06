@@ -6,8 +6,10 @@ fstab entries for the NAND partitions, antminer-data tool."
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
+FILESEXTRAPATHS:prepend := "${ANTMINER_MAINLINE_DIR}/tools:"
 SRC_URI = "file://init.sh \
            file://antminer-data \
+           file://flash-nand.sh \
            file://antminer-early.init \
            file://antminer-config.init \
            file://antminer-boot-ok.init \
@@ -48,6 +50,8 @@ do_install() {
     # the kernel runs /init from the initramfs before anything else
     install -m 0755 ${WORKDIR}/init.sh ${D}/init
     install -m 0755 ${WORKDIR}/antminer-data ${D}${sbindir}/antminer-data
+    # the same NAND provisioning script as tools/flash-nand.sh (TFTP or a local dir such as /boot)
+    install -m 0755 ${WORKDIR}/flash-nand.sh ${D}${sbindir}/antminer-flash-nand
     install -m 0755 ${WORKDIR}/antminer-early.init ${D}${sysconfdir}/init.d/antminer-early
     install -m 0755 ${WORKDIR}/antminer-config.init ${D}${sysconfdir}/init.d/antminer-config
     install -m 0755 ${WORKDIR}/antminer-boot-ok.init ${D}${sysconfdir}/init.d/antminer-boot-ok
@@ -67,7 +71,7 @@ pkg_postinst:${PN}() {
     grep -q '^/dev/mtdblock9' $D${sysconfdir}/fstab || cat $D${sysconfdir}/fstab.antminer >> $D${sysconfdir}/fstab
 }
 
-FILES:${PN} = "/init ${sbindir}/antminer-data ${sysconfdir}/init.d/antminer-early ${sysconfdir}/fstab.antminer ${sysconfdir}/default/volatiles/50_antminer ${sysconfdir}/opkg/antminer.conf /config /data"
+FILES:${PN} = "/init ${sbindir}/antminer-data ${sbindir}/antminer-flash-nand ${sysconfdir}/init.d/antminer-early ${sysconfdir}/fstab.antminer ${sysconfdir}/default/volatiles/50_antminer ${sysconfdir}/opkg/antminer.conf /config /data"
 FILES:${PN}-config = "${sysconfdir}/init.d/antminer-config"
 FILES:${PN}-bootok = "${sysconfdir}/init.d/antminer-boot-ok"
 FILES:${PN}-ntp = "${sysconfdir}/init.d/antminer-ntp ${sbindir}/antminer-ntp-hook"

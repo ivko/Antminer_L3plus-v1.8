@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ job.title }}{% endblock %}
+{% block content %}
+<h1>{{ job.title }}</h1>
+<p>status: <b id="status" class="{{ job.status }}">{{ job.status }}</b></p>
+<pre id="log">{{ job.lines | join("\n") }}</pre>
+<p><a href="{{ url_for('nand') }}">NAND</a> &middot; <a href="{{ url_for('index') }}">board</a></p>
+<script>
+(function poll() {
+  fetch("{{ url_for('api_job', job_id=job.id) }}").then(r => r.json()).then(j => {
+    const log = document.getElementById("log");
+    log.textContent = j.lines.join("\n");
+    const s = document.getElementById("status"); s.textContent = j.status; s.className = j.status;
+    window.scrollTo(0, document.body.scrollHeight);
+    if (j.status === "running") setTimeout(poll, 1000);
+  }).catch(() => setTimeout(poll, 2000));
+})();
+</script>
+{% endblock %}

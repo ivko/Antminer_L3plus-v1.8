@@ -1,0 +1,24 @@
+## uEnv.txt of the PROVISIONING microSD card (FAT32 partition 1, built by Yocto wic).
+## Read by the Bitmain U-Boot 2013.04 (from NAND on SYSBOOT=10011 boards, from this card's
+## MLO/u-boot.img on SYSBOOT=10111 boards). Loads our kernel, the default-profile DTB and the
+## standard initramfs; "antminer.root=sd" makes /init switch to the ext4 rootfs on partition 2
+## (antminer-provision-image: web UI, dtc, pinmux generator, NAND payload). NAND is untouched.
+
+bootfile=uImage
+fdtfile=am335x-antminer.dtb
+initramfsfile=initramfs.cpio.gz.u-boot
+mmcpart=1
+
+loadaddr=0x82000000
+fdtaddr=0x88000000
+initramfsaddr=0x88100000
+
+console=ttyS0,115200n8
+optargs=antminer.root=sd
+
+sdargs=setenv bootargs console=${console} ${optargs} init=/sbin/init
+loadfdt=load mmc ${mmcdev}:${mmcpart} ${fdtaddr} ${fdtfile}
+loadinitramfs=load mmc ${mmcdev}:${mmcpart} ${initramfsaddr} ${initramfsfile}
+loaduimage=load mmc ${mmcdev}:${mmcpart} ${loadaddr} ${bootfile}
+bootsd=bootm ${loadaddr} ${initramfsaddr} ${fdtaddr}
+uenvcmd=echo Booting the Antminer provisioning system from SD; run loadfdt loadinitramfs loaduimage sdargs bootsd

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ b.hostname }} - board{% endblock %}
+{% block content %}
+<h1>{{ b.hostname }}</h1>
+<table class="kv">
+<tr><th>MAC</th><td>{{ b.mac }}</td></tr>
+<tr><th>IP</th><td>{{ b.ip or "-" }}</td></tr>
+<tr><th>Running from</th><td>{{ b.root }}</td></tr>
+<tr><th>Device tree</th><td>{{ b.model }}</td></tr>
+<tr><th>Kernel</th><td>{{ b.kernel }}, up {{ b.uptime }}, clock {{ b.time }}</td></tr>
+{% if b.sysboot %}
+<tr><th>SYSBOOT</th><td>{{ b.sysboot.raw }} &rarr; sequence {{ b.sysboot.seq_bits }} = <b>{{ b.sysboot.order }}</b></td></tr>
+{% endif %}
+{% if sd %}
+<tr><th>SD card</th><td>{{ sd.name }}, {{ "%.1f"|format(sd.size_gb) }} GB, partitions: {{ sd.parts|join(", ") or "none" }}</td></tr>
+{% endif %}
+</table>
+
+<h2>NAND partitions</h2>
+<table>
+<tr><th>dev</th><th>name</th><th>size</th><th>role</th></tr>
+{% for p in mtd %}
+<tr class="{{ 'protected' if loop.index0 < 6 else '' }}">
+  <td>{{ p.dev }}</td><td>{{ p.name }}</td><td class="num">{{ (p.size / 1024) | int }} KiB</td>
+  <td>{% if loop.index0 < 5 %}Bitmain SPL / U-Boot - never written{% elif p.name == 'bootenv' %}U-Boot env (erased = default env){% elif p.name == 'fdt' %}device tree (pinmux profile){% elif p.name == 'kernel' %}uImage{% elif p.name == 'root' %}initramfs{% elif p.name == 'config' %}/config jffs2 (hostname, ssh, network, pinmux profiles){% elif p.name == 'data' %}UBIFS: persistent overlay, OpenPLC{% endif %}</td>
+</tr>
+{% endfor %}
+</table>
+
+<h2>Data partition / overlay</h2>
+<pre>{{ data }}</pre>
+
+<form method="post" action="{{ url_for('reboot') }}" onsubmit="return confirm('Reboot the board?')">
+<button class="danger">Reboot</button>
+</form>
+{% endblock %}

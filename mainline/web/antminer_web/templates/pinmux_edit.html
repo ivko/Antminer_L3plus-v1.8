@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Pinmux {{ name }}{% endblock %}
+{% block content %}
+<h1>Profile {{ name }} <span class="tag">{{ origin }}</span></h1>
+<form method="post">
+<textarea name="yaml" rows="28" spellcheck="false">{{ text }}</textarea>
+<div class="row">
+<button name="action" value="check">Validate &amp; build</button>
+<button name="action" value="save">Save to /config/pinmux</button>
+<button name="action" value="flash" class="danger" {% if busy %}disabled{% endif %} onclick="return confirm('Save, build and write this profile to mtd6? Takes effect at the next boot.')">Save + flash to mtd6</button>
+</div>
+</form>
+{% if result %}
+<h2>{{ "OK" if result.rc == 0 else "Errors" }}{% if result.saved %} - saved{% endif %}</h2>
+<pre class="{{ 'ok' if result.rc == 0 else 'err' }}">{{ result.out }}</pre>
+{% if result.pinmap %}<h3>Pin map</h3><pre>{{ result.pinmap }}</pre>{% endif %}
+{% endif %}
+<details><summary>Profile syntax</summary>
+<pre>name: my-board
+pins:
+  P9.24: uart1_txd                                  # function only
+  P9.26: {func: uart1_rxd, pull: up}
+  P8.43: {func: gpio, dir: out, init: 0, name: Q0}  # pull follows init
+  P8.39: {func: gpio, dir: in, pull: up, name: I0}
+  P9.17: {func: gpio, dir: out, init: 1, name: RS485_DE, hog: true}
+adc: [0, 1, 2, 3]                                   # AIN0..3 (1.8 V)
+i2c:
+  i2c2:
+    clock-frequency: 100000
+    devices:
+      - {compatible: "nxp,pcf8574", reg: 0x20, props: {gpio-controller: true, "#gpio-cells": 2}}
+unused: default      # every other free pad -> GPIO input pull-down; keep = leave alone</pre>
+</details>
+{% endblock %}

@@ -85,6 +85,18 @@ packagegroup не записва ipk на runtime зависимостите. Fl
 часовник (RTC без батерия → 2018 → login мълчаливо не работи): `antminer-base-ntp` пуска
 busybox ntpd при boot и записва часа в RTC.
 
+## Провизираща SD карта (стъпка 6)
+
+`bitbake antminer-provision-image` дава `antminer-provision-image-antminer-bbb.rootfs.wic`:
+MBR, p1 FAT32 64 MB (MLO, u-boot.img, uEnv.txt, uImage, am335x-antminer.dtb,
+initramfs.cpio.gz.u-boot от `IMAGE_BOOT_FILES`), p2 ext4 ~400 MB с rootfs-а. Рецепти:
+`antminer-sd-boot` (deploy на Bitmain MLO/u-boot.img от `mainline/boot/bitmain` и
+`sdcard/uEnv-sd.txt`), `antminer-pinmux` (gen-dts.py, pad базата, профилите, препроцесираната
+база от kernel source-а в do_compile, `antminer-dtb`), `antminer-web` (Flask UI от `mainline/web`),
+`antminer-provision` (fstab за /boot, банер с адреса). Кернелът има MMC/ext4/VFAT вградени.
+Запис на картата без четец на PC: от netboot-ната платка
+`wget -O - http://<pc>:8000/<path>.wic | dd of=/dev/mmcblk0 bs=1M` (feed сървърът сервира tmp/deploy).
+
 ## Структура
 
 | път | роля |
