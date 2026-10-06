@@ -102,7 +102,11 @@ initramfs.cpio.gz.u-boot от `IMAGE_BOOT_FILES`), p2 ext4 ~400 MB с rootfs-а.
 timestamp). След dd кернелът не вижда дяловете, защото mdev е автомонтирал суровото устройство:
 `echo mmc0:XXXX > /sys/bus/mmc/drivers/mmcblk/unbind; echo mmc0:XXXX > .../bind`.
 Проверено 2026-10-06: boot от картата през NAND U-Boot-а, root на ext4, web UI на :80,
-`antminer-dtb build default` на платката за 1.6 s дава байт-идентично DTB с билднатото от кернела.
+`antminer-dtb build default` на платката за 1.6 s дава байт-идентично DTB с билднатото от кернела,
+NAND флаш през UI (mtd6/7/8 с md5 проверка). Същият UI се инсталира и на NAND системата:
+`opkg install antminer-web` (feed-ът го носи чрез `antminer-feed-extras`), после
+`/etc/init.d/antminer-web start`; там е редно да му се сложи парола от страница Services
+(HTTP basic, `admin`, `/config/web-password`). Тестовата платка го има инсталиран на overlay-а.
 
 ## Структура
 
