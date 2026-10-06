@@ -20,6 +20,11 @@
 <fieldset><legend>SSH</legend>
 <label>root authorized_keys<textarea name="authorized_keys" rows="4" spellcheck="false">{{ c.authorized_keys }}</textarea></label>
 </fieldset>
+<fieldset><legend>Web UI access</legend>
+<p class="hint">{% if password_set %}A password is set: HTTP basic auth, user <b>admin</b>.{% else %}No password: the UI is open (fine on the provisioning card, not on a deployed board).{% endif %}</p>
+<label>set / change password <input type="password" name="web_password" autocomplete="new-password"></label>
+{% if password_set %}<label><input type="checkbox" name="web_password_clear"> remove the password</label>{% endif %}
+</fieldset>
 <button>Save</button>
 </form>
 <p class="hint">OpenPLC (autostart, Modbus port) is configured in its own web UI on port 8080 of the NAND system; ssh key and hostname set here are shared by both systems.</p>

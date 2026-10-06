@@ -12,6 +12,7 @@ INSANE_SKIP:${PN} += "dev-deps"
 RDEPENDS:${PN} = " \
     openplc-runtime \
     matiec \
+    antminer-web antminer-pinmux \
     gcc gcc-symlinks g++ g++-symlinks cpp cpp-symlinks binutils binutils-symlinks make \
     libc6-dev libstdc++-dev \
     python3 python3-modules \

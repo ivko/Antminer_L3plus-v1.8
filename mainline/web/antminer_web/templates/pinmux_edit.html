@@ -15,6 +15,81 @@
 <pre class="{{ 'ok' if result.rc == 0 else 'err' }}">{{ result.out }}</pre>
 {% if result.pinmap %}<h3>Pin map</h3><pre>{{ result.pinmap }}</pre>{% endif %}
 {% endif %}
+<details id="pintable"><summary>Pin table editor (free header pins)</summary>
+<p class="hint">Pick a function per pin, then <b>Apply table to YAML</b>: it rewrites the <code>pins:</code> section and the <code>adc:</code> line of the text above (other sections stay). Build/flash with the buttons above.</p>
+<div class="row" style="margin:8px 0">
+<label>ADC channels (AIN0..6, 1.8 V): {% for ch in range(7) %}<label style="display:inline;margin-right:8px"><input type="checkbox" class="adc" value="{{ ch }}"> AIN{{ ch }}</label>{% endfor %}</label>
+</div>
+<table class="pads" id="pins">
+<tr><th>pin</th><th>pad / gpio</th><th>function</th><th>gpio options</th><th>line name</th></tr>
+{% for r in pads %}
+<tr data-pin="{{ r.pin }}">
+<td>{{ r.pin }}</td><td class="small">{{ r.pad }} {{ r.gpio }}</td>
+<td><select class="func"><option value="">-</option>{% for f in r.funcs %}<option value="{{ f }}">{{ f }}</option>{% endfor %}</select></td>
+<td class="gpioopts">
+  <select class="dir"><option value="in">in</option><option value="out">out</option></select>
+  <select class="pull"><option value="">pull: default</option><option value="up">pull up</option><option value="down">pull down</option><option value="none">no pull</option></select>
+  <select class="init"><option value="0">init 0</option><option value="1">init 1</option></select>
+  <label style="display:inline"><input type="checkbox" class="hog"> hog</label>
+</td>
+<td><input class="name" placeholder="Q0 / I0 / RS485_DE"></td>
+</tr>
+{% endfor %}
+</table>
+<button type="button" onclick="applyTable()">Apply table to YAML</button>
+</details>
+<script>
+const CURRENT = {{ current | tojson }};
+(function fill() {
+  const ta = document.querySelector("textarea[name=yaml]");
+  for (const tr of document.querySelectorAll("#pins tr[data-pin]")) {
+    const c = CURRENT[tr.dataset.pin];
+    const func = tr.querySelector(".func");
+    if (c) {
+      const f = c.func === "gpio" ? "gpio" : c.func;
+      if ([...func.options].some(o => o.value === f)) func.value = f;
+      tr.querySelector(".dir").value = c.dir || "in";
+      tr.querySelector(".pull").value = c.pull || "";
+      tr.querySelector(".init").value = c.init || "0";
+      tr.querySelector(".hog").checked = !!c.hog;
+      tr.querySelector(".name").value = c.name || "";
+    }
+    const upd = () => { tr.querySelector(".gpioopts").style.visibility = func.value === "gpio" ? "visible" : "hidden";
+                        tr.querySelector(".name").style.visibility = func.value === "gpio" ? "visible" : "hidden"; };
+    func.addEventListener("change", upd); upd();
+  }
+  const m = ta.value.match(/^adc:\s*\[([^\]]*)\]/m);
+  if (m) for (const ch of m[1].split(",").map(s => s.trim()).filter(Boolean)) {
+    const cb = document.querySelector(`.adc[value="${ch}"]`); if (cb) cb.checked = true;
+  }
+})();
+function applyTable() {
+  const ta = document.querySelector("textarea[name=yaml]");
+  let lines = ["pins:"];
+  for (const tr of document.querySelectorAll("#pins tr[data-pin]")) {
+    const f = tr.querySelector(".func").value;
+    if (!f) continue;
+    const pin = tr.dataset.pin;
+    if (f !== "gpio") { lines.push(`  ${pin}: ${f}`); continue; }
+    const o = [`func: gpio`, `dir: ${tr.querySelector(".dir").value}`];
+    const pull = tr.querySelector(".pull").value;
+    if (tr.querySelector(".dir").value === "out") o.push(`init: ${tr.querySelector(".init").value}`);
+    if (pull) o.push(`pull: ${pull}`);
+    const name = tr.querySelector(".name").value.trim();
+    if (name) o.push(`name: ${name}`);
+    if (tr.querySelector(".hog").checked) o.push(`hog: true`);
+    lines.push(`  ${pin}: {${o.join(", ")}}`);
+  }
+  const adc = [...document.querySelectorAll(".adc:checked")].map(c => c.value).join(", ");
+  let text = ta.value.replace(/\r\n/g, "\n");
+  // drop the existing top-level pins: block (up to the next top-level key) and adc: line
+  text = text.replace(/^pins:[^\n]*\n(?:(?:[ \t]+[^\n]*|\s*#[^\n]*|)\n?)*/m, "");
+  text = text.replace(/^adc:.*\n?/m, "");
+  if (!/^name:/m.test(text)) text = "name: {{ name }}\n" + text;
+  ta.value = text.trimEnd() + "\n\n" + lines.join("\n") + `\n\nadc: [${adc}]\n`;
+  ta.scrollTop = ta.scrollHeight;
+}
+</script>
 <details><summary>Profile syntax</summary>
 <pre>name: my-board
 pins:
