@@ -64,6 +64,10 @@ def dump(model):
                 out.append(f"  # --- {hdr} ---")
                 last_hdr = hdr
             p = pins[key]
+            if isinstance(p, str):            # shorthand "P9.24: uart1_txd" straight from JSON
+                p = {"func": p}
+            if not isinstance(p, dict):
+                raise ValueError(f"pin {key}: spec must be a string or a mapping")
             comment = p.get("comment")
             # keep 0 (init: 0 matters), drop None / "" / false flags
             fields = {k: p[k] for k in PIN_KEYS

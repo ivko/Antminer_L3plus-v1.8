@@ -40,7 +40,19 @@ for y in sorted(glob.glob(os.path.join(board.PINMUX_DIR, "boards", "*.yaml"))):
     m = profile.load(text)
     print(f"{'ok ' if ok else 'ERR'} roundtrip {os.path.basename(y)}: {len(m['pins'])} pins, adc {m['adc']}")
 # YAML produced by the editor must be accepted back by the generator-side loader
-r = c.post("/api/profiles/breakout/yaml", json=profile.load(open(os.path.join(board.PINMUX_DIR, "boards", "breakout.yaml")).read()))
+m = profile.load(open(os.path.join(board.PINMUX_DIR, "boards", "breakout.yaml")).read())
+r = c.post("/api/profiles/breakout/yaml", json=m)
 print(f"{'ok ' if r.status_code == 200 else 'ERR'} {r.status_code} /api/profiles/breakout/yaml ({len(r.data)} bytes)")
 failed += r.status_code != 200
+# string shorthand and junk specs coming straight from JSON
+m["pins"]["P9.11"] = "uart4_rxd"
+r = c.post("/api/profiles/breakout/yaml", json=m)
+ok = r.status_code == 200 and b"P9.11: uart4_rxd" in r.data
+print(f"{'ok ' if ok else 'ERR'} string pin spec -> yaml")
+failed += not ok
+m["pins"]["P9.12"] = 42
+r = c.post("/api/profiles/breakout/yaml", json=m)
+ok = r.status_code == 422 and b"error" in r.data
+print(f"{'ok ' if ok else 'ERR'} junk pin spec -> 422 ({r.status_code})")
+failed += not ok
 sys.exit(1 if failed else 0)
