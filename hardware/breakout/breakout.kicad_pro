@@ -1,0 +1,83 @@
+{
+  "board": {
+    "design_settings": {
+      "defaults": {},
+      "rules": {}
+    },
+    "layer_presets": [],
+    "viewports": []
+  },
+  "boards": [],
+  "cvpcb": {
+    "equivalence_files": []
+  },
+  "libraries": {
+    "pinned_footprint_libs": [],
+    "pinned_symbol_libs": []
+  },
+  "meta": {
+    "filename": "breakout.kicad_pro",
+    "version": 3
+  },
+  "net_settings": {
+    "classes": [
+      {
+        "name": "Default",
+        "clearance": 0.2,
+        "track_width": 0.25,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6,
+        "bus_width": 12,
+        "line_style": 0,
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1
+      }
+    ],
+    "meta": {
+      "version": 4
+    }
+  },
+  "pcbnew": {
+    "page_layout_descr_file": ""
+  },
+  "schematic": {
+    "legacy_lib_dir": "",
+    "legacy_lib_list": [],
+    "meta": {
+      "version": 1
+    }
+  },
+  "sheets": [
+    [
+      "7a1c0b1e-0001-4000-8000-000000000001",
+      "Root"
+    ],
+    [
+      "7a1c0b1e-0002-4000-8000-000000000002",
+      "outputs"
+    ],
+    [
+      "7a1c0b1e-0003-4000-8000-000000000003",
+      "inputs"
+    ],
+    [
+      "7a1c0b1e-0004-4000-8000-000000000004",
+      "analog"
+    ],
+    [
+      "7a1c0b1e-0005-4000-8000-000000000005",
+      "serial"
+    ],
+    [
+      "7a1c0b1e-0006-4000-8000-000000000006",
+      "i2c_pwm"
+    ]
+  ],
+  "text_variables": {}
+}
