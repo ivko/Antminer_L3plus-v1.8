@@ -1,0 +1,58 @@
+#!/bin/sh
+# Build and install per-board device trees ON THE BOARD (no kernel tree, no cpp: dtc only).
+#
+#   antminer-dtb build <profile.yaml|name> [out.dtb]   # compile a profile (default: /tmp/<name>.dtb)
+#   antminer-dtb flash <file.dtb>                       # write to the NAND fdt partition (mtd6), verify
+#   antminer-dtb current                                # profile name of the DTB the kernel booted with
+#   antminer-dtb list                                   # shipped profiles
+#
+# Profiles: /usr/share/antminer/pinmux/boards/*.yaml (shipped) and /config/pinmux/*.yaml (local).
+set -e
+PM=/usr/share/antminer/pinmux
+LOCAL=/config/pinmux
+cmd="$1"; shift || true
+
+resolve() { # name or path -> yaml path
+    case "$1" in
+        */*|*.yaml) echo "$1" ;;
+        *) if [ -f "$LOCAL/$1.yaml" ]; then echo "$LOCAL/$1.yaml"; else echo "$PM/boards/$1.yaml"; fi ;;
+    esac
+}
+
+case "$cmd" in
+  list)
+    for f in "$PM"/boards/*.yaml "$LOCAL"/*.yaml; do [ -f "$f" ] && basename "$f" .yaml; done
+    ;;
+  current)
+    tr -d '\0' < /proc/device-tree/model | sed -n 's/.*profile \(.*\)$/\1/p'
+    ;;
+  build)
+    yaml=$(resolve "${1:?profile}")
+    [ -f "$yaml" ] || { echo "no profile $1" >&2; exit 1; }
+    name=$(basename "$yaml" .yaml)
+    out="${2:-/tmp/am335x-antminer-$name.dtb}"
+    dts="${out%.dtb}.dts"
+    python3 "$PM/gen-dts.py" "$yaml" --flat am335x-antminer-base.pp.dtsi -o "$dts"
+    dtc -I dts -O dtb -i "$PM" -o "$out" "$dts" 2>&1 | grep -vE 'Warning \((unit_address_vs_reg|simple_bus_reg|avoid_unnecessary_addr_size|graph_child_address|spi_bus_bridge|unique_unit_address)\)' >&2 || true
+    [ -s "$out" ] || { echo "dtc produced nothing" >&2; exit 1; }
+    echo "$out"
+    ;;
+  flash)
+    dtb="${1:?file.dtb}"
+    mtd=$(grep '"fdt"' /proc/mtd | cut -d: -f1)
+    [ "$mtd" = "mtd6" ] || { echo "unexpected fdt partition ($mtd), refusing" >&2; exit 1; }
+    size=$(stat -c %s "$dtb")
+    [ "$size" -le 131072 ] || { echo "$dtb is $size bytes, mtd6 is 128 KiB" >&2; exit 1; }
+    [ "$(hexdump -n 4 -e '4/1 "%02x"' "$dtb")" = "d00dfeed" ] || { echo "$dtb is not a DTB" >&2; exit 1; }
+    flash_erase /dev/$mtd 0 0 >/dev/null
+    nandwrite -p -q /dev/$mtd "$dtb"
+    # verify: nanddump pads to whole pages, compare only the file length
+    pages=$(( (size + 2047) / 2048 ))
+    nanddump -q -l $((pages * 2048)) /dev/$mtd 2>/dev/null | dd bs=1 count="$size" 2>/dev/null | md5sum | cut -d' ' -f1 > /tmp/.dtb.md5
+    want=$(md5sum "$dtb" | cut -d' ' -f1)
+    [ "$(cat /tmp/.dtb.md5)" = "$want" ] || { echo "verify FAILED" >&2; exit 1; }
+    echo "mtd6 <- $dtb ($size bytes) verified $want"
+    ;;
+  *)
+    sed -n '2,10p' "$0"; exit 1 ;;
+esac

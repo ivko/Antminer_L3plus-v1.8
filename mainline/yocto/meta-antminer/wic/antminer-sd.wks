@@ -1,0 +1,10 @@
+# Provisioning microSD card for the Antminer BB-Black V1.8 (built by: bitbake antminer-provision-image)
+#
+#  p1  FAT32  64 MiB  "boot"      MLO, u-boot.img, uEnv.txt, uImage, DTBs, initramfs  (IMAGE_BOOT_FILES)
+#                                  = also the payload the web UI flashes to NAND mtd6/7/8
+#  p2  ext4   ~400 MiB "provision" antminer-provision-image rootfs (web UI, dtc, pinmux generator)
+#
+# MBR partition table, p1 active, p1 starts at 4 MiB: what the AM335x ROM and U-Boot 2013.04 expect.
+part /boot --source bootimg-partition --ondisk mmcblk0 --fstype=vfat --label boot --active --align 4096 --fixed-size 64M
+part / --source rootfs --ondisk mmcblk0 --fstype=ext4 --label provision --align 4096 --size 400M --extra-space 64M
+bootloader --ptable msdos

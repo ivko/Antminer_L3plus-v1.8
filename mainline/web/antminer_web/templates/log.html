@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Log{% endblock %}
+{% block content %}
+<h1>Jobs</h1>
+{% if jobs %}
+<table><tr><th>job</th><th>status</th><th></th></tr>
+{% for j in jobs %}<tr><td>{{ j.title }}</td><td class="{{ j.status }}">{{ j.status }}{% if j.rc is not none %} ({{ j.rc }}){% endif %}</td><td><a href="{{ url_for('job', job_id=j.id) }}">log</a></td></tr>{% endfor %}
+</table>
+{% else %}<p>No jobs yet.</p>{% endif %}
+<h1>dmesg (tail)</h1>
+<pre class="small">{{ dmesg }}</pre>
+{% endblock %}

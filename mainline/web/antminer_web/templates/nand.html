@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}NAND{% endblock %}
+{% block content %}
+<h1>NAND provisioning</h1>
+<p>Writes only <b>mtd6</b> (device tree), <b>mtd7</b> (kernel) and <b>mtd8</b> (initramfs), each verified by md5 after writing.
+The Bitmain SPL/U-Boot (mtd0-4) and the env (mtd5) are never touched. Payload: <code>{{ payload_dir }}</code>. Running from: {{ root }}.</p>
+
+<h2>Payload on this card</h2>
+<table>
+<tr><th>file</th><th>kind</th><th>size</th><th>md5</th></tr>
+{% for f in payload %}
+<tr><td>{{ f.name }}</td><td>{{ f.kind }}</td><td class="num">{{ f.size }}</td><td class="mono">{{ f.md5 }}</td></tr>
+{% endfor %}
+</table>
+
+<h2>What is in NAND now</h2>
+{% if contents %}
+<table>
+<tr><th>partition</th><th>content</th><th>length</th><th>md5</th><th>matches payload</th></tr>
+{% for name, c in contents.items() %}
+<tr><td>{{ c.dev }} {{ name }}</td><td>{{ c.desc }}</td><td class="num">{{ c.length or "-" }}</td><td class="mono">{{ c.md5 or "-" }}</td>
+<td>{% set hits = payload | selectattr("md5", "equalto", c.md5) | map(attribute="name") | list %}{{ hits | join(", ") if hits else "no" }}</td></tr>
+{% endfor %}
+</table>
+{% else %}
+<p><a class="button" href="{{ url_for('nand', scan=1) }}">Scan NAND</a> (reads mtd6/7/8, ~10 s)</p>
+{% endif %}
+
+<h2>Flash</h2>
+<form method="post" action="{{ url_for('nand_flash') }}" onsubmit="return confirm('Erase and rewrite mtd6, mtd7, mtd8 of this board?')">
+<label>kernel <select name="kernel">{% for f in kernels %}<option>{{ f.name }}</option>{% endfor %}</select></label>
+<label>device tree <select name="dtb">{% for f in dtbs %}<option value="{{ f.name }}">{{ f.name }} (profile {{ f.profile }})</option>{% endfor %}</select></label>
+<label>initramfs <select name="initrd">{% for f in initrds %}<option>{{ f.name }}</option>{% endfor %}</select></label>
+<label><input type="checkbox" name="wipe_config"> also erase /config (mtd9: hostname, ssh keys, network, local pinmux profiles, Bitmain leftovers)</label>
+<button class="danger" {% if busy %}disabled{% endif %}>Flash kernel + DTB + initramfs</button>
+</form>
+
+<form method="post" action="{{ url_for('nand_dtb_only') }}" onsubmit="return confirm('Rewrite mtd6 (device tree) only?')">
+<label>device tree only <select name="dtb">{% for f in dtbs %}<option value="{{ f.name }}">{{ f.name }} (profile {{ f.profile }})</option>{% endfor %}</select></label>
+<button {% if busy %}disabled{% endif %}>Write DTB to mtd6</button>
+</form>
+
+<h2>Data partition (mtd10, UBIFS overlay)</h2>
+<pre>{{ data }}</pre>
+<div class="row">
+{% for a, txt, cls in [("init", "Init (format, destroys data)", "danger"), ("enable", "Enable overlay", ""), ("disable", "Disable overlay", ""), ("wipe", "Wipe upper layer", "danger")] %}
+<form method="post" action="{{ url_for('nand_data', action=a) }}" onsubmit="return confirm('antminer-data {{ a }}?')"><button class="{{ cls }}" {% if busy %}disabled{% endif %}>{{ txt }}</button></form>
+{% endfor %}
+</div>
+<p class="hint">Typical new board: Flash (with "erase /config") &rarr; Init &rarr; Enable &rarr; remove the card &rarr; Reboot. OpenPLC and the other feed packages are installed afterwards on the overlay with opkg.</p>
+{% endblock %}

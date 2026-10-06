@@ -188,15 +188,35 @@ SYSBOOT пиновете се четат от CONTROL_STATUS (`devmem 0x44E10040
 (само SD, NAND го няма в списъка) – хардуерна разлика в резистора на SYSBOOT2 (= lcd_data2 =
 P8.43). Т.е. "вкарвам SD и boot-ва от нея" важи за платките с 0x17, не за тази.
 
-microSD слотът на тестовата платка работи само в 1-bit режим: Linux sdhci-omap с
-`bus-width = <1>` чете картата без грешка дори на 50 MHz, а с 4-bit (и на 400 kHz) всяко
-четене дава `I/O error` / "Got data interrupt ... no data operation" – DAT1..3 са прекъснати
-някъде между слота и процесора. Bitmain U-Boot ползва 4-bit и затова "чете" само боклук
-(`mmc read` връща OK, без да пипне буфера). Логове: `device-dump/netboot-22..25-sd-*.log`,
-`uboot-sdcard-0*.log`. Кернелът вече има MMC/SDHCI_OMAP/VFAT вградени (+93 KB) за диагностика
-и за SD като носител; `sdcard/uEnv.txt` е готов за платки с работещ слот (FAT32, дял 1).
-Другите платки: проверка със същия тест (`netboot.ps1 -Dtb am335x-antminer-mmc1bit-fast.dtb`
-срещу стандартното DTB) преди да се разчита на SD за recovery.
+microSD слотът: с една конкретна карта (DDINC 16 GB, старата Bitmain карта) тестовата платка
+чете само в 1-bit режим, а в 4-bit (дори на 400 kHz) всяко четене дава `I/O error`; същата
+карта работи в 4-bit на другата платка със стария кернел. С друга карта (USD00 16 GB) 4-bit на
+50 MHz е без нито една грешка на тестовата платка. Т.е. слотът е здрав, проблемът е маргинален
+контакт карта/слот. Bitmain U-Boot ползва 4-bit, затова с лоша комбинация "чете" боклук
+(`mmc read` връща OK, без да пипне буфера). Логове: `device-dump/netboot-22..26-*.log`,
+`uboot-sdcard-0*.log`. Кернелът има MMC/SDHCI_OMAP/VFAT вградени (+93 KB) – основа за
+провизиращата SD карта; `sdcard/uEnv.txt` е готов (FAT32, дял 1). При проблем с карта:
+`netboot.ps1 -Dtb am335x-antminer-mmc1bit-fast.dtb` срещу стандартното DTB показва дали е
+4-bit проблем.
+
+## Провизираща microSD карта (стъпка 6), 2026-10-06
+
+Една карта за двата типа платки: FAT дял 1 носи Bitmain MLO + u-boot.img (за платките със
+SYSBOOT 10111 ROM-ът тръгва от тях), `uEnv.txt`, нашия uImage, DTB и initramfs; ext4 дял 2 е
+`antminer-provision-image` (web UI, dtc, генераторът на DTS). `uEnv.txt` подава
+`antminer.root=sd` и `/init` прави `switch_root` в дял 2 вместо overlay върху NAND. Самите
+файлове от дял 1 са и payload-ът за NAND. Образът на цялата карта е `.wic`
+(`yocto/meta-antminer/wic/antminer-sd.wks`), пише се с Rufus/dd или от самата платка.
+
+На платката: `antminer-dtb build <profile>` компилира YAML профил с dtc върху предварително
+препроцесирана база (`pinmux/make-base-pp.sh`, `gen-dts.py --flat`; резултатът е байт-идентичен
+с cpp build-а), `antminer-dtb flash x.dtb` го записва в mtd6 с проверка;
+`antminer-flash-nand /boot uImage x.dtb initramfs.cpio.gz.u-boot` флашва mtd6/7/8 от картата.
+Web UI (Flask, порт 80, `mainline/web/`): платка/SYSBOOT, NAND (съдържание срещу payload, флаш,
+data дял), pinmux (редактор на YAML, build, запис в mtd6, таблица на пиновете), услуги
+(hostname, NTP, статичен IP, SSH ключове в /config), лог. `antminer-config` вече чете
+`/config/network` (MODE=static ADDRESS NETMASK GATEWAY DNS) и линква `/config/ssh/authorized_keys`.
+Тест на хоста: `python3 web/test_smoke.py`.
 
 ## Следващи стъпки
 

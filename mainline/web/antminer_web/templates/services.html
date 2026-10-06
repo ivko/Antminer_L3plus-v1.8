@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Services{% endblock %}
+{% block content %}
+<h1>Services and identity</h1>
+<p>Stored on the board's /config partition (NAND mtd9, jffs2){% if not c.config_mounted %} - <b>not mounted, changes would be lost</b>{% endif %}. Applied by <code>antminer-config</code> at boot.</p>
+{% if msg %}<p class="ok">{{ msg }}</p>{% endif %}
+<form method="post">
+<fieldset><legend>Identity</legend>
+<label>hostname override <input name="hostname" value="{{ c.hostname }}" placeholder="empty = antminer-&lt;last 3 MAC bytes&gt;"></label>
+<label>NTP server <input name="ntp" value="{{ c.ntp }}" placeholder="pool.ntp.org"></label>
+</fieldset>
+<fieldset><legend>Network (eth0)</legend>
+<label><input type="radio" name="mode" value="dhcp" {% if c.net.MODE != 'static' %}checked{% endif %}> DHCP</label>
+<label><input type="radio" name="mode" value="static" {% if c.net.MODE == 'static' %}checked{% endif %}> static:</label>
+<label>address <input name="address" value="{{ c.net.ADDRESS }}" placeholder="192.168.1.50"></label>
+<label>netmask <input name="netmask" value="{{ c.net.NETMASK }}"></label>
+<label>gateway <input name="gateway" value="{{ c.net.GATEWAY }}"></label>
+<label>DNS <input name="dns" value="{{ c.net.DNS }}" placeholder="192.168.1.1"></label>
+</fieldset>
+<fieldset><legend>SSH</legend>
+<label>root authorized_keys<textarea name="authorized_keys" rows="4" spellcheck="false">{{ c.authorized_keys }}</textarea></label>
+</fieldset>
+<button>Save</button>
+</form>
+<p class="hint">OpenPLC (autostart, Modbus port) is configured in its own web UI on port 8080 of the NAND system; ssh key and hostname set here are shared by both systems.</p>
+{% endblock %}

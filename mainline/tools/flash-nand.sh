@@ -2,7 +2,7 @@
 # Provision the Antminer BB-Black V1.8 from a running Linux (netbooted antminer-image or the
 # old Angstrom): fetch kernel/DTB/initramfs over TFTP and write them to NAND with verification.
 #
-#   sh flash-nand.sh [--wipe-config] <tftp-server-ip> [uImage] [am335x-antminer.dtb] [initramfs.cpio.gz.u-boot]
+#   sh flash-nand.sh [--wipe-config] <tftp-server-ip | /local/dir> [uImage] [am335x-antminer.dtb] [initramfs.cpio.gz.u-boot]
 #
 # Writes ONLY: mtd6 (fdt), mtd7 (kernel), mtd8 (root). Never touches mtd0..mtd5 (SPL/U-Boot/env):
 # the board has no boot button, a broken SPL/U-Boot means JTAG. Reversible with the files in
@@ -43,9 +43,15 @@ done
 cd /tmp
 if [ "$DTB_ONLY" = 1 ]; then FILES="$DTB"; else FILES="$KERNEL $DTB $ROOTFS"; fi
 for f in $FILES; do
-    echo ">> tftp $f"
     rm -f "$f"
-    tftp -g -r "$f" "$SERVER" || { echo "tftp failed for $f"; exit 1; }
+    case "$SERVER" in
+        /*)  # a local directory (provisioning SD card: /boot) instead of a TFTP server
+            echo ">> copy $SERVER/$f"
+            cp "$SERVER/$f" "$f" || { echo "missing $SERVER/$f"; exit 1; } ;;
+        *)
+            echo ">> tftp $f"
+            tftp -g -r "$f" "$SERVER" || { echo "tftp failed for $f"; exit 1; } ;;
+    esac
 done
 
 check_fit() { # file mtd

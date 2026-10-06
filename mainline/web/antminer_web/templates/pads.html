@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Header pins{% endblock %}
+{% block content %}
+<h1>P8 / P9 header pins</h1>
+<p>Reserved pads belong to the fixed part of the device tree (NAND, Ethernet, console, PMIC, SD card, LEDs) and are refused by the generator.</p>
+<table class="pads">
+<tr><th>pin</th><th>BBB name</th><th>pad</th><th>gpio</th><th>modes</th><th>state</th></tr>
+{% for r in rows %}
+<tr class="{{ 'reserved' if r.state not in ('free', 'power') else r.state }}"><td>{{ r.pin }}</td><td>{{ r.name }}</td><td class="mono">{{ r.pad or "" }}</td><td>{{ r.gpio }}</td><td class="small">{{ r.modes }}</td><td>{{ r.state }}</td></tr>
+{% endfor %}
+</table>
+{% endblock %}
