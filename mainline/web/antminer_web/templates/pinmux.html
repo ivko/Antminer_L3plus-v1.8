@@ -7,11 +7,11 @@ the board compiles it to a DTB with <code>antminer-dtb</code> and writes it to m
 <table>
 <tr><th>profile</th><th>origin</th><th></th></tr>
 {% for p in profiles %}
-<tr><td><a href="{{ url_for('pinmux_edit', name=p.name) }}">{{ p.name }}</a>{% if p.name == current %} <span class="tag">active</span>{% endif %}</td><td>{{ p.origin }}</td>
-<td><a class="button" href="{{ url_for('pinmux_edit', name=p.name) }}">edit / build / flash</a></td></tr>
+<tr><td><a href="{{ url_for('pinmux_board', name=p.name) }}">{{ p.name }}</a>{% if p.name == current %} <span class="tag">active</span>{% endif %}</td><td>{{ p.origin }}</td>
+<td><a class="button" href="{{ url_for('pinmux_board', name=p.name) }}">board editor</a> <a class="button" href="{{ url_for('pinmux_edit', name=p.name) }}">YAML</a></td></tr>
 {% endfor %}
 </table>
-<form method="get" action="{{ url_for('pinmux_edit', name='new') }}" onsubmit="this.action='/pinmux/'+this.n.value; return !!this.n.value.match(/^[A-Za-z0-9][A-Za-z0-9_-]*$/)">
+<form method="get" action="{{ url_for('pinmux_board', name='new') }}" onsubmit="this.action='/pinmux/'+this.n.value+'/board'; return !!this.n.value.match(/^[A-Za-z0-9][A-Za-z0-9_-]*$/)">
 <label>new profile name <input name="n" placeholder="my-board" pattern="[A-Za-z0-9][A-Za-z0-9_-]*"></label><button>Create</button>
 </form>
 <p><a href="{{ url_for('pinmux_pads') }}">Header pin table (free / reserved pads)</a></p>

@@ -7,7 +7,9 @@ import subprocess
 
 from flask import Flask, Response, abort, jsonify, redirect, render_template, request, url_for
 
-from . import __version__, board
+import json
+
+from . import __version__, board, profile
 from .jobs import run_quick, runner
 
 FLASH = "/usr/sbin/antminer-flash-nand"
@@ -152,6 +154,88 @@ def create_app():
                                origin="local" if path == local else ("shipped" if os.path.exists(shipped) else "new"),
                                pads=[r for r in _pad_rows() if r["state"] == "free"], current=_current_pins(text))
 
+    # ---- board editor (Lit component + JSON API) ----------------------------------------
+    @app.route("/pinmux/<name>/board")
+    def pinmux_board(name):
+        if not SAFE_NAME.match(name):
+            abort(400)
+        return render_template("board.html", name=name, current=board.identity()["profile"])
+
+    @app.route("/api/pads")
+    def api_pads():
+        return jsonify({"pads": _pad_rows(), "headers": _header_layout()})
+
+    @app.route("/api/profiles")
+    def api_profiles():
+        return jsonify(board.profiles())
+
+    @app.route("/api/profiles/<name>", methods=["GET", "PUT"])
+    def api_profile(name):
+        if not SAFE_NAME.match(name):
+            abort(400)
+        local = os.path.join(board.CONFIG_DIR, "pinmux", f"{name}.yaml")
+        shipped = os.path.join(board.PINMUX_DIR, "boards", f"{name}.yaml")
+        if request.method == "PUT":
+            model = request.get_json(force=True, silent=True)
+            if not isinstance(model, dict):
+                abort(400, "JSON model expected")
+            model["name"] = name
+            text = profile.dump(model)
+            os.makedirs(os.path.dirname(local), exist_ok=True)
+            with open(local, "w", newline="\n") as fh:
+                fh.write(text)
+            run_quick(["sync"])
+            return jsonify({"saved": local, "yaml": text})
+        path = local if os.path.exists(local) else shipped
+        text = board.read(path) if os.path.exists(path) else f"name: {name}\npins: {{}}\nadc: []\n"
+        try:
+            model = profile.load(text)
+        except Exception as ex:  # noqa: BLE001
+            return jsonify({"error": f"cannot parse profile: {ex}"}), 422
+        model["origin"] = "local" if path == local else ("shipped" if os.path.exists(shipped) else "new")
+        model["yaml"] = text
+        return jsonify(model)
+
+    @app.route("/api/profiles/<name>/yaml", methods=["POST"])
+    def api_profile_yaml(name):
+        model = request.get_json(force=True, silent=True) or {}
+        model["name"] = name
+        return Response(profile.dump(model), mimetype="text/plain")
+
+    @app.route("/api/profiles/<name>/build", methods=["POST"])
+    def api_profile_build(name):
+        """validate + compile a JSON model on the board; returns per-pin errors and the pin map"""
+        if not SAFE_NAME.match(name):
+            abort(400)
+        model = request.get_json(force=True, silent=True) or {}
+        model["name"] = name
+        tmp = f"/tmp/antminer-web-{name}.yaml"
+        with open(tmp, "w", newline="\n") as fh:
+            fh.write(profile.dump(model))
+        dtb = f"/tmp/am335x-antminer-{name}.dtb"
+        rc, out = run_quick([DTB, "build", tmp, dtb], timeout=120)
+        result = {"ok": rc == 0, "output": out.strip(), "dtb_size": os.path.getsize(dtb) if rc == 0 and os.path.exists(dtb) else None}
+        js = dtb[:-4] + ".json"
+        if os.path.exists(js):
+            with open(js) as fh:
+                result.update(json.load(fh))
+        if not result.get("errors") and rc != 0:
+            result["errors"] = [{"pin": None, "text": out.strip()[-500:]}]
+        return jsonify(result)
+
+    @app.route("/api/profiles/<name>/flash", methods=["POST"])
+    def api_profile_flash(name):
+        if not SAFE_NAME.match(name):
+            abort(400)
+        dtb = f"/tmp/am335x-antminer-{name}.dtb"
+        if not os.path.exists(dtb):
+            return jsonify({"error": "build first"}), 409
+        try:
+            j = runner.start(f"pinmux profile '{name}' -> mtd6", [DTB, "flash", dtb])
+        except RuntimeError as ex:
+            return jsonify({"error": str(ex)}), 409
+        return jsonify({"job": j.id, "url": url_for("job", job_id=j.id)})
+
     # ---- services ---------------------------------------------------------------------
     @app.route("/services", methods=["GET", "POST"])
     def services():
@@ -247,6 +331,25 @@ def _pad_rows():
                      "gpio": e.get("gpio") or "", "state": why or "free", "funcs": funcs})
     rows.sort(key=lambda r: (r["pin"].split(".")[0], int(r["pin"].split(".")[1])))
     return rows
+
+
+def _header_layout():
+    """P9 / P8 as the physical 2x23 headers: rows of (odd pin, even pin), pin 1 at the top.
+    Power pins carry their rail name so the editor can draw them."""
+    import json
+    with open(os.path.join(board.PINMUX_DIR, "am335x-bbb-pins.json")) as fh:
+        db = json.load(fh)
+    layout = {}
+    for hdr in ("P9", "P8"):
+        rows = []
+        for n in range(1, 47, 2):
+            row = []
+            for pin in (f"{hdr}.{n}", f"{hdr}.{n + 1}"):
+                e = db.get(pin, {})
+                row.append({"pin": pin, "name": e.get("name", ""), "power": e.get("offset") is None})
+            rows.append(row)
+        layout[hdr] = rows
+    return layout
 
 
 def _current_pins(text):

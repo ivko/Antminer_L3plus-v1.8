@@ -216,6 +216,15 @@ Web UI (Flask, порт 80, `mainline/web/`): платка/SYSBOOT, NAND (съд
 data дял), pinmux (редактор на YAML, build, запис в mtd6, таблица на пиновете), услуги
 (hostname, NTP, статичен IP, SSH ключове в /config), лог. `antminer-config` вече чете
 `/config/network` (MODE=static ADDRESS NETMASK GATEWAY DNS) и линква `/config/ssh/authorized_keys`.
+Визуален редактор на пиновете (`/pinmux/<профил>/board`, Lit компонент
+`web/antminer_web/static/board-editor.js` с vendor-нат `lit-all.min.js`, без build стъпка): P9 и P8
+като физическите хедъри, плочки с цвят по категория (захранване, запазени, GPIO in/out, UART, I2C,
+SPI, PWM, CAN, timer, ADC), клик → диалог (функция, посока, init, pull, име на линията, hog,
+коментар), AIN плочките превключват ADC каналите, маркери за променени/грешни/непълни периферии.
+JSON API: `/api/pads`, `/api/profiles[/<name>[/build|/flash|/yaml]]`; `gen-dts.py --json` дава
+грешките по пин. Профилът се пази като YAML (`web/antminer_web/profile.py`, коментарите на пин са
+в поле `comment:`). Разработка на PC: `ANTMINER_PINMUX=.../pinmux ANTMINER_CONFIG=/tmp/cfg
+ANTMINER_PAYLOAD=.../out/sdcard python3 run.py --port 8088`, `?open=P8.43` отваря диалога.
 Тест на хоста: `python3 web/test_smoke.py`. UI-ят е отворен, докато няма парола; парола
 (HTTP basic, потребител `admin`) се слага от страница Services и живее в `/config/web-password`.
 
