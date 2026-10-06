@@ -1,0 +1,35 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          openplc
+# Required-Start:    networking
+# Default-Start:     5
+# Short-Description: OpenPLC v3 runtime web server (port 8080) + PLC core
+### END INIT INFO
+OPENPLC_DIR=/opt/openplc
+LOG=/var/log/openplc.log
+PIDFILE=/var/run/openplc-webserver.pid
+
+case "$1" in
+  start)
+    [ -d "$OPENPLC_DIR/webserver" ] || exit 0
+    echo "Starting OpenPLC runtime (http://$(hostname):8080)"
+    cd "$OPENPLC_DIR/webserver"
+    start-stop-daemon -S -b -m -p "$PIDFILE" -x /usr/bin/python3 -- webserver.py >> "$LOG" 2>&1
+    ;;
+  stop)
+    echo "Stopping OpenPLC runtime"
+    start-stop-daemon -K -p "$PIDFILE" 2>/dev/null
+    killall openplc 2>/dev/null || true
+    rm -f "$PIDFILE"
+    ;;
+  restart)
+    $0 stop; sleep 1; $0 start
+    ;;
+  status)
+    if [ -f "$PIDFILE" ] && kill -0 "$(cat $PIDFILE)" 2>/dev/null; then echo "webserver running (pid $(cat $PIDFILE))"; else echo "webserver not running"; fi
+    pidof openplc >/dev/null && echo "PLC core running" || echo "PLC core not running"
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|status}"; exit 1 ;;
+esac
+exit 0

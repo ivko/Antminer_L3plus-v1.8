@@ -1,0 +1,31 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          antminer-ntp
+# Required-Start:    networking
+# Default-Start:     5
+# Short-Description: time sync (the RTC has no battery: without this the clock starts in 2018)
+### END INIT INFO
+#
+# A wrong clock breaks more than timestamps: Flask session cookies expire relative to the
+# board's time, so the OpenPLC web login silently fails from any browser.
+# Server: /config/ntp-server (one hostname/IP per line, first used) or pool.ntp.org.
+SERVER=$(head -n 1 /config/ntp-server 2>/dev/null | tr -cd 'A-Za-z0-9.:-')
+[ -n "$SERVER" ] || SERVER=pool.ntp.org
+PIDFILE=/var/run/antminer-ntpd.pid
+
+case "$1" in
+  start)
+    echo "Starting ntpd (server $SERVER)"
+    # busybox ntpd: daemon mode keeps the clock disciplined; -S hook saves it to the RTC
+    start-stop-daemon -S -b -m -p "$PIDFILE" -x /usr/sbin/ntpd -- -n -p "$SERVER" -S /usr/sbin/antminer-ntp-hook
+    ;;
+  stop)
+    start-stop-daemon -K -p "$PIDFILE" 2>/dev/null; rm -f "$PIDFILE"
+    ;;
+  status)
+    [ -f "$PIDFILE" ] && kill -0 "$(cat $PIDFILE)" 2>/dev/null && echo "ntpd running ($SERVER)" || echo "ntpd not running"
+    date
+    ;;
+  *) echo "Usage: $0 {start|stop|status}"; exit 1 ;;
+esac
+exit 0

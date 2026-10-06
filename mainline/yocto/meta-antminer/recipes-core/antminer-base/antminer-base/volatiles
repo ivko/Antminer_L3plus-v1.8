@@ -2,3 +2,6 @@
 # runtime state of the I/O module daemons (tmpfs, gone at reboot; persistent settings live in /config)
 d root root 0755 /var/volatile/antminer none
 l root root 0755 /run/antminer /var/volatile/antminer
+# opkg download cache (see /etc/opkg/antminer.conf)
+d root root 0755 /var/volatile/cache none
+d root root 0755 /var/volatile/cache/opkg none
