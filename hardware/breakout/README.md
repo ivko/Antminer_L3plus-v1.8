@@ -7,7 +7,9 @@ KiCad 10 проект, **генериран** от `gen-sch.py`: схемата 
 
 Схемата следва `mainline/pinmux/boards/default.yaml` (Q0..3, I0..3, UART1/2/5, I2C2, ADC,
 ehrpwm0B) и добавя Q4..7 (P8.27-30), I4..7 (P8.31-34), RS485_DE0/1 (P9.17/18), BTN (P9.23),
-FAN_TACH (P9.30). Профилът за тези пинове е следваща стъпка (`boards/breakout.yaml`).
+FAN_TACH (P9.30), SPARE0..8. Профилът за платката е `mainline/pinmux/boards/breakout.yaml`
+(вкл. PCF8574 на 0x20 и TMP1075 на 0x48 като I2C child възли):
+`powershell -File mainline\tools\deploy-dtb.ps1 -Profile breakout`.
 
 ## Файлове
 
@@ -61,7 +63,5 @@ NAND пиновете (P8.3-10, P8.22-26, P9.11, P9.13) са маркирани 
 
 ## Следващи стъпки
 
-- `mainline/pinmux/boards/breakout.yaml` с всички пинове и I2C устройствата (нужна е
-  поддръжка на `devices:` в gen-dts.py).
 - Разполагане и трасиране на PCB, BOM (`kicad-cli sch export bom`).
 - Вариант 2 с галванична изолация (ISO1500, оптрони навсякъде, ULN2803) за DIN-rail кутия.
