@@ -179,14 +179,19 @@
  * at 0x24 ("i2c mw 0x24 1 0x3e" in bootcmd), so it is present. There is no
  * baseboard EEPROM at 0x50 on this board.
  */
-&baseboard_eeprom {
-	status = "disabled";
-};
+/delete-node/ &baseboard_eeprom;
 
 /* am335x-bone-common.dtsi enables i2c2 (P9.19/20); it is a per-board choice here */
 &i2c2 {
 	status = "disabled";
 };
+
+/* no cape ID EEPROMs (0x54..0x57) on this board: drop the bone-common nodes so i2c2 shows
+ * only what the profile adds */
+/delete-node/ &cape_eeprom0;
+/delete-node/ &cape_eeprom1;
+/delete-node/ &cape_eeprom2;
+/delete-node/ &cape_eeprom3;
 
 /* ------------------------------------------------------------ not on AM3352 */
 

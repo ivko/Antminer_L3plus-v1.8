@@ -75,7 +75,7 @@ i2c:
           gpio-controller: true
           "#gpio-cells": 2
           gpio-line-names: [EXP0, EXP1, EXP2, EXP3, EXP4, EXP5, EXP6, EXP7]
-      # TMP1075DGK, A0-A2 = GND -> 0x48; hwmon via the tmp102 driver
+      # TMP1075DGK, A0-A2 = GND -> 0x48; hwmon via the lm75 driver (CONFIG_SENSORS_LM75)
       - compatible: "ti,tmp1075"
         reg: 0x48
         label: board_temp
