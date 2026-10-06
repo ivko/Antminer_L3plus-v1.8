@@ -54,8 +54,8 @@ const CURRENT = {{ current | tojson }};
       tr.querySelector(".hog").checked = !!c.hog;
       tr.querySelector(".name").value = c.name || "";
     }
-    const upd = () => { tr.querySelector(".gpioopts").style.visibility = func.value === "gpio" ? "visible" : "hidden";
-                        tr.querySelector(".name").style.visibility = func.value === "gpio" ? "visible" : "hidden"; };
+    const upd = () => { const g = func.value === "gpio";
+                        for (const el of tr.querySelectorAll(".gpioopts select, .gpioopts label, .name")) el.style.display = g ? "" : "none"; };
     func.addEventListener("change", upd); upd();
   }
   const m = ta.value.match(/^adc:\s*\[([^\]]*)\]/m);
