@@ -1,0 +1,1675 @@
+{
+ "P8.1": {
+  "ball": null,
+  "name": "GND",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P8.2": {
+  "ball": null,
+  "name": "GND",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P8.3": {
+  "ball": "R9",
+  "name": "GPIO1_6",
+  "offset": 2072,
+  "modes": [
+   "gpmc_ad6",
+   "mmc1_dat6",
+   null,
+   null,
+   null,
+   null,
+   null,
+   "gpio1[6]"
+  ],
+  "gpio": [
+   1,
+   6
+  ]
+ },
+ "P8.4": {
+  "ball": "T9",
+  "name": "GPIO1_7",
+  "offset": 2076,
+  "modes": [
+   "gpmc_ad7",
+   "mmc1_dat7",
+   null,
+   null,
+   null,
+   null,
+   null,
+   "gpio1[7]"
+  ],
+  "gpio": [
+   1,
+   7
+  ]
+ },
+ "P8.5": {
+  "ball": "R8",
+  "name": "GPIO1_2",
+  "offset": 2056,
+  "modes": [
+   "gpmc_ad2",
+   "mmc1_dat2",
+   null,
+   null,
+   null,
+   null,
+   null,
+   "gpio1[2]"
+  ],
+  "gpio": [
+   1,
+   2
+  ]
+ },
+ "P8.6": {
+  "ball": "T8",
+  "name": "GPIO1_3",
+  "offset": 2060,
+  "modes": [
+   "gpmc_ad3",
+   "mmc1_dat3",
+   null,
+   null,
+   null,
+   null,
+   null,
+   "gpio1[3]"
+  ],
+  "gpio": [
+   1,
+   3
+  ]
+ },
+ "P8.7": {
+  "ball": "R7",
+  "name": "TIMER4",
+  "offset": 2192,
+  "modes": [
+   "gpmc_advn_ale",
+   null,
+   "timer4",
+   null,
+   null,
+   null,
+   null,
+   "gpio2[2]"
+  ],
+  "gpio": [
+   2,
+   2
+  ]
+ },
+ "P8.8": {
+  "ball": "T7",
+  "name": "TIMER7",
+  "offset": 2196,
+  "modes": [
+   "gpmc_oen_ren",
+   null,
+   "timer7",
+   null,
+   null,
+   null,
+   null,
+   "gpio2[3]"
+  ],
+  "gpio": [
+   2,
+   3
+  ]
+ },
+ "P8.9": {
+  "ball": "T6",
+  "name": "TIMER5",
+  "offset": 2204,
+  "modes": [
+   "gpmc_ben0_cle",
+   null,
+   "timer5",
+   null,
+   null,
+   null,
+   null,
+   "gpio2[5]"
+  ],
+  "gpio": [
+   2,
+   5
+  ]
+ },
+ "P8.10": {
+  "ball": "U6",
+  "name": "TIMER6",
+  "offset": 2200,
+  "modes": [
+   "gpmc_wen",
+   null,
+   "timer6",
+   null,
+   null,
+   null,
+   null,
+   "gpio2[4]"
+  ],
+  "gpio": [
+   2,
+   4
+  ]
+ },
+ "P8.11": {
+  "ball": "R12",
+  "name": "GPIO1_13",
+  "offset": 2100,
+  "modes": [
+   "gpmc_ad13",
+   "lcd_data18",
+   "mmc1_dat5",
+   "mmc2_dat1",
+   "eQEP2B_in",
+   "pr1_mii0_txd1",
+   "pr1_pru0_pru_r30_15",
+   "gpio1[13]"
+  ],
+  "gpio": [
+   1,
+   13
+  ]
+ },
+ "P8.12": {
+  "ball": "T12",
+  "name": "GPIO1_12",
+  "offset": 2096,
+  "modes": [
+   "gpmc_ad12",
+   "lcd_data19",
+   "mmc1_dat4",
+   "mmc2_dat0",
+   "eQEP2A_IN",
+   "pr1_mii0_txd2",
+   "pr1_pru0_pru_r30_14",
+   "gpio1[12]"
+  ],
+  "gpio": [
+   1,
+   12
+  ]
+ },
+ "P8.13": {
+  "ball": "T10",
+  "name": "EHRPWM2B",
+  "offset": 2084,
+  "modes": [
+   "gpmc_ad9",
+   "lcd_data22",
+   "mmc1_dat1",
+   "mmc2_dat5",
+   "ehrpwm2B",
+   "pr1_mii0_col",
+   null,
+   "gpio0[23]"
+  ],
+  "gpio": [
+   0,
+   23
+  ]
+ },
+ "P8.14": {
+  "ball": "T11",
+  "name": "GPIO0_26",
+  "offset": 2088,
+  "modes": [
+   "gpmc_ad10",
+   "lcd_data21",
+   "mmc1_dat2",
+   "mmc2_dat6",
+   "ehrpwm2_tripzone_in",
+   "pr1_mii0_txen",
+   null,
+   "gpio0[26]"
+  ],
+  "gpio": [
+   0,
+   26
+  ]
+ },
+ "P8.15": {
+  "ball": "U13",
+  "name": "GPIO1_15",
+  "offset": 2108,
+  "modes": [
+   "gpmc_ad15",
+   "lcd_data16",
+   "mmc1_dat7",
+   "mmc2_dat3",
+   "eQEP2_strobe",
+   "pr1_ecap0_ecap_capin_apwm_o",
+   "pr1_pru0_pru_r31_15",
+   "gpio1[15]"
+  ],
+  "gpio": [
+   1,
+   15
+  ]
+ },
+ "P8.16": {
+  "ball": "V13",
+  "name": "GPIO1_14",
+  "offset": 2104,
+  "modes": [
+   "gpmc_ad14",
+   "lcd_data17",
+   "mmc1_dat6",
+   "mmc2_dat2",
+   "eQEP2_index",
+   "pr1_mii0_txd0",
+   "pr1_pru0_pru_r31_14",
+   "gpio1[14]"
+  ],
+  "gpio": [
+   1,
+   14
+  ]
+ },
+ "P8.17": {
+  "ball": "U12",
+  "name": "GPIO0_27",
+  "offset": 2092,
+  "modes": [
+   "gpmc_ad11",
+   "lcd_data20",
+   "mmc1_dat3",
+   "mmc2_dat7",
+   "ehrpwm0_synco",
+   "pr1_mii0_txd3",
+   null,
+   "gpio0[27]"
+  ],
+  "gpio": [
+   0,
+   27
+  ]
+ },
+ "P8.18": {
+  "ball": "V12",
+  "name": "GPIO2_1",
+  "offset": 2188,
+  "modes": [
+   "gpmc_clk",
+   "lcd_memory_clk",
+   "gpmc_wait1",
+   "mmc2_clk",
+   "pr1_mii1_crs",
+   "pr1_mdio_mdclk",
+   "mcasp0_fsr",
+   "gpio2[1]"
+  ],
+  "gpio": [
+   2,
+   1
+  ]
+ },
+ "P8.19": {
+  "ball": "U10",
+  "name": "EHRPWM2A",
+  "offset": 2080,
+  "modes": [
+   "gpmc_ad8",
+   "lcd_data23",
+   "mmc1_dat0",
+   "mmc2_dat4",
+   "ehrpwm2A",
+   "pr1_mii_mt0_clk",
+   null,
+   "gpio0[22]"
+  ],
+  "gpio": [
+   0,
+   22
+  ]
+ },
+ "P8.20": {
+  "ball": "V9",
+  "name": "GPIO1_31",
+  "offset": 2180,
+  "modes": [
+   "gpmc_csn2",
+   "gpmc_be1n",
+   "mmc1_cmd",
+   "pr1_edio_data_in7",
+   "pr1_edio_data_out7",
+   "pr1_pru1_pru_r30_13",
+   "pr1_pru1_pru_r31_13",
+   "gpio1[31]"
+  ],
+  "gpio": [
+   1,
+   31
+  ]
+ },
+ "P8.21": {
+  "ball": "U9",
+  "name": "GPIO1_30",
+  "offset": 2176,
+  "modes": [
+   "gpmc_csn1",
+   "gpmc_clk",
+   "mmc1_clk",
+   "pr1_edio_data_in6",
+   "pr1_edio_data_out6",
+   "pr1_pru1_pru_r30_12",
+   "pr1_pru1_pru_r31_12",
+   "gpio1[30]"
+  ],
+  "gpio": [
+   1,
+   30
+  ]
+ },
+ "P8.22": {
+  "ball": "V8",
+  "name": "GPIO1_5",
+  "offset": 2068,
+  "modes": [
+   "gpmc_ad5",
+   "mmc1_dat5",
+   null,
+   null,
+   null,
+   null,
+   null,
+   "gpio1[5]"
+  ],
+  "gpio": [
+   1,
+   5
+  ]
+ },
+ "P8.23": {
+  "ball": "U8",
+  "name": "GPIO1_4",
+  "offset": 2064,
+  "modes": [
+   "gpmc_ad4",
+   "mmc1_dat4",
+   null,
+   null,
+   null,
+   null,
+   null,
+   "gpio1[4]"
+  ],
+  "gpio": [
+   1,
+   4
+  ]
+ },
+ "P8.24": {
+  "ball": "V7",
+  "name": "GPIO1_1",
+  "offset": 2052,
+  "modes": [
+   "gpmc_ad1",
+   "mmc1_dat1",
+   null,
+   null,
+   null,
+   null,
+   null,
+   "gpio1[1]"
+  ],
+  "gpio": [
+   1,
+   1
+  ]
+ },
+ "P8.25": {
+  "ball": "U7",
+  "name": "GPIO1_0",
+  "offset": 2048,
+  "modes": [
+   "gpmc_ad0",
+   "mmc1_dat0",
+   null,
+   null,
+   null,
+   null,
+   null,
+   "gpio1[0]"
+  ],
+  "gpio": [
+   1,
+   0
+  ]
+ },
+ "P8.26": {
+  "ball": "V6",
+  "name": "GPIO1_29",
+  "offset": 2172,
+  "modes": [
+   "gpmc_csn0",
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   "gpio1[29]"
+  ],
+  "gpio": [
+   1,
+   29
+  ]
+ },
+ "P8.27": {
+  "ball": "U5",
+  "name": "GPIO2_22",
+  "offset": 2272,
+  "modes": [
+   "lcd_vsync",
+   "gpmc_a8",
+   "gpmc_a1",
+   "pr1_edio_data_in2",
+   "pr1_edio_data_out2",
+   "pr1_pru1_pru_r30_8",
+   "pr1_pru1_pru_r31_8",
+   "gpio2[22]"
+  ],
+  "gpio": [
+   2,
+   22
+  ]
+ },
+ "P8.28": {
+  "ball": "V5",
+  "name": "GPIO2_24",
+  "offset": 2280,
+  "modes": [
+   "lcd_pclk",
+   "gpmc_a10",
+   "pr1_mii0_crs",
+   "pr1_edio_data_in4",
+   "pr1_edio_data_out4",
+   "pr1_pru1_pru_r30_10",
+   "pr1_pru1_pru_r31_10",
+   "gpio2[24]"
+  ],
+  "gpio": [
+   2,
+   24
+  ]
+ },
+ "P8.29": {
+  "ball": "R5",
+  "name": "GPIO2_23",
+  "offset": 2276,
+  "modes": [
+   "lcd_hsync",
+   "gpmc_a9",
+   "gpmc_a2",
+   "pr1_edio_data_in3",
+   "pr1_edio_data_out3",
+   "pr1_pru1_pru_r30_9",
+   "pr1_pru1_pru_r31_9",
+   "gpio2[23]"
+  ],
+  "gpio": [
+   2,
+   23
+  ]
+ },
+ "P8.30": {
+  "ball": "R6",
+  "name": "GPIO2_25",
+  "offset": 2284,
+  "modes": [
+   "lcd_ac_bias_en",
+   "gpmc_a11",
+   "pr1_mii1_crs",
+   "pr1_edio_data_in5",
+   "pr1_edio_data_out5",
+   "pr1_pru1_pru_r30_11",
+   "pr1_pru1_pru_r31_11",
+   "gpio2[25]"
+  ],
+  "gpio": [
+   2,
+   25
+  ]
+ },
+ "P8.31": {
+  "ball": "V4",
+  "name": "UART5_CTSN",
+  "offset": 2264,
+  "modes": [
+   "lcd_data14",
+   "gpmc_a18",
+   "eQEP1_index",
+   "mcasp0_axr1",
+   "uart5_rxd",
+   "pr1_mii0_rxd3",
+   "uart5_ctsn",
+   "gpio0[10]"
+  ],
+  "gpio": [
+   0,
+   10
+  ]
+ },
+ "P8.32": {
+  "ball": "T5",
+  "name": "UART5_RTSN",
+  "offset": 2268,
+  "modes": [
+   "lcd_data15",
+   "gpmc_a19",
+   "eQEP1_strobe",
+   "mcasp0_ahclkx",
+   "mcasp0_axr3",
+   "pr1_mii0_rxdv",
+   "uart5_rtsn",
+   "gpio0[11]"
+  ],
+  "gpio": [
+   0,
+   11
+  ]
+ },
+ "P8.33": {
+  "ball": "V3",
+  "name": "UART4_RTSN",
+  "offset": 2260,
+  "modes": [
+   "lcd_data13",
+   "gpmc_a17",
+   "eQEP1B_in",
+   "mcasp0_fsr",
+   "mcasp0_axr3",
+   "pr1_mii0_rxer",
+   "uart4_rtsn",
+   "gpio0[9]"
+  ],
+  "gpio": [
+   0,
+   9
+  ]
+ },
+ "P8.34": {
+  "ball": "U4",
+  "name": "UART3_RTSN",
+  "offset": 2252,
+  "modes": [
+   "lcd_data11",
+   "gpmc_a15",
+   "ehrpwm1B",
+   "mcasp0_ahclkr",
+   "mcasp0_axr2",
+   "pr1_mii0_rxd0",
+   "uart3_rtsn",
+   "gpio2[17]"
+  ],
+  "gpio": [
+   2,
+   17
+  ]
+ },
+ "P8.35": {
+  "ball": "V2",
+  "name": "UART4_CTSN",
+  "offset": 2256,
+  "modes": [
+   "lcd_data12",
+   "gpmc_a16",
+   "eQEP1A_in",
+   "mcasp0_aclkr",
+   "mcasp0_axr2",
+   "pr1_mii0_rxlink",
+   "uart4_ctsn",
+   "gpio0[8]"
+  ],
+  "gpio": [
+   0,
+   8
+  ]
+ },
+ "P8.36": {
+  "ball": "U3",
+  "name": "UART3_CTSN",
+  "offset": 2248,
+  "modes": [
+   "lcd_data10",
+   "gpmc_a14",
+   "ehrpwm1A",
+   "mcasp0_axr0",
+   null,
+   "pr1_mii0_rxd1",
+   "uart3_ctsn",
+   "gpio2[16]"
+  ],
+  "gpio": [
+   2,
+   16
+  ]
+ },
+ "P8.37": {
+  "ball": "U1",
+  "name": "UART5_TXD",
+  "offset": 2240,
+  "modes": [
+   "lcd_data8",
+   "gpmc_a12",
+   "ehrpwm1_tripzone_in",
+   "mcasp0_aclkx",
+   "uart5_txd",
+   "pr1_mii0_rxd3",
+   "uart2_ctsn",
+   "gpio2[14]"
+  ],
+  "gpio": [
+   2,
+   14
+  ]
+ },
+ "P8.38": {
+  "ball": "U2",
+  "name": "UART5_RXD",
+  "offset": 2244,
+  "modes": [
+   "lcd_data9",
+   "gpmc_a13",
+   "ehrpwm0_synco",
+   "mcasp0_fsx",
+   "uart5_rxd",
+   "pr1_mii0_rxd2",
+   "uart2_rtsn",
+   "gpio2[15]"
+  ],
+  "gpio": [
+   2,
+   15
+  ]
+ },
+ "P8.39": {
+  "ball": "T3",
+  "name": "GPIO2_12",
+  "offset": 2232,
+  "modes": [
+   "lcd_data6",
+   "gpmc_a6",
+   "pr1_edio_data_in6",
+   "eQEP2_index",
+   "pr1_edio_data_out6",
+   "pr1_pru1_pru_r30_6",
+   "pr1_pru1_pru_r31_6",
+   "gpio2[12]"
+  ],
+  "gpio": [
+   2,
+   12
+  ]
+ },
+ "P8.40": {
+  "ball": "T4",
+  "name": "GPIO2_13",
+  "offset": 2236,
+  "modes": [
+   "lcd_data7",
+   "gpmc_a7",
+   "pr1_edio_data_in7",
+   "eQEP2_strobe",
+   "pr1_edio_data_out7",
+   "pr1_pru1_pru_r30_7",
+   "pr1_pru1_pru_r31_7",
+   "gpio2[13]"
+  ],
+  "gpio": [
+   2,
+   13
+  ]
+ },
+ "P8.41": {
+  "ball": "T1",
+  "name": "GPIO2_10",
+  "offset": 2224,
+  "modes": [
+   "lcd_data4",
+   "gpmc_a4",
+   "pr1_mii0_txd1",
+   "eQEP2A_in",
+   null,
+   "pr1_pru1_pru_r30_4",
+   "pr1_pru1_pru_r31_4",
+   "gpio2[10]"
+  ],
+  "gpio": [
+   2,
+   10
+  ]
+ },
+ "P8.42": {
+  "ball": "T2",
+  "name": "GPIO2_11",
+  "offset": 2228,
+  "modes": [
+   "lcd_data5",
+   "gpmc_a5",
+   "pr1_mii0_txd0",
+   "eQEP2B_in",
+   null,
+   "pr1_pru1_pru_r30_5",
+   "pr1_pru1_pru_r31_5",
+   "gpio2[11]"
+  ],
+  "gpio": [
+   2,
+   11
+  ]
+ },
+ "P8.43": {
+  "ball": "R3",
+  "name": "GPIO2_8",
+  "offset": 2216,
+  "modes": [
+   "lcd_data2",
+   "gpmc_a2",
+   "pr1_mii0_txd3",
+   "ehrpwm2_tripzone_in",
+   null,
+   "pr1_pru1_pru_r30_2",
+   "pr1_pru1_pru_r31_2",
+   "gpio2[8]"
+  ],
+  "gpio": [
+   2,
+   8
+  ]
+ },
+ "P8.44": {
+  "ball": "R4",
+  "name": "GPIO2_9",
+  "offset": 2220,
+  "modes": [
+   "lcd_data3",
+   "gpmc_a3",
+   "pr1_mii0_txd2",
+   "ehrpwm0_synco",
+   null,
+   "pr1_pru1_pru_r30_3",
+   "pr1_pru1_pru_r31_3",
+   "gpio2[9]"
+  ],
+  "gpio": [
+   2,
+   9
+  ]
+ },
+ "P8.45": {
+  "ball": "R1",
+  "name": "GPIO2_6",
+  "offset": 2208,
+  "modes": [
+   "lcd_data0",
+   "gpmc_a0",
+   "pr1_mii_mt0_clk",
+   "ehrpwm2A",
+   null,
+   "pr1_pru1_pru_r30_0",
+   "pr1_pru1_pru_r31_0",
+   "gpio2[6]"
+  ],
+  "gpio": [
+   2,
+   6
+  ]
+ },
+ "P8.46": {
+  "ball": "R2",
+  "name": "GPIO2_7",
+  "offset": 2212,
+  "modes": [
+   "lcd_data1",
+   "gpmc_a1",
+   "pr1_mii0_txen",
+   "ehrpwm2B",
+   null,
+   "pr1_pru1_pru_r30_1",
+   "pr1_pru1_pru_r31_1",
+   "gpio2[7]"
+  ],
+  "gpio": [
+   2,
+   7
+  ]
+ },
+ "P9.1": {
+  "ball": null,
+  "name": "GND",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.2": {
+  "ball": null,
+  "name": "GND",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.3": {
+  "ball": null,
+  "name": "DC_3.3V",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.4": {
+  "ball": null,
+  "name": "DC_3.3V",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.5": {
+  "ball": null,
+  "name": "VDD_5V",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.6": {
+  "ball": null,
+  "name": "VDD_5V",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.7": {
+  "ball": null,
+  "name": "SYS_5V",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.8": {
+  "ball": null,
+  "name": "SYS_5V",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.9": {
+  "ball": null,
+  "name": "PWR_BUT",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.10": {
+  "ball": "A10",
+  "name": "SYS_RESETn",
+  "offset": null,
+  "modes": [
+   "RESET_OUT",
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.11": {
+  "ball": "T17",
+  "name": "UART4_RXD",
+  "offset": 2160,
+  "modes": [
+   "gpmc_wait0",
+   "mii2_crs",
+   "gpmc_csn4",
+   "rmii2_crs_dv",
+   "mmc1_sdcd",
+   "pr1_mii1_col",
+   "uart4_rxd",
+   "gpio0[30]"
+  ],
+  "gpio": [
+   0,
+   30
+  ]
+ },
+ "P9.12": {
+  "ball": "U18",
+  "name": "GPIO1_28",
+  "offset": 2168,
+  "modes": [
+   "gpmc_ben1",
+   "mii2_col",
+   "gpmc_csn6",
+   "mmc2_dat3",
+   "gpmc_dir",
+   "pr1_mii1_rxlink",
+   "mcasp0_aclkr",
+   "gpio1[28]"
+  ],
+  "gpio": [
+   1,
+   28
+  ]
+ },
+ "P9.13": {
+  "ball": "U17",
+  "name": "UART4_TXD",
+  "offset": 2164,
+  "modes": [
+   "gpmc_wpn",
+   "mii2_rxerr",
+   "gpmc_csn5",
+   "rmii2_rxerr",
+   "mmc2_sdcd",
+   "pr1_mii1_txen",
+   "uart4_txd",
+   "gpio0[31]"
+  ],
+  "gpio": [
+   0,
+   31
+  ]
+ },
+ "P9.14": {
+  "ball": "U14",
+  "name": "EHRPWM1A",
+  "offset": 2120,
+  "modes": [
+   "gpmc_a2",
+   "mii2_txd3",
+   "rgmii2_td3",
+   "mmc2_dat1",
+   "gpmc_a18",
+   "pr1_mii1_txd2",
+   "ehrpwm1A",
+   "gpio1[18]"
+  ],
+  "gpio": [
+   1,
+   18
+  ]
+ },
+ "P9.15": {
+  "ball": "R13",
+  "name": "GPIO1_16",
+  "offset": 2112,
+  "modes": [
+   "gpmc_a0",
+   "gmii2_txen",
+   "rmii2_tctl",
+   "mii2_txen",
+   "gpmc_a16",
+   "pr1_mii_mt1_clk",
+   "ehrpwm1_tripzone_input",
+   "gpio1[16]"
+  ],
+  "gpio": [
+   1,
+   16
+  ]
+ },
+ "P9.16": {
+  "ball": "T14",
+  "name": "EHRPWM1B",
+  "offset": 2124,
+  "modes": [
+   "gpmc_a3",
+   "mii2_txd2",
+   "rgmii2_td2",
+   "mmc2_dat2",
+   "gpmc_a19",
+   "pr1_mii1_txd1",
+   "ehrpwm1B",
+   "gpio1[19]"
+  ],
+  "gpio": [
+   1,
+   19
+  ]
+ },
+ "P9.17": {
+  "ball": "A16",
+  "name": "I2C1_SCL",
+  "offset": 2396,
+  "modes": [
+   "spi0_cs0",
+   "mmc2_sdwp",
+   "I2C1_SCL",
+   "ehrpwm0_synci",
+   "pr1_uart0_txd",
+   "pr1_edio_data_in1",
+   "pr1_edio_data_out1",
+   "gpio0[5]"
+  ],
+  "gpio": [
+   0,
+   5
+  ]
+ },
+ "P9.18": {
+  "ball": "B16",
+  "name": "I2C1_SDA",
+  "offset": 2392,
+  "modes": [
+   "spi0_d1",
+   "mmc1_sdwp",
+   "I2C1_SDA",
+   "ehrpwm0_tripzone",
+   "pr1_uart0_rxd",
+   "pr1_edio_data_in0",
+   "pr1_edio_data_out0",
+   "gpio0[4]"
+  ],
+  "gpio": [
+   0,
+   4
+  ]
+ },
+ "P9.19": {
+  "ball": "D17",
+  "name": "I2C2_SCL",
+  "offset": 2428,
+  "modes": [
+   "uart1_rtsn",
+   "timer5",
+   "dcan0_rx",
+   "I2C2_SCL",
+   "spi1_cs1",
+   "pr1_uart0_rts_n",
+   "pr1_edc_latch1_in",
+   "gpio0[13]"
+  ],
+  "gpio": [
+   0,
+   13
+  ]
+ },
+ "P9.20": {
+  "ball": "D18",
+  "name": "I2C2_SDA",
+  "offset": 2424,
+  "modes": [
+   "uart1_ctsn",
+   "timer6",
+   "dcan0_tx",
+   "I2C2_SDA",
+   "spi1_cs0",
+   "pr1_uart0_cts_n",
+   "pr1_edc_latch0_in",
+   "gpio0[12]"
+  ],
+  "gpio": [
+   0,
+   12
+  ]
+ },
+ "P9.21": {
+  "ball": "B17",
+  "name": "UART2_TXD",
+  "offset": 2388,
+  "modes": [
+   "spi0_d0",
+   "uart2_txd",
+   "I2C2_SCL",
+   "ehrpwm0B",
+   "pr1_uart0_rts_n",
+   "pr1_edio_latch_in",
+   "EMU3",
+   "gpio0[3]"
+  ],
+  "gpio": [
+   0,
+   3
+  ]
+ },
+ "P9.22": {
+  "ball": "A17",
+  "name": "UART2_RXD",
+  "offset": 2384,
+  "modes": [
+   "spi0_sclk",
+   "uart2_rxd",
+   "I2C2_SDA",
+   "ehrpwm0A",
+   "pr1_uart0_cts_n",
+   "pr1_edio_sof",
+   "EMU2",
+   "gpio0[2]"
+  ],
+  "gpio": [
+   0,
+   2
+  ]
+ },
+ "P9.23": {
+  "ball": "V14",
+  "name": "GPIO1_17",
+  "offset": 2116,
+  "modes": [
+   "gpmc_a1",
+   "gmii2_rxdv",
+   "rgmii2_rxdv",
+   "mmc2_dat0",
+   "gpmc_a17",
+   "pr1_mii1_txd3",
+   "ehrpwm0_synco",
+   "gpio1[17]"
+  ],
+  "gpio": [
+   1,
+   17
+  ]
+ },
+ "P9.24": {
+  "ball": "D15",
+  "name": "UART1_TXD",
+  "offset": 2436,
+  "modes": [
+   "uart1_txd",
+   "mmc2_sdwp",
+   "dcan1_rx",
+   "I2C1_SCL",
+   null,
+   "pr1_uart0_txd",
+   "pr1_pru0_pru_r31_16",
+   "gpio0[15]"
+  ],
+  "gpio": [
+   0,
+   15
+  ]
+ },
+ "P9.25": {
+  "ball": "A14",
+  "name": "GPIO3_21",
+  "offset": 2476,
+  "modes": [
+   "mcasp0_ahclkx",
+   "eQEP0_strobe",
+   "mcasp0_axr3",
+   "mcasp1_axr1",
+   "EMU4",
+   "pr1_pru0_pru_r30_7",
+   "pr1_pru0_pru_r31_7",
+   "gpio3[21]"
+  ],
+  "gpio": [
+   3,
+   21
+  ]
+ },
+ "P9.26": {
+  "ball": "D16",
+  "name": "UART1_RXD",
+  "offset": 2432,
+  "modes": [
+   "uart1_rxd",
+   "mmc1_sdwp",
+   "dcan1_tx",
+   "I2C1_SDA",
+   null,
+   "pr1_uart0_rxd",
+   "pr1_pru1_pru_r31_16",
+   "gpio0[14]"
+  ],
+  "gpio": [
+   0,
+   14
+  ]
+ },
+ "P9.27": {
+  "ball": "C13",
+  "name": "GPIO3_19",
+  "offset": 2468,
+  "modes": [
+   "mcasp0_fsr",
+   "eQEP0B_in",
+   "mcasp0_axr3",
+   "mcasp1_fsx",
+   "EMU2",
+   "pr1_pru0_pru_r30_5",
+   "pr1_pru0_pru_r31_5",
+   "gpio3[19]"
+  ],
+  "gpio": [
+   3,
+   19
+  ]
+ },
+ "P9.28": {
+  "ball": "C12",
+  "name": "SPI1_CS0",
+  "offset": 2460,
+  "modes": [
+   "mcasp0_ahclkr",
+   "ehrpwm0_synci",
+   "mcasp0_axr2",
+   "spi1_cs0",
+   "eCAP2_in_PWM2_out",
+   "pr1_pru0_pru_r30_3",
+   "pr1_pru0_pru_r31_3",
+   "gpio3[17]"
+  ],
+  "gpio": [
+   3,
+   17
+  ]
+ },
+ "P9.29": {
+  "ball": "B13",
+  "name": "SPI1_D0",
+  "offset": 2452,
+  "modes": [
+   "mcasp0_fsx",
+   "ehrpwm0B",
+   null,
+   "spi1_d0",
+   "mmc1_sdcd",
+   "pr1_pru0_pru_r30_1",
+   "pr1_pru0_pru_r31_1",
+   "gpio3[15]"
+  ],
+  "gpio": [
+   3,
+   15
+  ]
+ },
+ "P9.30": {
+  "ball": "D12",
+  "name": "SPI1_D1",
+  "offset": 2456,
+  "modes": [
+   "mcasp0_axr0",
+   "ehrpwm0_tripzone",
+   null,
+   "spi1_d1",
+   "mmc2_sdcd",
+   "pr1_pru0_pru_r30_2",
+   "pr1_pru0_pru_r31_2",
+   "gpio3[16]"
+  ],
+  "gpio": [
+   3,
+   16
+  ]
+ },
+ "P9.31": {
+  "ball": "A13",
+  "name": "SPI1_SCLK",
+  "offset": 2448,
+  "modes": [
+   "mcasp0_aclkx",
+   "ehrpwm0A",
+   null,
+   "spi1_sclk",
+   "mmc0_sdcd",
+   "pr1_pru0_pru_r30_0",
+   "pr1_pru0_pru_r31_0",
+   "gpio3[14]"
+  ],
+  "gpio": [
+   3,
+   14
+  ]
+ },
+ "P9.32": {
+  "ball": null,
+  "name": "VADC",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.33": {
+  "ball": "C8",
+  "name": "AIN4",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.34": {
+  "ball": null,
+  "name": "AGND",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.35": {
+  "ball": "A8",
+  "name": "AIN6",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.36": {
+  "ball": "B8",
+  "name": "AIN5",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.37": {
+  "ball": "B7",
+  "name": "AIN2",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.38": {
+  "ball": "A7",
+  "name": "AIN3",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.39": {
+  "ball": "B6",
+  "name": "AIN0",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.40": {
+  "ball": "C7",
+  "name": "AIN1",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.41": {
+  "ball": "D14",
+  "name": "CLKOUT2",
+  "offset": 2484,
+  "modes": [
+   "xdma_event_intr1",
+   null,
+   "tclkin",
+   "clkout2",
+   "timer7",
+   "pr1_pru0_pru_r31_16",
+   "EMU3",
+   "gpio0[20]"
+  ],
+  "gpio": [
+   0,
+   20
+  ]
+ },
+ "P9.42": {
+  "ball": "C18",
+  "name": "GPIO0_7",
+  "offset": 2404,
+  "modes": [
+   "eCAP0_in_PWM0_out",
+   "uart3_txd",
+   "spi1_cs1",
+   "pr1_ecap0_ecap_capin_apwm_o",
+   "spi1_sclk",
+   "mmc0_sdwp",
+   "xdma_event_intr2",
+   "gpio0[7]"
+  ],
+  "gpio": [
+   0,
+   7
+  ]
+ },
+ "P9.43": {
+  "ball": null,
+  "name": "GND",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.44": {
+  "ball": null,
+  "name": "GND",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.45": {
+  "ball": null,
+  "name": "GND",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ },
+ "P9.46": {
+  "ball": null,
+  "name": "GND",
+  "offset": null,
+  "modes": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "gpio": null
+ }
+}

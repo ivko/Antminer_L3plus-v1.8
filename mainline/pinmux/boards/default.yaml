@@ -1,0 +1,45 @@
+# Default profile for the Antminer BB-Black V1.8 I/O module.
+# This is what dts/am335x-antminer.dts is generated from (the image's built-in DTB).
+# It keeps the four UARTs the Bitmain hash board connectors expose, I2C2, the fan PWM pad
+# and four GPIO outputs on the LCD data pads that were used as PLC outputs in earlier tests.
+#
+# Pad reference: pinmux/am335x-bbb-pins.json (P8/P9 names) + EXTRA_PADS in gen-dts.py.
+# Reserved by the fixed part: NAND, Ethernet, UART0 console, I2C0 PMIC, microSD, user LEDs.
+
+name: default
+
+pins:
+  # --- UARTs on the hash board connectors (TTL, 3.3 V) ---------------------------
+  P9.24: uart1_txd
+  P9.26: uart1_rxd
+  P9.21: uart2_txd           # spi0_d0 pad
+  P9.22: uart2_rxd           # spi0_sclk pad
+  uart0_rtsn: uart4_txd      # not on P8/P9
+  uart0_ctsn: uart4_rxd
+  P8.37: uart5_txd           # lcd_data8
+  P8.38: uart5_rxd           # lcd_data9
+
+  # --- I2C2 (P9.19 / P9.20), 100 kHz ------------------------------------------------
+  P9.19: i2c2_scl
+  P9.20: i2c2_sda
+
+  # --- PWM: ehrpwm0B on mcasp0_fsx (Bitmain fan PWM) ---------------------------------
+  P9.29: ehrpwm0b
+
+  # --- GPIO outputs Q0..Q3 (safe level low until userspace drives them) ---------------
+  P8.43: {func: gpio, dir: out, init: 0, name: Q0}
+  P8.44: {func: gpio, dir: out, init: 0, name: Q1}
+  P8.45: {func: gpio, dir: out, init: 0, name: Q2}
+  P8.46: {func: gpio, dir: out, init: 0, name: Q3}
+
+  # --- GPIO inputs I0..I3 with pull-ups ---------------------------------------------
+  P8.39: {func: gpio, dir: in, pull: up, name: I0}
+  P8.40: {func: gpio, dir: in, pull: up, name: I1}
+  P8.41: {func: gpio, dir: in, pull: up, name: I2}
+  P8.42: {func: gpio, dir: in, pull: up, name: I3}
+
+# all eight 1.8 V ADC inputs (P9.33..P9.40), /sys/bus/iio/devices/iio:device0
+adc: [0, 1, 2, 3, 4, 5, 6, 7]
+
+i2c:
+  i2c2: {clock-frequency: 100000}

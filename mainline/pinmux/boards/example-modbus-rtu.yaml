@@ -1,0 +1,34 @@
+# Example profile: Modbus RTU gateway with four RS485 channels.
+# Each channel = one TTL UART + one GPIO driving the RS485 transceiver DE/RE pin (driver
+# enable, active high, idle low so the bus is released at power-on). Plus two spare inputs
+# and the first four ADC channels. Deploy with:
+#   powershell -File tools\deploy-dtb.ps1 -Profile example-modbus-rtu -NetbootOnly
+
+name: example-modbus-rtu
+
+pins:
+  # channel 0: UART1
+  P9.24: uart1_txd
+  P9.26: uart1_rxd
+  P8.43: {func: gpio, dir: out, init: 0, name: RS485_DE0}
+  # channel 1: UART2 (spi0 pads)
+  P9.21: uart2_txd
+  P9.22: uart2_rxd
+  P8.44: {func: gpio, dir: out, init: 0, name: RS485_DE1}
+  # channel 2: UART4 (uart0 flow-control pads, not on P8/P9)
+  uart0_rtsn: uart4_txd
+  uart0_ctsn: uart4_rxd
+  P8.45: {func: gpio, dir: out, init: 0, name: RS485_DE2}
+  # channel 3: UART5 (lcd_data8/9)
+  P8.37: uart5_txd
+  P8.38: uart5_rxd
+  P8.46: {func: gpio, dir: out, init: 0, name: RS485_DE3}
+
+  # spare digital inputs with pull-ups
+  P8.39: {func: gpio, dir: in, pull: up, name: DI0}
+  P8.40: {func: gpio, dir: in, pull: up, name: DI1}
+
+  # a status output the kernel owns (hog): "module alive" line, high from boot
+  P8.41: {func: gpio, dir: out, init: 1, name: ALIVE, hog: true}
+
+adc: [0, 1, 2, 3]

@@ -1,0 +1,10 @@
+# /etc/network/interfaces -- Antminer BB-Black V1.8 I/O module
+# The only network interface is the on-board 100 Mbit Ethernet. Per-board static
+# addresses belong in /config (step 4), this file is the image default.
+
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet dhcp
+    udhcpc_opts -t 0

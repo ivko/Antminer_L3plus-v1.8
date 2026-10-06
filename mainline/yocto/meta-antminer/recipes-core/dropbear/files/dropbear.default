@@ -1,0 +1,6 @@
+# Antminer I/O module: keep the SSH host key on the NAND config partition so it survives
+# reboots (the rootfs is a ramfs). /config is mounted by fstab before rc5.d/S10dropbear runs.
+# Not "/config/dropbear": the Bitmain firmware left a *file* with that name on old boards.
+DROPBEAR_RSAKEY_DIR="/config/ssh"
+# root login is allowed while the image carries debug-tweaks; add -w here to disallow it
+DROPBEAR_EXTRA_ARGS=""

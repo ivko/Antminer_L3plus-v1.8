@@ -1,0 +1,39 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          antminer-config
+# Required-Start:    hostname mountall
+# Default-Start:     S
+# Short-Description: per-board identity and persistent dirs on the NAND /config partition
+### END INIT INFO
+#
+# /config (jffs2, NAND mtd9) is the only writable persistent storage of the module:
+#   /config/hostname   optional, overrides the MAC-derived name
+#   /config/ssh/       SSH host key (DROPBEAR_RSAKEY_DIR in /etc/default/dropbear)
+#   /config/network    optional, sourced by nothing yet (step 4: static IP, Modbus settings)
+# Boards provisioned from the Bitmain firmware may still carry its files here (cgminer.conf,
+# dropbear, shadow, ...); they are ignored. flash-nand.sh --wipe-config erases the partition.
+
+case "$1" in
+  start)
+    if ! grep -qs ' /config ' /proc/mounts; then
+        mount /config 2>/dev/null || echo "antminer-config: /config not mounted, settings are volatile"
+    fi
+    mkdir -p /config/ssh 2>/dev/null
+
+    MAC=$(cat /sys/class/net/eth0/address 2>/dev/null | tr -d ':')
+    if [ -s /config/hostname ]; then
+        H=$(head -n 1 /config/hostname | tr -cd 'A-Za-z0-9-')
+    fi
+    [ -n "$H" ] || H="antminer-${MAC#??????}"      # last 3 MAC bytes, e.g. antminer-731c92
+    echo "$H" > /etc/hostname
+    hostname "$H"
+    grep -q "[[:space:]]$H\$" /etc/hosts 2>/dev/null || echo "127.0.1.1	$H" >> /etc/hosts
+    echo "antminer-config: hostname $H (mac $MAC)"
+    ;;
+  stop|status) ;;
+  *)
+    echo "Usage: $0 {start}"
+    exit 1
+    ;;
+esac
+exit 0
