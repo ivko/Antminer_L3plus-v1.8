@@ -196,11 +196,22 @@ def create_app():
         model["yaml"] = text
         return jsonify(model)
 
+    @app.errorhandler(Exception)
+    def api_errors(ex):
+        """JSON errors for the API, Flask's default pages elsewhere"""
+        if request.path.startswith("/api/"):
+            code = getattr(ex, "code", 500)
+            return jsonify({"error": str(getattr(ex, "description", ex)), "type": type(ex).__name__}), code
+        raise ex
+
     @app.route("/api/profiles/<name>/yaml", methods=["POST"])
     def api_profile_yaml(name):
         model = request.get_json(force=True, silent=True) or {}
         model["name"] = name
-        return Response(profile.dump(model), mimetype="text/plain")
+        try:
+            return Response(profile.dump(model), mimetype="text/plain")
+        except ValueError as ex:
+            return jsonify({"error": str(ex)}), 422
 
     @app.route("/api/profiles/<name>/build", methods=["POST"])
     def api_profile_build(name):
@@ -210,8 +221,12 @@ def create_app():
         model = request.get_json(force=True, silent=True) or {}
         model["name"] = name
         tmp = f"/tmp/antminer-web-{name}.yaml"
+        try:
+            text = profile.dump(model)
+        except ValueError as ex:
+            return jsonify({"ok": False, "errors": [{"pin": None, "text": str(ex)}]}), 422
         with open(tmp, "w", newline="\n") as fh:
-            fh.write(profile.dump(model))
+            fh.write(text)
         dtb = f"/tmp/am335x-antminer-{name}.dtb"
         rc, out = run_quick([DTB, "build", tmp, dtb], timeout=120)
         result = {"ok": rc == 0, "output": out.strip(), "dtb_size": os.path.getsize(dtb) if rc == 0 and os.path.exists(dtb) else None}
