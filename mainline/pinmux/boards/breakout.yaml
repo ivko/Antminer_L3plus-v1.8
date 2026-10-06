@@ -1,0 +1,81 @@
+# Profile for the test breakout cape (repo/hardware/breakout): default.yaml plus the extra
+# channels the cape wires up. Line names match the schematic nets, so OpenPLC's hardware
+# layer (I*/Q*) and gpioinfo show the same names as the silkscreen.
+#   bash build-dtb.sh boards/breakout.yaml
+#   powershell -File ..\tools\deploy-dtb.ps1 -Profile breakout -NetbootOnly
+
+name: breakout
+
+pins:
+  # --- RS-485 channels (serial sheet): UART1 + DE0, UART2 + DE1 ------------------------
+  P9.24: uart1_txd
+  P9.26: uart1_rxd
+  P9.17: {func: gpio, dir: out, init: 0, name: RS485_DE0}   # spi0_cs0 pad, DE/~RE of THVD1500 #0
+  P9.21: uart2_txd           # spi0_d0 pad
+  P9.22: uart2_rxd           # spi0_sclk pad
+  P9.18: {func: gpio, dir: out, init: 0, name: RS485_DE1}   # spi0_d1 pad, DE/~RE of THVD1500 #1
+  # UART5 TTL header with loopback jumper
+  P8.37: uart5_txd           # lcd_data8
+  P8.38: uart5_rxd           # lcd_data9
+
+  # --- I2C2: Qwiic, PCF8574 expander, TMP1075 (i2c_pwm sheet) ----------------------------
+  P9.19: i2c2_scl
+  P9.20: i2c2_sda
+
+  # --- PWM0B -> LED, RC test point, fan; tach pulse input -----------------------------------
+  P9.29: ehrpwm0b
+  P9.30: {func: gpio, dir: in, pull: up, name: FAN_TACH}    # open-collector tach, 10k pull-up on the cape
+
+  # --- digital outputs Q0..Q7: low-side MOSFET, LED buffer (outputs sheet) -------------------
+  P8.43: {func: gpio, dir: out, init: 0, name: Q0}
+  P8.44: {func: gpio, dir: out, init: 0, name: Q1}
+  P8.45: {func: gpio, dir: out, init: 0, name: Q2}
+  P8.46: {func: gpio, dir: out, init: 0, name: Q3}
+  P8.27: {func: gpio, dir: out, init: 0, name: Q4}          # lcd_vsync
+  P8.28: {func: gpio, dir: out, init: 0, name: Q5}          # lcd_pclk
+  P8.29: {func: gpio, dir: out, init: 0, name: Q6}          # lcd_hsync
+  P8.30: {func: gpio, dir: out, init: 0, name: Q7}          # lcd_ac_bias
+
+  # --- digital inputs I0..I7: DIP switch / PC817 pull the pad to GND, SoC pull-up ------------
+  P8.39: {func: gpio, dir: in, pull: up, name: I0}
+  P8.40: {func: gpio, dir: in, pull: up, name: I1}
+  P8.41: {func: gpio, dir: in, pull: up, name: I2}
+  P8.42: {func: gpio, dir: in, pull: up, name: I3}
+  P8.31: {func: gpio, dir: in, pull: up, name: I4}          # lcd_data14, also the push button
+  P8.32: {func: gpio, dir: in, pull: up, name: I5}          # lcd_data15
+  P8.33: {func: gpio, dir: in, pull: up, name: I6}          # lcd_data13
+  P8.34: {func: gpio, dir: in, pull: up, name: I7}          # lcd_data11
+
+  # --- button with external 10k pull-up and RC debounce --------------------------------------
+  P9.23: {func: gpio, dir: in, pull: none, name: BTN}
+
+  # --- SPARE header: free GPIO / eHRPWM1 brought out as plain GPIO for now -------------------
+  P9.12: {func: gpio, dir: in, name: SPARE0}                # gpmc_be1n gpio1_28
+  P9.14: {func: gpio, dir: in, name: SPARE1}                # ehrpwm1a pad, switch to ehrpwm1a when needed
+  P9.15: {func: gpio, dir: in, name: SPARE2}                # gpio1_16
+  P9.16: {func: gpio, dir: in, name: SPARE3}                # ehrpwm1b pad
+  P9.25: {func: gpio, dir: in, name: SPARE4}                # gpio3_21
+  P9.27: {func: gpio, dir: in, name: SPARE5}                # gpio3_19
+  P9.42: {func: gpio, dir: in, name: SPARE6}                # gpio0_7
+  P8.11: {func: gpio, dir: in, name: SPARE7}                # gpio1_13
+  P8.12: {func: gpio, dir: in, name: SPARE8}                # gpio1_12
+
+# AIN0..AIN6 are wired on the cape (AIN7 is not on the header)
+adc: [0, 1, 2, 3, 4, 5, 6]
+
+i2c:
+  i2c2:
+    clock-frequency: 100000
+    devices:
+      # PCF8574T, A0-A2 = GND -> 0x20; its 8 lines appear as a gpiochip named EXP0..EXP7
+      - compatible: "nxp,pcf8574"
+        reg: 0x20
+        label: exp_io
+        props:
+          gpio-controller: true
+          "#gpio-cells": 2
+          gpio-line-names: [EXP0, EXP1, EXP2, EXP3, EXP4, EXP5, EXP6, EXP7]
+      # TMP1075DGK, A0-A2 = GND -> 0x48; hwmon via the tmp102 driver
+      - compatible: "ti,tmp1075"
+        reg: 0x48
+        label: board_temp

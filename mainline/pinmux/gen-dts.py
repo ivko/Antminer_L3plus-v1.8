@@ -23,6 +23,7 @@ Profile format:
     uart0_ctsn: uart4_rxd            # pad name, for pads that are not on P8/P9
   adc: [0, 1, 2, 3, 4, 5, 6, 7]      # AIN channels to enable (1.8 V inputs)
   i2c:  {i2c2: {clock-frequency: 100000}}         # optional per-peripheral extras
+  i2c:  {i2c2: {devices: [{compatible: "nxp,pcf8574", reg: 0x20, props: {...}}]}}  # child nodes
   spi:  {spi0: {spidev: [0], max-frequency: 16000000}}
   unused: default                    # default: every other free pad -> GPIO input pull-down; keep: leave alone
 Options per pin: func, pull (up|down|none), rx (true|false), slew (fast|slow),
@@ -329,6 +330,31 @@ class Gen:
             w(f"\tpinctrl-0 = <&{gkey}_pins>;")
             if node.startswith("i2c"):
                 w(f"\tclock-frequency = <{int(extra.get('clock-frequency', 100000))}>;")
+                # devices: [{compatible: "nxp,pcf8574", reg: 0x20, label: ext_io,
+                #            props: {gpio-controller: true, "#gpio-cells": 2, gpio-line-names: [EXP0, ...]}}]
+                devs = extra.get("devices") or []
+                if devs:
+                    w("\t#address-cells = <1>;")
+                    w("\t#size-cells = <0>;")
+                for dev in devs:
+                    reg = int(dev["reg"])
+                    label = dev.get("label")
+                    node_name = dev.get("node", dev["compatible"].split(",")[-1])
+                    w(f"\t{label + ': ' if label else ''}{node_name}@{reg:x} {{")
+                    w(f"\t\tcompatible = \"{dev['compatible']}\";")
+                    w(f"\t\treg = <0x{reg:x}>;")
+                    for k, v in (dev.get("props") or {}).items():
+                        if v is True:
+                            w(f"\t\t{k};")
+                        elif isinstance(v, bool):
+                            continue
+                        elif isinstance(v, int):
+                            w(f"\t\t{k} = <{v}>;")
+                        elif isinstance(v, list):
+                            w(f"\t\t{k} = " + ", ".join(f"\"{x}\"" if isinstance(x, str) else f"<{int(x)}>" for x in v) + ";")
+                        else:
+                            w(f"\t\t{k} = \"{v}\";")
+                    w("\t};")
             if node.startswith("spi"):
                 w("\t#address-cells = <1>;")
                 w("\t#size-cells = <0>;")

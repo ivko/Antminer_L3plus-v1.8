@@ -49,6 +49,19 @@ boot или U-Boot. `unused: keep` изключва това.
 `spiN_*` → `&spiN` + spidev, `ehrpwmNa/b`, `ecapN_in_pwmN_out` → PWM, `dcanN_rx/tx` → CAN,
 `eqepN*` → енкодер, `timerN` → само mux. ADC каналите нямат pinmux.
 
+I2C устройства на шината се описват като child възли (`boards/breakout.yaml`):
+```yaml
+i2c:
+  i2c2:
+    clock-frequency: 100000
+    devices:
+      - {compatible: "nxp,pcf8574", reg: 0x20, label: exp_io,
+         props: {gpio-controller: true, "#gpio-cells": 2, gpio-line-names: [EXP0, EXP1]}}
+      - {compatible: "ti,tmp1075", reg: 0x48}
+```
+`props` стойности: `true` → празно property, число → `<n>`, списък → низове/клетки, низ → низ.
+Драйверът трябва да е в кернела (`kernel/defconfig`: PCF857X и TMP102/HWMON са включени).
+
 ## Pad база
 
 `am335x-bbb-pins.json` се извлича от `../../docs/BBB_Pins.xlsx` с `extract-pins.py`: P8/P9
