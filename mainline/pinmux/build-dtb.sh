@@ -31,7 +31,7 @@ DTSDIR="$KSRC/arch/arm/boot/dts/ti/omap"
 cpp -nostdinc -undef -D__DTS__ -x assembler-with-cpp \
     -I "$MAIN/dts" -I "$DTSDIR" -I "$KSRC/arch/arm/boot/dts" -I "$KSRC/include" \
     "$DTS" > "$OUT/.$NAME.pp.dts"
-dtc -I dts -O dtb -i "$MAIN/dts" -i "$DTSDIR" -o "$DTB" "$OUT/.$NAME.pp.dts" 2> >(grep -v -E 'Warning \((unit_address_vs_reg|simple_bus_reg|avoid_unnecessary_addr_size|graph_child_address|spi_bus_bridge)\)' >&2 || true)
+dtc -I dts -O dtb -i "$MAIN/dts" -i "$DTSDIR" -o "$DTB" "$OUT/.$NAME.pp.dts" 2> >(grep -v -E 'Warning \((unit_address_vs_reg|simple_bus_reg|avoid_unnecessary_addr_size|graph_child_address|spi_bus_bridge|unique_unit_address)\)|also defined at' >&2 || true)
 rm -f "$OUT/.$NAME.pp.dts"
 echo "dts: $DTS"
 echo "dtb: $DTB ($(stat -c %s "$DTB") bytes)"

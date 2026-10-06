@@ -16,9 +16,11 @@ SRC_URI = "file://gen-dts.py \
 S = "${WORKDIR}"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "antminer-bbb"
+inherit deploy
 
-# the preprocessed base needs the kernel's dts/ and include/dt-bindings/ trees
-DEPENDS = "virtual/kernel"
+# the preprocessed base needs the kernel's dts/ and include/dt-bindings/ trees; the shipped
+# profiles are also compiled here (dtc-native) and deployed, so the SD card carries a DTB per profile
+DEPENDS = "virtual/kernel dtc-native python3-pyyaml-native python3-native"
 do_compile[depends] += "virtual/kernel:do_shared_workdir"
 
 PINMUX_DIR = "${datadir}/antminer/pinmux"
@@ -55,7 +57,26 @@ with open(dst, "w") as fh:
     fh.write(body.strip() + "\n")
 EOF
     grep -qE '^\s*#(include|define)|AM33XX_IOPAD|^\s*/include/' am335x-antminer-base.pp.dtsi && bbfatal "preprocessor leftovers" || true
+
+    # every shipped profile -> DTB, exactly the way the board does it (gen-dts --flat + dtc)
+    mkdir -p dtbs
+    for y in boards/*.yaml; do
+        n=$(basename "$y" .yaml)
+        python3 gen-dts.py "$y" --flat am335x-antminer-base.pp.dtsi -o "dtbs/am335x-antminer-$n.dts" || bbfatal "profile $n does not generate"
+        dtc -I dts -O dtb -i "${WORKDIR}" -o "dtbs/am335x-antminer-$n.dtb" "dtbs/am335x-antminer-$n.dts" 2> dtbs/$n.log || { cat dtbs/$n.log; bbfatal "profile $n does not compile"; }
+    done
 }
+
+do_deploy() {
+    # profile-<name>.dtb: a distinct prefix so the SD image can pick them up with one wildcard
+    # without catching the kernel's own am335x-antminer-*.dtb deploy copies
+    install -d ${DEPLOYDIR}
+    for f in ${B}/dtbs/am335x-antminer-*.dtb; do
+        n=$(basename "$f" .dtb); n=${n#am335x-antminer-}
+        install -m 0644 "$f" ${DEPLOYDIR}/profile-$n.dtb
+    done
+}
+addtask deploy after do_compile before do_build
 
 do_install() {
     install -d ${D}${PINMUX_DIR}/boards ${D}${sbindir}

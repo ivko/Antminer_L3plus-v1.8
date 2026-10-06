@@ -92,10 +92,17 @@ MBR, p1 FAT32 64 MB (MLO, u-boot.img, uEnv.txt, uImage, am335x-antminer.dtb,
 initramfs.cpio.gz.u-boot от `IMAGE_BOOT_FILES`), p2 ext4 ~400 MB с rootfs-а. Рецепти:
 `antminer-sd-boot` (deploy на Bitmain MLO/u-boot.img от `mainline/boot/bitmain` и
 `sdcard/uEnv-sd.txt`), `antminer-pinmux` (gen-dts.py, pad базата, профилите, препроцесираната
-база от kernel source-а в do_compile, `antminer-dtb`), `antminer-web` (Flask UI от `mainline/web`),
-`antminer-provision` (fstab за /boot, банер с адреса). Кернелът има MMC/ext4/VFAT вградени.
-Запис на картата без четец на PC: от netboot-ната платка
-`wget -O - http://<pc>:8000/<path>.wic | dd of=/dev/mmcblk0 bs=1M` (feed сървърът сервира tmp/deploy).
+база от kernel source-а в do_compile, `antminer-dtb`; билдва и deploy-ва по едно DTB за всеки
+профил в `boards/`, които wic слага на картата), `antminer-web` (Flask UI от `mainline/web`),
+`antminer-provision` (fstab за /boot, банер с адреса). Кернелът има MMC/ext4/VFAT вградени
+(в `kernel/defconfig`, не само във фрагмента: рецептата чете defconfig).
+Запис на картата без четец на PC: от netboot-ната платка с MMC кернел
+`wget -O - http://<pc>:8000/images/antminer-bbb/<истинското име>.wic | dd of=/dev/mmcblk0 bs=1M`
+(feed сървърът сервира tmp/deploy; symlink-овете не се резолвват през \\wsl$, ползвай файла с
+timestamp). След dd кернелът не вижда дяловете, защото mdev е автомонтирал суровото устройство:
+`echo mmc0:XXXX > /sys/bus/mmc/drivers/mmcblk/unbind; echo mmc0:XXXX > .../bind`.
+Проверено 2026-10-06: boot от картата през NAND U-Boot-а, root на ext4, web UI на :80,
+`antminer-dtb build default` на платката за 1.6 s дава байт-идентично DTB с билднатото от кернела.
 
 ## Структура
 
