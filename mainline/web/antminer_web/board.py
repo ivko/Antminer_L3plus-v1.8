@@ -9,8 +9,8 @@ import time
 from .jobs import run_quick
 
 PAYLOAD_DIR = os.environ.get("ANTMINER_PAYLOAD", "/boot")
-CONFIG_DIR = "/config"
-PINMUX_DIR = "/usr/share/antminer/pinmux"
+CONFIG_DIR = os.environ.get("ANTMINER_CONFIG", "/config")
+PINMUX_DIR = os.environ.get("ANTMINER_PINMUX", "/usr/share/antminer/pinmux")   # host dev: repo/mainline/pinmux
 
 # TRM table 26-7 (AM335x), the rows we have met
 SYSBOOT_SEQ = {

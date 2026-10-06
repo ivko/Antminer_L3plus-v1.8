@@ -32,7 +32,8 @@ case "$cmd" in
     name=$(basename "$yaml" .yaml)
     out="${2:-/tmp/am335x-antminer-$name.dtb}"
     dts="${out%.dtb}.dts"
-    python3 "$PM/gen-dts.py" "$yaml" --flat am335x-antminer-base.pp.dtsi -o "$dts"
+    # the JSON summary next to the .dts feeds the web UI (per-pin errors, pin map)
+    python3 "$PM/gen-dts.py" "$yaml" --flat am335x-antminer-base.pp.dtsi -o "$dts" --json "${out%.dtb}.json"
     # the am33xx dtsi files trigger a fixed set of harmless dtc warnings; keep real errors only
     dtc -I dts -O dtb -i "$PM" -o "$out" "$dts" 2>&1 | grep -vE 'Warning \((unit_address_vs_reg|simple_bus_reg|avoid_unnecessary_addr_size|graph_child_address|spi_bus_bridge|unique_unit_address)\)|also defined at' >&2 || true
     [ -s "$out" ] || { echo "dtc produced nothing" >&2; exit 1; }

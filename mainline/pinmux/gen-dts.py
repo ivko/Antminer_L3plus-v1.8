@@ -158,6 +158,7 @@ class Gen:
         self.gpio_names = {b: [""] * 32 for b in range(4)}
         self.hogs = {b: [] for b in range(4)}
         self.used = {}          # offset -> key
+        self.pins_out = []      # structured per-pin result for --json (web UI)
 
     def lookup(self, key):
         k = key.strip()
@@ -210,24 +211,41 @@ class Gen:
         value = conf | mode
 
         label = f"{e['header'] or e['pad']}"
+        info = {"key": key, "label": label, "pad": e["pad"], "offset": off, "value": value, "func": func,
+                "gpio": f"gpio{e['gpio'][0]}_{e['gpio'][1]}" if e["gpio"] else None,
+                "comment": spec.get("comment")}
         if func == "gpio":
             b, l = e["gpio"]
             name = str(spec.get("name", f"{label.replace('.', '_')}"))
             self.gpio_names[b][l] = name
             comment = f"{label} {e['pad']} gpio{b}_{l} {name} {spec.get('dir','in')}"
             self.groups.setdefault("board_gpio", []).append((off, value, comment))
+            info.update(name=name, dir=str(spec.get("dir", "in")).lower(), line=b * 32 + l)
             if spec.get("hog"):
                 d = str(spec.get("dir", "in")).lower()
                 hog = "input" if d == "in" else ("output-high" if int(spec.get("init", 0)) else "output-low")
                 self.hogs[b].append((l, name, hog))
+                info["hog"] = hog
         else:
             p = periph_of(func)
             if p is None:
                 self.errors.append(f"{key}: don't know which peripheral {func} belongs to"); return
             node, gkey = p
             self.groups.setdefault(gkey, []).append((off, value, f"{label} {e['pad']} -> {func}"))
+            info.update(peripheral=node or gkey)
             if node:
                 self.periphs[node] = gkey
+        self.pins_out.append(info)
+
+    def json_result(self):
+        """machine-readable summary for the web UI: errors keep the 'pin: text' shape"""
+        def split(msg):
+            k, _, t = msg.partition(": ")
+            return {"pin": k.split(" ")[0] if t else None, "text": t or msg}
+        return {"ok": not self.errors, "errors": [split(e) for e in self.errors],
+                "warnings": [split(w) for w in self.warnings], "pins": self.pins_out,
+                "peripherals": sorted(self.periphs),
+                "unused_pads": len(self.groups.get("unused_pads", []))}
 
     @staticmethod
     def apply_pull(conf, pull):
@@ -423,6 +441,7 @@ def main():
     ap.add_argument("--pins", default=os.path.join(HERE, "am335x-bbb-pins.json"))
     ap.add_argument("--flat", metavar="BASE_PP_DTSI",
                     help="emit a dtc-only .dts that /include/s this preprocessed base (no cpp needed)")
+    ap.add_argument("--json", metavar="FILE", help="also write a JSON summary (pins, errors) for the web UI")
     a = ap.parse_args()
     with open(a.pins) as f:
         db = json.load(f)
@@ -439,6 +458,9 @@ def main():
         g.add_unused(profile)
     for wmsg in g.warnings:
         print(f"warning: {wmsg}", file=sys.stderr)
+    if a.json:
+        with open(a.json, "w") as f:
+            json.dump(g.json_result(), f, indent=1)
     if g.errors:
         for e in g.errors:
             print(f"error: {e}", file=sys.stderr)
