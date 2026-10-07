@@ -9,3 +9,4 @@ hardware/breakout/out/
 *.kicad_prl
 .history/
 fp-info-cache
+mainline/tools/site.local.conf

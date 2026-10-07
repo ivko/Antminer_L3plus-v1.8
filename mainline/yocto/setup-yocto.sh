@@ -5,9 +5,10 @@
 #   bash /mnt/e/Antminer/repo/mainline/yocto/setup-yocto.sh setup      # only clone/configure, no build
 #   bash /mnt/e/Antminer/repo/mainline/yocto/setup-yocto.sh fg         # build in the foreground
 #
-# Variables: Y (build tree, default ~/antminer/yocto), REPO (this repository as seen from WSL,
-# default /mnt/e/Antminer/repo), FEED_HOST (ip:port of the PC that serves the opkg feed; it is
-# baked into /etc/opkg/base-feeds.conf of every image, default 192.168.200.104:8000).
+# Variables: Y (build tree, default ~/antminer/yocto), REPO (this repository, default: found from
+# the script's location), FEED_HOST (ip:port of the PC that serves the opkg feed; it is baked into
+# /etc/opkg/base-feeds.conf of every image; default PC_IP:FEED_PORT from mainline/tools/site.conf,
+# else 192.168.200.104:8000).
 # local.conf and bblayers.conf are written only if they do not exist yet.
 #
 # Everything heavy lives in $Y (ext4 inside WSL, ~50 GB after a full build). Only the layer
@@ -15,10 +16,13 @@
 set -euo pipefail
 
 Y="${Y:-$HOME/antminer/yocto}"
-REPO="${REPO:-/mnt/e/Antminer/repo}"
+REPO="${REPO:-$(cd "$(dirname "$0")/../.." && pwd)}"
+# default feed address: PC_IP / FEED_PORT from tools/site.conf (+ site.local.conf)
+site() { cat "$REPO/mainline/tools/site.conf" "$REPO/mainline/tools/site.local.conf" 2>/dev/null | sed -n "s/^$1=//p" | tail -n 1 | tr -d '\r'; }
+SITE_IP=$(site PC_IP); SITE_PORT=$(site FEED_PORT)
 LAYER="$REPO/mainline/yocto/meta-antminer"
 KVER=6.12.112
-FEED_HOST="${FEED_HOST:-192.168.200.104:8000}"   # PC that will serve tmp/deploy/ipk over HTTP
+FEED_HOST="${FEED_HOST:-${SITE_IP:-192.168.200.104}:${SITE_PORT:-8000}}"   # PC that will serve tmp/deploy/ipk over HTTP
 
 if ! dpkg -s chrpath >/dev/null 2>&1 || ! dpkg -s zstd >/dev/null 2>&1; then
     echo ">> installing Yocto host packages (needs sudo; or run this block as root: wsl -u root)"

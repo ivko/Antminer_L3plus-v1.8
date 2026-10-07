@@ -11,8 +11,12 @@
 **Нищо на конзолата.** 115200 8N1, без flow control. TX/RX кръстосани, общ GND, 3.3 V
 нива (не RS-232).
 
-**netboot.ps1 не тегли файлове.** Firewall за UDP 69; файловете трябва да са в `mainline\out\`
-(`wsl bash .../tools/stage-out.sh`); `-ServerIp` трябва да е IP-то на PC-то в мрежата на платката.
+**netboot не тегли файлове.** Firewall за UDP 69; файловете трябва да са в `mainline/out/`
+(`antminer.py stage`); `PC_IP` (`antminer.py config`) трябва да е IP-то на PC-то в мрежата на
+платката, иначе го задай в `tools/site.local.conf`.
+
+**antminer.py: „no answer on the serial console“.** Платката е изключена, портът е грешен
+(`SERIAL_PORT`) или TX/RX са разменени. **„pyserial is missing“**: `pip install pyserial`.
 
 ## Boot
 
@@ -40,7 +44,7 @@
 
 ## Мрежа и пакети
 
-**`opkg update` не може да свали.** Feed сървърът пуснат ли е (`feed-server-start.ps1`), firewall
+**`opkg update` не може да свали.** Feed сървърът пуснат ли е (`antminer.py feed status`), firewall
 за TCP 8000, правилен ли е IP-то в `/etc/opkg/base-feeds.conf` (04-packages).
 
 **opkg: няма място.** `df -h /data`. Изчисти списъците (`rm -rf /var/lib/opkg/lists/*`) и
