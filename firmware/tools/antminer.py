@@ -380,6 +380,44 @@ def cmd_netboot(cfg, args):
     netboot(cfg, args, args.kernel, args.dtb, args.initrd, args.bootargs, args.wait)
 
 
+def cmd_run(cfg, args):
+    """load a flat binary (bare-metal program) over TFTP and start it with U-Boot's "go" """
+    name = os.path.basename(args.file)
+    src = args.file if os.path.exists(args.file) else os.path.join(OUT, args.file)
+    if not os.path.exists(src):
+        sys.exit(f"no such file: {args.file}")
+    if os.path.abspath(os.path.dirname(src)) != os.path.abspath(OUT):
+        import shutil
+        shutil.copy(src, os.path.join(OUT, name))
+    tftp = TftpThread(OUT).start()
+    c = open_console(cfg, args)
+    try:
+        c.to_uboot()
+        c.uboot("setenv autoload no")
+        c.uboot(f"setenv serverip {cfg['PC_IP']}")
+        if args.board_ip:
+            c.uboot(f"setenv ipaddr {args.board_ip}")
+        else:
+            c.uboot("dhcp", 60)
+            if "DHCP client bound to address" not in c.tail:
+                sys.exit("DHCP failed; retry with --board-ip")
+        c.uboot(f"tftp {args.addr} {name}", 120)
+        c.tail = ""
+        c.write(f"go {args.addr}\r")
+        print(f"\n[run] started at {args.addr}; console for {args.wait} s (Ctrl-C to stop watching)")
+        end = time.time() + args.wait
+        try:
+            while time.time() < end:
+                c.pump()
+                time.sleep(0.01)
+        except KeyboardInterrupt:
+            pass
+        print("\n[run] done (the program keeps running on the board)")
+    finally:
+        c.close()
+        tftp.stop.set()
+
+
 def build_dtb(profile):
     pinmux = unix_path(os.path.join(MAIN, "pinmux"))
     print(f"[dtb] building pinmux/boards/{profile}.yaml")
@@ -518,6 +556,14 @@ def main():
     p.add_argument("--wait", type=int, default=90, help="seconds of kernel log to show")
     p.add_argument("--log")
     p.set_defaults(fn=cmd_netboot)
+
+    p = sub.add_parser("run", help="TFTP a flat binary (bare metal) and start it with U-Boot 'go'")
+    p.add_argument("file", help="binary in firmware/out (or a path, copied there)")
+    p.add_argument("--addr", default="0x82000000")
+    p.add_argument("--board-ip")
+    p.add_argument("--wait", type=int, default=15, help="seconds of console output to show")
+    p.add_argument("--log")
+    p.set_defaults(fn=cmd_run)
 
     p = sub.add_parser("deploy-dtb", help="build a pinmux profile and write it to mtd6")
     p.add_argument("profile")
