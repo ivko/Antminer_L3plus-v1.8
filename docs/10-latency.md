@@ -43,6 +43,7 @@ GND (P9.1) ───────────────────────
 | 2 | OpenPLC v3, `gpio-echo-1ms.st`, task interval 1 ms (CPU saturated, load 2.8) | 6.12.112 (PREEMPT none) | 1.28 ms | 1.97 ms | 2.61 ms | 2.78 ms | 0.38 ms | `2026-10-07-openplc-1ms.csv` (533 edges, 200 MHz) |
 | 3 | `latency-echo` busy poll, SCHED_FIFO 80, mlockall, OpenPLC stopped | 6.12.112 (PREEMPT none) | 2.70 µs | 5.01 µs | 7.11 µs | 9.22 µs | 1.34 µs | `2026-10-07-linux-busypoll.csv` (534 edges, 200 MHz) |
 | 4 | `latency-echo 1000`: 1 ms period via `clock_nanosleep`, SCHED_FIFO 80 | 6.12.112 (PREEMPT none) | 15.4 µs | 507 µs | 997 µs | 999 µs | 289 µs | `2026-10-07-linux-periodic-1ms.csv` (534 edges, 200 MHz) |
+| 5 | `latency-echo -e`: sleep in the kernel, wake on the I0 edge event, SCHED_FIFO 80 | 6.12.112 (PREEMPT none) | 122 µs | 128 µs | 174 µs | 284 µs | 11.7 µs | `2026-10-07-linux-edge.csv` (534 edges, 200 MHz) |
 
 Reading variant 1: the distribution is flat from 1.9 to 51.8 ms, i.e. uniform over one 50 ms
 cycle (the edge arrives at a random phase of the cycle) plus a fixed ~1.9 ms for the cycle's own
@@ -63,7 +64,12 @@ Reading variant 4: uniform over exactly one 1 ms period on top of ~15 µs (timer
 idle plus the two ioctls); no wake-up later than the period in 50 s. CPU almost idle. Compare
 with variant 2: the same 1 ms cycle costs 1.3 ms in OpenPLC and 15 µs here.
 
-Planned variants: `latency-echo -e` (edge-event wake-up); the same on a PREEMPT_RT
+Reading variant 5: a sharp peak at 122-130 us with a tail to 284 us. The ~120 us floor is far
+above the ioctl cost seen in variant 3, so it is the wake-up path itself: GPIO interrupt, exit
+from the CPU idle state, gpiolib event, wake of the user thread, then the two ioctls. Variant 5b
+repeats it with the deeper cpuidle states disabled to separate idle-exit from the rest.
+
+Planned variants: the edge-event mode without cpuidle; the same on a PREEMPT_RT
 kernel (needs the external 6.12-rt patches: 32-bit ARM has no ARCH_SUPPORTS_RT in 6.12); bare metal / RTOS on
 the A8 loaded by U-Boot (no Linux). The AM3352 has no PRU (verified: the PRU-ICSS address space
 gives a bus error and its PRCM module never leaves the disabled state), so a PRU variant is not
