@@ -1,5 +1,9 @@
 # yocto — Yocto scarthgap образ и ipk feed за Antminer BB-Black V1.8
 
+> **Дневник на разработката**, не ръководство: какво е пробвано, в какъв ред и защо, с
+> резултатите от тестовете. Част от описаното е заменено по-късно. За билд, инсталиране и
+> употреба виж [docs/](../../docs/) и [README](../../README.md) в корена.
+
 Слоят `meta-antminer` описва платката като Yocto машина и строи:
 
 - `uImage` на linux-stable 6.12 от `../kernel/defconfig` и `../dts/am335x-antminer.dts` (едни и

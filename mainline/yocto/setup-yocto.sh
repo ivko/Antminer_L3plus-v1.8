@@ -5,7 +5,13 @@
 #   bash /mnt/e/Antminer/repo/mainline/yocto/setup-yocto.sh setup      # only clone/configure, no build
 #   bash /mnt/e/Antminer/repo/mainline/yocto/setup-yocto.sh fg         # build in the foreground
 #
-# Everything heavy lives in $Y (ext4 inside WSL). Only the layer meta-antminer is read from /mnt/e.
+# Variables: Y (build tree, default ~/antminer/yocto), REPO (this repository as seen from WSL,
+# default /mnt/e/Antminer/repo), FEED_HOST (ip:port of the PC that serves the opkg feed; it is
+# baked into /etc/opkg/base-feeds.conf of every image, default 192.168.200.104:8000).
+# local.conf and bblayers.conf are written only if they do not exist yet.
+#
+# Everything heavy lives in $Y (ext4 inside WSL, ~50 GB after a full build). Only the layer
+# meta-antminer is read from the repository.
 set -euo pipefail
 
 Y="${Y:-$HOME/antminer/yocto}"
@@ -50,6 +56,7 @@ BBLAYERS ?= " \\
   $Y/poky/meta \\
   $Y/poky/meta-poky \\
   $Y/meta-openembedded/meta-oe \\
+  $Y/meta-openembedded/meta-python \\
   $LAYER \\
   "
 EOF
@@ -81,13 +88,5 @@ fi
 
 if [ "${1:-}" = "setup" ]; then echo ">> setup done, no build"; exit 0; fi
 
-cd "$Y"
-# shellcheck disable=SC1091
-set +u; source poky/oe-init-build-env build >/dev/null; set -u
-echo ">> bitbake antminer-image (then package-index); log: $Y/build/bitbake.log"
-if [ "${1:-}" = "fg" ]; then
-    bitbake antminer-image && bitbake package-index
-else
-    nohup bash -c "bitbake antminer-image && bitbake package-index; echo BITBAKE_EXIT=\$?" > "$Y/build/bitbake.log" 2>&1 &
-    echo ">> started in background, pid $!"
-fi
+echo ">> setup done; starting the build (same as: bash build.sh${1:+ $1})"
+exec bash "$REPO/mainline/yocto/build.sh" "${1:-}"
