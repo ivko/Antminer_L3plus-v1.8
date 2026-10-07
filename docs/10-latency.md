@@ -49,6 +49,7 @@ GND (P9.1) ───────────────────────
 | 6 | as 5c on a CONFIG_PREEMPT kernel (netbooted, same config otherwise) | 6.12.112 PREEMPT | 41.1 µs | 49.3 µs | 63.8 µs | 85.7 µs | 5.0 µs | `2026-10-07-linux-edge-preempt.csv` (534 edges, 200 MHz) |
 | 6L | as 6 under load: 2 CPU hogs, UBIFS write loop, 3000 UDP pkt/s (`latency-load.sh` + `latency-flood.py`) | 6.12.112 PREEMPT | 146 µs | 173 µs | 1.22 ms | 1.45 ms | 189 µs | `2026-10-07-linux-edge-preempt-load.csv` (534 edges, 200 MHz) |
 | 5cL | as 5c under the same load (plain kernel) | 6.12.112 (PREEMPT none) | 148 µs | 178 µs | 983 µs | 1.41 ms | 186 µs | `2026-10-07-linux-edge-load.csv` (534 edges, 200 MHz) |
+| 5cL-net | as 5cL without the NAND writes (2 CPU hogs + 3000 UDP pkt/s) | 6.12.112 (PREEMPT none) | 61 µs | 77 µs | 539 µs | 817 µs | 91 µs | `2026-10-07-linux-edge-load-net.csv` (534 edges, 200 MHz) |
 
 Reading variant 1: the distribution is flat from 1.9 to 51.8 ms, i.e. uniform over one 50 ms
 cycle (the edge arrives at a random phase of the cycle) plus a fixed ~1.9 ms for the cycle's own
@@ -107,7 +108,11 @@ preemption does not interrupt either (softirqs for the 3000 pkt/s network RX, an
 driver, which polls the chip's ready/busy in the kernel during writes). The next captures
 isolate the two: load without NAND writes, and load with NAND writes only.
 
-Planned variants: 5cL-net (hogs + network only), 5cL-nand (NAND writes only); the same on a PREEMPT_RT
+Reading 5cL-net: without flash writes the median halves (178 -> 77 us) and the tail shrinks
+from 1.41 to 0.82 ms. The network softirq at 3000 pkt/s alone still produces a sub-millisecond
+tail; the NAND write path adds the rest.
+
+Planned variants: 5cL-nand (NAND writes only, no hogs, no network); the same on a PREEMPT_RT
 kernel (needs the external 6.12-rt patches: 32-bit ARM has no ARCH_SUPPORTS_RT in 6.12); bare metal / RTOS on
 the A8 loaded by U-Boot (no Linux). The AM3352 has no PRU (verified: the PRU-ICSS address space
 gives a bus error and its PRCM module never leaves the disabled state), so a PRU variant is not
