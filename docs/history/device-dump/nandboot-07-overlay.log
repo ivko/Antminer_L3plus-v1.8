@@ -1,0 +1,314 @@
+reboot
+root@antminer-731c92:~# starting pid 311, tty '': '/etc/init.d/rcK'
+Stopping Dropbear SSH server: stopped /usr/sbin/dropbear (pid 248)
+dropbear.
+Stopping syslogd/klogd: stopped syslogd (pid 254)
+stopped klogd (pid 257)
+done
+Unmounting remote filesystems...
+Deconfiguring network interfaces... [   41.794149] cpsw-switch 4a100000.switch eth0: Link is Down
+done.
+starting pid 340, tty '': '/sbin/swapoff -a'
+starting pid 341, tty '': '/bin/umount -a -r'
+[   41.828464] UBIFS (ubi0:0): un-mount UBI device 0
+[   41.833332] UBIFS (ubi0:0): background thread "ubifs_bgt0_0" stops
+umount: devtmpfs busy - remounted read-only
+umount: can't unmount /: Invalid argument
+The system is going down NOW!
+Sent SIGTERM to all processes
+Sent SIGKILL to all processes
+Requesting system reboot
+[   43.923767] reboot: Restarting system
+
+U-Boot SPL 2013.04-dirty (Aug 04 2014 - 11:06:44)
+Control_status {00420313}
+Could not probe the EEPROM; something fundamentally wrong on the I2C bus.
+Could not get board ID.
+default->A335BNLT.
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Peripheral mode controller at 47401000 using PIO, IRQ 0
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Host mode controller at 47401800 using PIO, IRQ 0
+CONFIG_SYS_NAND_U_BOOT_OFFS:80000
+CONFIG_SYS_NAND_PAGE_SIZE:800
+spl_image.size:5cd2c
+spl_image.load_addr:807fffc0
+image entry point: 0x80800000
+
+
+U-Boot 2013.04-dirty (Jan 04 2015 - 17:08:05)
+
+I2C:   ready
+DRAM:  256 MiB
+WARNING: Caches not enabled
+Could not probe the EEPROM; something fundamentally wrong on the I2C bus.
+Could not get board ID.
+NAND:  256 MiB
+MMC:   OMAP SD/MMC: 0, OMAP SD/MMC: 1
+*** Warning - bad CRC, using default environment
+
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Peripheral mode controller at 47401000 using PIO, IRQ 0
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Host mode controller at 47401800 using PIO, IRQ 0
+Net:   <ethaddr> not set. Validating first E-fuse MAC
+cpsw, usb_ether
+Press ESC to abort autoboot in 1 seconds
+gpio: pin 53 (gpio 53) value is 1
+mmc_send_cmd : timeout: No status update
+Card did not respond to voltage select!
+mmc0(part 0) is current device
+mmc_send_cmd : timeout: No status update
+Card did not respond to voltage select!
+No micro SD card found, setting mmcdev to 1
+Card did not respond to voltage select!
+mmc1(part 0) is current device
+mmc_send_cmd : timeout: No status update
+Card did not respond to voltage select!
+Booting from nand ...
+
+NAND read: device 0 offset 0x280000, size 0x500000
+ 5242880 bytes read: OK
+gpio: pin 54 (gpio 54) value is 1
+
+NAND read: device 0 offset 0x800000, size 0x1400000
+ 20971520 bytes read: OK
+gpio: pin 55 (gpio 55) value is 1
+
+NAND read: device 0 offset 0x260000, size 0x20000
+ 131072 bytes read: OK
+gpio: pin 56 (gpio 56) value is 1
+## Booting kernel from Legacy Image at 80200000 ...
+   Image Name:   Linux-6.12.112
+   Image Type:   ARM Linux Kernel Image (uncompressed)
+   Data Size:    2582232 Bytes = 2.5 MiB
+   Load Address: 80008000
+   Entry Point:  80008000
+   Verifying Checksum ... OK
+## Loading init Ramdisk from Legacy Image at 81000000 ...
+   Image Name:   antminer-image-antminer-bbb.root
+   Image Type:   ARM Linux RAMDisk Image (uncompressed)
+   Data Size:    5612712 Bytes = 5.4 MiB
+   Load Address: 00000000
+   Entry Point:  00000000
+   Verifying Checksum ... OK
+## Flattened Device Tree blob at 80f80000
+   Booting using the fdt blob at 0x80f80000
+   Loading Kernel Image ... OK
+OK
+   Loading Ramdisk to 8ecdd000, end 8f2374a8 ... OK
+   Using Device Tree in place at 80f80000, end 80f94368
+
+Starting kernel ...
+
+[    0.000000] Booting Linux on physical CPU 0x0
+[    0.000000] Linux version 6.12.112 (oe-user@oe-host) (arm-poky-linux-gnueabi-gcc (GCC) 13.5.0, GNU ld (GNU Binutils) 2.42.0.20240723) #1 Sat Oct  3 10:36:00 UTC 2026
+[    0.000000] CPU: ARMv7 Processor [413fc082] revision 2 (ARMv7), cr=50c5387d
+[    0.000000] CPU: PIPT / VIPT nonaliasing data cache, VIPT aliasing instruction cache
+[    0.000000] OF: fdt: Machine model: Bitmain Antminer BB-Black V1.8 (AM3352), profile default
+[    0.000000] Memory policy: Data cache writeback
+[    0.000000] cma: Reserved 16 MiB at 0x8d800000 on node -1
+[    0.000000] Zone ranges:
+[    0.000000]   Normal   [mem 0x0000000080000000-0x000000008fefffff]
+[    0.000000]   HighMem  empty
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000080000000-0x000000008fefffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000080000000-0x000000008fefffff]
+[    0.000000] OF: reserved mem: Reserved memory: No reserved-memory node in the DT
+[    0.000000] CPU: All CPU(s) started in SVC mode.
+[    0.000000] AM335X ES2.1 (neon)
+[    0.000000] Kernel command line: console=ttyO0,115200n8 init=/sbin/init
+[    0.000000] Dentry cache hash table entries: 32768 (order: 5, 131072 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 16384 (order: 4, 65536 bytes, linear)
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 65280
+[    0.000000] mem auto-init: stack:all(zero), heap alloc:off, heap free:off
+[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=1, Nodes=1
+[    0.000000] NR_IRQS: 16, nr_irqs: 16, preallocated irqs: 16
+[    0.000000] IRQ: Found an INTC at 0x(ptrval) (revision 5.0) with 128 interrupts
+[    0.000000] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.000000] TI gptimer clocksource: always-on /ocp/interconnect@44c00000/segment@200000/target-module@31000
+[    0.000002] sched_clock: 32 bits at 24MHz, resolution 41ns, wraps every 89478484971ns
+[    0.000037] clocksource: dmtimer: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 79635851949 ns
+[    0.000655] TI gptimer clockevent: 24000000 Hz at /ocp/interconnect@48000000/segment@0/target-module@40000
+[    0.002739] WARNING: Your 'console=ttyO0' has been replaced by 'ttyS0'
+[    0.002758] This ensures that you still see kernel messages. Please
+[    0.002766] update your kernel commandline.
+[    0.002802] Calibrating delay loop... 548.86 BogoMIPS (lpj=2744320)
+[    0.050786] CPU: Testing write buffer coherency: ok
+[    0.050877] CPU0: Spectre v2: using BPIALL workaround
+[    0.050892] pid_max: default: 32768 minimum: 301
+[    0.051112] Mount-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.051144] Mountpoint-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.053637] Setting up static identity map for 0x80100000 - 0x80100054
+[    0.054045] Memory: 228268K/261120K available (4096K kernel code, 370K rwdata, 1572K rodata, 1024K init, 178K bss, 15836K reserved, 16384K cma-reserved, 0K highmem)
+[    0.054637] devtmpfs: initialized
+[    0.083785] VFP support v0.3: implementor 41 architecture 3 part 30 variant c rev 3
+[    0.084211] futex hash table entries: 256 (order: 0, 3072 bytes, linear)
+[    0.085670] pinctrl core: initialized pinctrl subsystem
+[    0.088250] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.091577] DMA: preallocated 256 KiB pool for atomic coherent allocations
+[    0.093430] thermal_sys: Registered thermal governor 'fair_share'
+[    0.093446] thermal_sys: Registered thermal governor 'step_wise'
+[    0.093458] thermal_sys: Registered thermal governor 'user_space'
+[    0.093506] cpuidle: using governor menu
+[    0.138185] pps_core: LinuxPPS API ver. 1 registered
+[    0.138213] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.138256] PTP clock support registered
+[    0.142399] clocksource: Switched to clocksource dmtimer
+[    0.145440] NET: Registered PF_INET protocol family
+[    0.145780] IP idents hash table entries: 4096 (order: 3, 32768 bytes, linear)
+[    0.147142] tcp_listen_portaddr_hash hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.147192] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.147241] TCP established hash table entries: 2048 (order: 1, 8192 bytes, linear)
+[    0.147289] TCP bind hash table entries: 2048 (order: 2, 16384 bytes, linear)
+[    0.147351] TCP: Hash tables configured (established 2048 bind 2048)
+[    0.147484] UDP hash table entries: 256 (order: 0, 4096 bytes, linear)
+[    0.147523] UDP-Lite hash table entries: 256 (order: 0, 4096 bytes, linear)
+[    0.147736] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.149425] Unpacking initramfs...
+[    0.163484] workingset: timestamp_bits=30 max_order=16 bucket_order=0
+[    0.163821] jffs2: version 2.2. (NAND) (SUMMARY)  ?? 2001-2006 Red Hat, Inc.
+[    0.164342] Key type asymmetric registered
+[    0.164364] Asymmetric key parser 'x509' registered
+[    0.164456] io scheduler mq-deadline registered
+[    0.164471] io scheduler kyber registered
+[    0.164512] io scheduler bfq registered
+[    0.166558] target-module@4b000000:target-module@140000:pmu@0:fck: device ID is greater than 24
+[    0.168079] ledtrig-cpu: registered to indicate activity on CPUs
+[    0.170969] Serial: 8250/16550 driver, 8 ports, IRQ sharing enabled
+[    0.193112] i2c_dev: i2c /dev entries driver
+[    0.194411] cpuidle: enable-method property 'ti,am3352' found operations
+[    0.196076] Initializing XFRM netlink socket
+[    0.196140] NET: Registered PF_PACKET protocol family
+[    0.196169] NET: Registered PF_KEY protocol family
+[    0.196260] Key type dns_resolver registered
+[    0.196356] ThumbEE CPU extension supported.
+[    0.196378] Registering SWP/SWPB emulation handler
+[    0.197039] omap_voltage_late_init: Voltage driver support not added
+[    0.328308] /ocp/interconnect@44c00000/segment@200000/target-module@10000/scm@0/pinmux@800: Fixed dependency cycle(s) with /ocp/interconnect@44c00000/segment@200000/target-module@10000/scm@0/pinmux@800/unused-pads-pins
+[    0.328396] /ocp/interconnect@44c00000/segment@200000/target-module@10000/scm@0/pinmux@800: Fixed dependency cycle(s) with /ocp/interconnect@44c00000/segment@200000/target-module@10000/scm@0/pinmux@800/board-gpio-pins
+[    0.329281] pinctrl-single 44e10800.pinmux: 142 pins, size 568
+[    0.357441] omap_wdt: OMAP Watchdog Timer Rev 0x01: initial timeout 60 sec
+[    0.360155] omap_rtc 44e3e000.rtc: already running
+[    0.361762] omap_rtc 44e3e000.rtc: registered as rtc0
+[    0.361834] omap_rtc 44e3e000.rtc: setting system clock to 2018-03-09T20:24:13 UTC (1520627053)
+[    0.385113] 48022000.serial: ttyS1 at MMIO 0x48022000 (irq = 21, base_baud = 3000000) is a 8250
+[    0.390706] 48024000.serial: ttyS2 at MMIO 0x48024000 (irq = 22, base_baud = 3000000) is a 8250
+[    0.433289] OMAP GPIO hardware version 0.1
+[    0.464869] omap_i2c 4819c000.i2c: bus 2 rev0.11 at 100 kHz
+[    0.471431] 481a8000.serial: ttyS4 at MMIO 0x481a8000 (irq = 31, base_baud = 3000000) is a 8250
+[    0.484427] 481aa000.serial: ttyS5 at MMIO 0x481aa000 (irq = 32, base_baud = 3000000) is a 8250
+[    0.498412] 48000000.interconnect:segment@200000:target-module@0:mpu@0:fck: device ID is greater than 24
+[    0.562948] davinci_mdio 4a101000.mdio: davinci mdio revision 1.6, bus freq 1000000
+[    1.162574] Freeing initrd memory: 5484K
+[    1.209578] davinci_mdio 4a101000.mdio: phy[0]: device 4a101000.mdio:00, driver SMSC LAN8710/LAN8720
+[    1.210316] cpsw-switch 4a100000.switch: initialized cpsw ale version 1.4
+[    1.210345] cpsw-switch 4a100000.switch: ALE Table size 1024, Policers 0
+[    1.210624] cpsw-switch 4a100000.switch: cpts: overflow check period 500 (jiffies)
+[    1.210651] cpsw-switch 4a100000.switch: CPTS: ref_clk_freq:250000000 calc_mult:2147483648 calc_shift:29 error:0 nsec/sec
+[    1.210731] cpsw-switch 4a100000.switch: Detected MACID = c4:f3:12:73:1c:92
+[    1.212617] cpsw-switch 4a100000.switch: initialized (regs 0x4a100000, pool size 256) hw_ver:0019010C 1.12 (0)
+[    1.225270] debugfs: Directory '49000000.dma' with parent 'dmaengine' already present!
+[    1.225312] edma 49000000.dma: TI EDMA DMA engine driver
+[    1.238813] omap-gpmc 50000000.gpmc: GPMC revision 6.0
+[    1.238850] gpmc_mem_init: disabling cs 0 mapped at 0x0-0x1000000
+[    1.244248] omap-sham 53100000.sham: hw accel on OMAP rev 4.3
+[    1.244700] omap-sham 53100000.sham: will run requests pump with realtime priority
+[    1.246515] omap-aes 53500000.aes: OMAP AES hw accel rev: 3.2
+[    1.246918] omap-aes 53500000.aes: will run requests pump with realtime priority
+[    1.247527] ti-sysc 44e31000.target-module: Failed to create device link (0x180) with ocp
+[    1.247559] ti-sysc 48040000.target-module: Failed to create device link (0x180) with ocp
+[    1.277904] 44e09000.serial: ttyS0 at MMIO 0x44e09000 (irq = 42, base_baud = 3000000) is a 8250
+[    1.278008] printk: legacy console [ttyS0] enabled
+[    2.113115] tps65217-pmic: Failed to locate of_node [id: -1]
+[    2.119154] tps65217-bl: Failed to locate of_node [id: -1]
+[    2.129988] tps65217 0-0024: TPS65217 ID 0xe version 1.2
+[    2.135599] omap_i2c 44e0b000.i2c: bus 0 rev0.11 at 400 kHz
+[    2.147247] nand: device found, Manufacturer ID: 0x2c, Chip ID: 0xda
+[    2.153718] nand: Micron MT29F2G08ABAEAWP
+[    2.157762] nand: 256 MiB, SLC, erase size: 128 KiB, page size: 2048, OOB size: 64
+[    2.165578] nand: using OMAP_ECC_BCH8_CODE_HW ECC scheme
+[    2.171154] 11 fixed-partitions partitions found on MTD device omap2-nand.0
+[    2.178224] Creating 11 MTD partitions on "omap2-nand.0":
+[    2.183694] 0x000000000000-0x000000020000 : "spl"
+[    2.192245] 0x000000020000-0x000000040000 : "spl_backup1"
+[    2.201288] 0x000000040000-0x000000060000 : "spl_backup2"
+[    2.210411] 0x000000060000-0x000000080000 : "spl_backup3"
+[    2.219457] 0x000000080000-0x000000240000 : "u-boot"
+[    2.228658] 0x000000240000-0x000000260000 : "bootenv"
+[    2.236333] 0x000000260000-0x000000280000 : "fdt"
+[    2.243584] 0x000000280000-0x000000780000 : "kernel"
+[    2.253707] 0x000000800000-0x000001c00000 : "root"
+[    2.271734] 0x000001c00000-0x000003000000 : "config"
+[    2.289772] 0x000003000000-0x000010000000 : "data"
+[    2.410712] cpufreq: cpufreq_online: CPU0: Running at unlisted initial frequency: 550000 KHz, changing to: 600000 KHz
+[    2.422888] clk: Disabling unused clocks
+[    2.427037] PM: genpd: Disabling unused power domains
+[    2.434991] Freeing unused kernel image (initmem) memory: 1024K
+[    2.441357] Run /init as init process
+[    2.472473] watchdog: watchdog0: watchdog did not stop!
+[    2.511651] ubi0: attaching mtd10
+[    3.093146] ubi0: scanning is finished
+[    3.109194] ubi0: attached mtd10 (name "data", size 208 MiB)
+[    3.115033] ubi0: PEB size: 131072 bytes (128 KiB), LEB size: 129024 bytes
+[    3.121963] ubi0: min./max. I/O unit sizes: 2048/2048, sub-page size 512
+[    3.128741] ubi0: VID header offset: 512 (aligned 512), data offset: 2048
+[    3.135598] ubi0: good PEBs: 1664, bad PEBs: 0, corrupted PEBs: 0
+[    3.141738] ubi0: user volume: 1, internal volumes: 1, max. volumes count: 128
+[    3.149028] ubi0: max/mean erase counter: 3/1, WL threshold: 4096, image sequence number: 1509894993
+[    3.158241] ubi0: available PEBs: 0, total reserved PEBs: 1664, PEBs reserved for bad PEB handling: 40
+[    3.167823] ubi0: background thread "ubi_bgt0d" started, PID 55
+[    3.190177] UBIFS (ubi0:0): Mounting in unauthenticated mode
+[    3.196220] UBIFS (ubi0:0): background thread "ubifs_bgt0_0" started, PID 58
+[    3.280936] UBIFS (ubi0:0): UBIFS: mounted UBI device 0, volume 0, name "data"
+[    3.288266] UBIFS (ubi0:0): LEB size: 129024 bytes (126 KiB), min./max. I/O unit sizes: 2048 bytes/2048 bytes
+[    3.298263] UBIFS (ubi0:0): FS size: 207470592 bytes (197 MiB, 1608 LEBs), max 1620 LEBs, journal size 10450944 bytes (9 MiB, 81 LEBs)
+[    3.310430] UBIFS (ubi0:0): reserved for root: 4952683 bytes (4836 KiB)
+[    3.317093] UBIFS (ubi0:0): media format: w5/r0 (latest is w5/r0), UUID 076F54AD-14ED-40F7-A2C5-652E6D3098F5, small LPT model
+init: overlay root on ubi0:data (attempt 1)
+init started: BusyBox v1.36.1 ()
+starting pid 82, tty '': '/bin/mount -t proc proc /proc'
+starting pid 83, tty '': '/bin/mount -t sysfs sysfs /sys'
+starting pid 84, tty '': '/bin/mount -t devtmpfs devtmpfs /dev'
+starting pid 85, tty '': '/bin/mount -o remount,rw /'
+starting pid 86, tty '': '/bin/mkdir -p /dev/pts'
+starting pid 87, tty '': '/bin/mount -t devpts devpts /dev/pts'
+starting pid 88, tty '': '/bin/mount -a'
+[    3.956613] jffs2: notice: (88) jffs2_build_xattr_subsystem: complete building xattr subsystem, 0 of xdatum (0 unchecked, 0 orphan) and 0 of xref (0 dead, 0 orphan) found.
+starting pid 90, tty '': '/sbin/swapon -a'
+starting pid 96, tty '': '/etc/init.d/rcS'
+Starting mdev... OK
+Starting hardware watchdog (60 s)
+[    7.692431] random: crng init done
+antminer-config: hostname antminer-731c92 (mac c4f312731c92)
+Configuring network interfaces... [    7.884973] cpsw-switch 4a100000.switch: starting ndev. mode: dual_mac
+[    7.963539] SMSC LAN8710/LAN8720 4a101000.mdio:00: attached PHY driver (mii_bus:phy_addr=4a101000.mdio:00, irq=POLL)
+udhcpc: started, v1.36.1
+udhcpc: broadcasting discover
+udhcpc: broadcasting discover
+[   11.123327] cpsw-switch 4a100000.switch eth0: Link is Up - 100Mbps/Full - flow control off
+udhcpc: broadcasting discover
+udhcpc: broadcasting select for 192.168.200.105, server 192.168.200.1
+udhcpc: lease of 192.168.200.105 obtained from 192.168.200.1, lease time 7200
+/etc/udhcpc.d/50default: Adding DNS 192.168.200.1
+done.
+Starting Dropbear SSH server: dropbear.
+Starting syslogd/klogd: done
+starting pid 281, tty '/dev/ttyS0': '/usr/sbin/ttyrun ttyS0 /sbin/getty 115200 ttyS0'
+
+Antminer I/O Module 0.1 antminer-731c92 /dev/ttyS0
+
+antminer-731c92 login: 

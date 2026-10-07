@@ -1,0 +1,99 @@
+
+/ # reboot -f
+[   46.907554] reboot: Restarting system
+
+U-Boot SPL 2013.04-dirty (Aug 04 2014 - 11:06:44)
+Control_status {00420313}
+Could not probe the EEPROM; something fundamentally wrong on the I2C bus.
+Could not get board ID.
+default->A335BNLT.
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Peripheral mode controller at 47401000 using PIO, IRQ 0
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Host mode controller at 47401800 using PIO, IRQ 0
+CONFIG_SYS_NAND_U_BOOT_OFFS:80000
+CONFIG_SYS_NAND_PAGE_SIZE:800
+spl_image.size:5cd2c
+spl_image.load_addr:807fffc0
+image entry point: 0x80800000
+
+
+U-Boot 2013.04-dirty (Jan 04 2015 - 17:08:05)
+
+I2C:   ready
+DRAM:  256 MiB
+WARNING: Caches not enabled
+Could not probe the EEPROM; something fundamentally wrong on the I2C bus.
+Could not get board ID.
+NAND:  256 MiB
+MMC:   OMAP SD/MMC: 0, OMAP SD/MMC: 1
+*** Warning - bad CRC, using default environment
+
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Peripheral mode controller at 47401000 using PIO, IRQ 0
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Host mode controller at 47401800 using PIO, IRQ 0
+Net:   <ethaddr> not set. Validating first E-fuse MAC
+cpsw, usb_ether
+Press ESC to abort autoboot in 1 seconds
+U-Boot# <INTERRUPT>
+U-Boot# 
+U-Boot# 
+U-Boot# nand bad
+
+Device 0 bad blocks:
+U-Boot# nand read 0x82000000 0x3000000 0x20000
+
+NAND read: device 0 offset 0x3000000, size 0x20000
+ 131072 bytes read: OK
+U-Boot# crc32 0x82000000 0x20000
+CRC32 for 82000000 ... 8201ffff ==> 8c47c3b4
+U-Boot# setenv autoload no
+U-Boot# setenv serverip 192.168.200.104
+U-Boot# dhcp
+cpsw Waiting for PHY auto negotiation to complete.. done
+link up on port 0, speed 100, full duplex
+BOOTP broadcast 1
+DHCP client bound to address 192.168.200.109
+U-Boot# tftp 0x83000000 nandtest.bin
+link up on port 0, speed 100, full duplex
+Using cpsw device
+TFTP from server 192.168.200.104; our IP address is 192.168.200.109
+Filename 'nandtest.bin'.
+Load address: 0x83000000
+Loading: *#########
+	 726.6 KiB/s
+done
+Bytes transferred = 131072 (20000 hex)
+U-Boot# crc32 0x83000000 0x20000
+CRC32 for 83000000 ... 8301ffff ==> 8c47c3b4
+U-Boot# nand erase 0x3020000 0x20000
+
+NAND erase: device 0 offset 0x3020000, size 0x20000
+Erasing at 0x3020000 -- 100% complete.
+OK
+U-Boot# nand write 0x83000000 0x3020000 0x20000
+
+NAND write: device 0 offset 0x3020000, size 0x20000
+ 131072 bytes written: OK
+U-Boot# nand read 0x84000000 0x3020000 0x20000
+
+NAND read: device 0 offset 0x3020000, size 0x20000
+ 131072 bytes read: OK
+U-Boot# crc32 0x84000000 0x20000
+CRC32 for 84000000 ... 8401ffff ==> 8c47c3b4
+U-Boot# cmp.b 0x83000000 0x84000000 0x20000
+Total of 131072 byte(s) were the same
+U-Boot# 

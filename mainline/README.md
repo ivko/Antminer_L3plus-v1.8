@@ -84,7 +84,7 @@ bash /mnt/e/Antminer/repo/mainline/build-kernel.sh
 ```
 
 Сорсовете отиват в `~/antminer/linux` вътре в WSL (ext4). Резултатът е в `repo/mainline/out/`:
-`uImage.bin`, `am335x-antminer.dtb`, `uEnv.txt`, `initramfs.bin.SD` (копие на images/initramfs.bin.SD-fixed).
+`uImage.bin`, `am335x-antminer.dtb`, `uEnv.txt`, `initramfs.bin.SD` (копие на legacy/images/initramfs.bin.SD-fixed).
 Всичко от `out/` се копира на FAT дяла на SD картата.
 
 Скриптът печата кои символи от fragment-а не са влезли в .config. Преименувани опции

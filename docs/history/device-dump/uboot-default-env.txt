@@ -1,0 +1,54 @@
+# U-Boot 2013.04-dirty (Jan 04 2015) default environment, Bitmain build
+# Extracted 2026-10-05 from NAND mtd4 (u-boot) via: nanddump /dev/mtd4 | strings
+# Note: bootenv partition (mtd5) is erased (all 0xFF) -> U-Boot reports "bad CRC, using default environment".
+# This is the environment actually in effect when booting from NAND.
+
+bootcmd=gpio set 53; i2c mw 0x24 1 0x3e; run findfdt; mmc dev 0; if mmc rescan ; then echo micro SD card found;setenv mmcdev 0;else echo No micro SD card found, setting mmcdev to 1;setenv mmcdev 1;fi;setenv bootpart ${mmcdev}:2;mmc dev ${mmcdev}; if mmc rescan; then gpio set 54; echo SD/MMC found on device ${mmcdev};if run loadbootenv; then echo Loaded environment from ${bootenv};run importbootenv;fi;if test -n $uenvcmd; then echo Running uenvcmd ...;run uenvcmd;fi;gpio set 55; if run loaduimage; then gpio set 56; run loadfdt;run mmcboot;fi;fi;run nandboot;
+bootdelay=1
+baudrate=115200
+loadaddr=0x80200000
+kloadaddr=0x80007fc0
+fdtaddr=0x80F80000
+rdaddr=0x81000000
+bootfile=uImage
+fdtfile=am335x-boneblack.dtb
+console=ttyO0,115200n8
+optargs=
+mtdids=nand0=omap2-nand.0
+mtdparts=mtdparts=omap2-nand.0:128k(SPL),128k(SPL.backup1),128k(SPL.backup2),128k(SPL.backup3),1792k(u-boot),128k(u-boot-env),128k(fdt),5m(kernel),20m(rootfs),-(usrdata)
+dfu_alt_info_mmc=boot part 0 1;rootfs part 0 2;MLO fat 0 1;MLO.raw mmc 100 100;u-boot.img.raw mmc 300 3C0;u-boot.img fat 0 1;uEnv.txt fat 0 1
+dfu_alt_info_emmc=rawemmc mmc 0 3751936
+dfu_alt_info_nand=SPL part 0 1;SPL.backup1 part 0 2;SPL.backup2 part 0 3;SPL.backup3 part 0 4;u-boot part 0 5;u-evn part 0 6;fdt part 0 7;kernel part 0 8;rootfs part 0 9;usrda part 0 10
+mmcdev=0
+mmcroot=/dev/mmcblk0p2 ro
+mmcrootfstype=ext4 rootwait
+nandroot=ubi0:rootfs rw ubi.mtd=7,2048
+nandrootfstype=ubifs rootwait=1
+nandsrcaddr=0x280000
+nandimgsize=0x500000
+mmcargs=setenv bootargs console=${console} ${optargs} root=${mmcroot} rootfstype=${mmcrootfstype}
+nandargs=setenv bootargs console=${console} ${optargs} init=/sbin/init
+bootenv=uEnv.txt
+loadbootenv=load mmc ${mmcdev} ${loadaddr} ${bootenv}
+importbootenv=echo Importing environment from mmc ...; env import -t $loadaddr $filesize
+loadramdisk=load mmc ${mmcdev} ${rdaddr} ramdisk.gz
+loaduimage=load mmc ${bootpart} ${kloadaddr} ${bootdir}/${bootfile}
+loadfdt=load mmc ${bootpart} ${fdtaddr} ${bootdir}/${fdtfile}
+mmcboot=echo Booting from mmc ...; run mmcargs; bootm ${kloadaddr} - ${fdtaddr}
+nandboot=echo Booting from nand ...; run nandargs; nand read ${loadaddr} ${nandsrcaddr} ${nandimgsize}; gpio set 54; nand read ${rdaddr} ${nandfsaddr} ${nandfssize}; gpio set 55; nand read ${fdtaddr} ${nandfdtaddr} ${nandfdtsize}; gpio set 56; bootm ${loadaddr} ${rdaddr} ${fdtaddr}
+
+# Variables referenced by nandboot but NOT visible as "name=" strings in the binary
+# (nandfsaddr, nandfssize, nandfdtaddr, nandfdtsize, findfdt, bootdir).
+# From the NAND boot log (logs/before-after-reset.txt) the effective values are:
+#   nandfsaddr  = 0x800000   nandfssize  = 0x1400000   (root, 20 MiB)
+#   nandfdtaddr = 0x260000   nandfdtsize = 0x20000     (fdt, 128 KiB)
+# They are probably set in C code (board file) or concatenated differently in the env string.
+# Verify with "printenv" at the U-Boot prompt (press ESC during the 1 s autoboot delay).
+
+# Observations
+# - SD boot path: U-Boot loads uEnv.txt from mmc0 partition 1 (FAT), imports it and runs ${uenvcmd}.
+#   Our uEnv.txt fully controls load addresses and file names -> new kernel/DTB can be tested from SD
+#   without touching NAND.
+# - NAND boot path: hardcoded nand read of 0x500000 at 0x280000 -> kernel image in NAND must be <= 5 MiB.
+# - No "bootz" string found in the grep; use legacy uImage (mkimage -T kernel) for the new kernel.
+# - nandroot/ubifs variables are unused leftovers from the TI am335x_evm defaults.

@@ -1,0 +1,9 @@
+
+reboot -f
+Login incorrect
+antminer-731c92 login: process '/usr/sbin/ttyrun ttyS0 /sbin/getty 115200 ttyS0' (pid 243) exited. Scheduling for restart.
+starting pid 244, tty '/dev/ttyS0': '/usr/sbin/ttyrun ttyS0 /sbin/getty 115200 ttyS0'
+
+Antminer I/O Module 0.1 antminer-731c92 /dev/ttyS0
+
+antminer-731c92 login: 
