@@ -1,0 +1,36 @@
+latency.py report for 2026-10-07-linux-edge-noidle.csv
+
+note: 60 edges in glitch bursts (< 1 us apart) ignored
+note: 66 edges in glitch bursts (< 1 us apart) ignored
+capture       49.95 s, 1141 rows
+pairs      534   (stimulus edges 534, unanswered 0)
+min          119.71 us
+median       143.75 us
+mean         146.84 us
+p99          182.15 us
+p99.9        389.75 us
+max          389.75 us
+jitter       270.04 us   (max - min)
+stdev         15.19 us
+
+histogram
+  119.71 us  ###                                      28
+  133.21 us  ######################################## 335
+  146.71 us  ###########                              100
+  160.22 us  #######                                  61
+  173.72 us                                           6
+  187.22 us                                           2
+  200.72 us                                           1
+  214.23 us                                           0
+  227.73 us                                           0
+  241.23 us                                           0
+  254.73 us                                           0
+  268.23 us                                           0
+  281.74 us                                           0
+  295.24 us                                           0
+  308.74 us                                           0
+  322.24 us                                           0
+  335.75 us                                           0
+  349.25 us                                           0
+  362.75 us                                           0
+  376.25 us                                           1

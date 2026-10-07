@@ -1,0 +1,34 @@
+latency.py report for 2026-10-07-linux-edge-preempt.csv
+
+capture       49.99 s, 1069 rows
+pairs      534   (stimulus edges 534, unanswered 0)
+min           41.10 us
+median        49.32 us
+mean          50.90 us
+p99           63.80 us
+p99.9         85.72 us
+max           85.72 us
+jitter        44.62 us   (max - min)
+stdev          5.01 us
+
+histogram
+   41.10 us                                           4
+   43.33 us  ###                                      17
+   45.56 us  ########################                 113
+   47.79 us  ######################################## 186
+   50.02 us  #################                        81
+   52.25 us  ####                                     22
+   54.48 us  #####                                    26
+   56.72 us  ########                                 40
+   58.95 us  ####                                     22
+   61.18 us  ###                                      15
+   63.41 us                                           3
+   65.64 us                                           2
+   67.87 us                                           1
+   70.10 us                                           0
+   72.33 us                                           0
+   74.56 us                                           0
+   76.79 us                                           1
+   79.02 us                                           0
+   81.25 us                                           0
+   83.48 us                                           1

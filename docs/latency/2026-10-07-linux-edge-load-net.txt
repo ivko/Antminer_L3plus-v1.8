@@ -1,0 +1,34 @@
+latency.py report for 2026-10-07-linux-edge-load-net.csv
+
+capture       49.99 s, 1069 rows
+pairs      534   (stimulus edges 534, unanswered 0)
+min           61.23 us
+median        76.58 us
+mean         108.91 us
+p99          539.47 us
+p99.9        816.79 us
+max          816.79 us
+jitter       755.56 us   (max - min)
+stdev         90.59 us
+
+histogram
+   61.23 us  ######################################## 411
+   99.01 us  #                                        14
+  136.79 us  #####                                    57
+  174.56 us                                           9
+  212.34 us                                           9
+  250.12 us                                           7
+  287.90 us                                           7
+  325.67 us                                           4
+  363.45 us                                           3
+  401.23 us                                           5
+  439.01 us                                           0
+  476.79 us                                           1
+  514.56 us                                           2
+  552.34 us                                           1
+  590.12 us                                           1
+  627.90 us                                           1
+  665.67 us                                           0
+  703.45 us                                           1
+  741.23 us                                           0
+  779.01 us                                           1
