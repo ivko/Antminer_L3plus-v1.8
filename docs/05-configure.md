@@ -93,7 +93,7 @@ cat /var/log/antminer-web.log      # web UI
 1. Сложи SSH ключ в `/config/ssh/authorized_keys` и парола на web UI-а (Services).
 2. Смени паролата на OpenPLC (`openplc`/`openplc`) от неговия UI.
 3. Махни `debug-tweaks` от `IMAGE_FEATURES` в
-   `mainline/yocto/meta-antminer/recipes-core/images/antminer-image.bb` и добави root парола
+   `firmware/yocto/meta-antminer/recipes-core/images/antminer-image.bb` и добави root парола
    през `EXTRA_USERS_PARAMS` (`inherit extrausers`), пребилдвай и флашни. `passwd` на самата
    платка работи само при overlay и не оцелява при `antminer-data wipe`.
 4. Feed сървърът е обикновен HTTP без автентикация; дръж го само в доверена мрежа.

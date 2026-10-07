@@ -1,0 +1,15 @@
+# Manual U-Boot 2013.04 netboot (what tools/netboot.ps1 types for you).
+# Press ESC within 1 s of "Press ESC to abort autoboot" to get the "U-Boot# " prompt.
+# TFTP server: python tools/tftp-server.py --root repo/firmware/out   (UDP 69 open in firewall)
+
+setenv autoload no
+setenv serverip 192.168.1.50          # PC running tftp-server.py
+dhcp                                   # or: setenv ipaddr 192.168.1.77
+tftp 0x82000000 uImage.bin
+tftp 0x88000000 am335x-antminer.dtb
+tftp 0x88100000 initramfs.bin.SD
+iminfo 0x82000000
+setenv bootargs console=ttyS0,115200n8 earlycon init=/bin/sh
+bootm 0x82000000 0x88100000 0x88000000
+
+# Nothing persists: no saveenv, no NAND writes. Power-cycle -> boots the old system from NAND.

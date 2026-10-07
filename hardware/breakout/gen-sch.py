@@ -383,7 +383,7 @@ def root_sheet():
                sheet_uuid=ROOT_UUID)
     header(sh, 60, 100, "P9", P9, "P9")
     header(sh, 150, 100, "P8", P8, "P8")
-    sh.text((40, 150), "P8.3-10, P8.22-26, P9.11, P9.13: NAND (do not use). Other NC pins are free, see mainline/pinmux.", 1.27)
+    sh.text((40, 150), "P8.3-10, P8.22-26, P9.11, P9.13: NAND (do not use). Other NC pins are free, see firmware/pinmux.", 1.27)
 
     # ---- 24 V field supply input --------------------------------------------------------
     x, y = 250, 60

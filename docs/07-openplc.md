@@ -15,7 +15,7 @@ Web интерфейсът е на `http://<ip>:8080`, `openplc` / `openplc`. Mo
 
 ## Входове и изходи
 
-Hardware layer-ът (`mainline/yocto/meta-antminer/recipes-openplc/openplc-runtime/files/antminer.cpp`)
+Hardware layer-ът (`firmware/yocto/meta-antminer/recipes-openplc/openplc-runtime/files/antminer.cpp`)
 не знае нищо за конкретни пинове. При старт търси GPIO линии с имена `I<n>` и `Q<n>` във
 всички gpiochip-ове (включително I2C експандери) и ADC каналите:
 
@@ -42,14 +42,14 @@ Hardware layer-ът (`mainline/yocto/meta-antminer/recipes-openplc/openplc-runti
 
 ## Първа програма
 
-Пример: `mainline/openplc/examples/gpio-echo.st` (Q0 = I0 или coil 8, Q1 мига на 1 Hz, AIN0 се
+Пример: `firmware/openplc/examples/gpio-echo.st` (Q0 = I0 или coil 8, Q1 мига на 1 Hz, AIN0 се
 копира в holding register 0).
 
 През UI-а: Programs → Upload → Compile → Dashboard → Start PLC. Или от PC-то:
 ```powershell
-python mainline\tools\openplc-test.py <ip> --program mainline\openplc\examples\gpio-echo.st
-python mainline\tools\openplc-test.py <ip> --autostart on --only-settings     # RUN след всеки boot
-python mainline\tools\openplc-test.py <ip> --no-compile --no-start --write-coil 8 1
+python firmware\tools\openplc-test.py <ip> --program firmware\openplc\examples\gpio-echo.st
+python firmware\tools\openplc-test.py <ip> --autostart on --only-settings     # RUN след всеки boot
+python firmware\tools\openplc-test.py <ip> --no-compile --no-start --write-coil 8 1
 ```
 `openplc-test.py` влиза, качва, компилира, стартира и чете по Modbus TCP coils, discrete inputs,
 holding и input регистрите (само стандартна Python библиотека).
