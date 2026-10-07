@@ -11,14 +11,15 @@ case "$1" in
     ip=$(ip -4 -o addr show eth0 2>/dev/null | awk '{print $4}' | cut -d/ -f1)
     mac=$(cat /sys/class/net/eth0/address 2>/dev/null)
     sysboot=$(devmem 0x44E10040 2>/dev/null)
-    {
-      echo "========================================================"
-      echo " Antminer provisioning system (running from the SD card)"
-      echo "   board MAC $mac   SYSBOOT $sysboot"
-      echo "   web UI:  http://${ip:-<waiting for DHCP>}/"
-      echo "   ssh:     root@${ip:-?} (no password)"
-      echo "========================================================"
-    } | tee /dev/console
+    # one writer only: rcS stdout already is the console (tee to /dev/console doubled every character)
+    banner="========================================================
+ Antminer provisioning system (running from the SD card)
+   board MAC $mac   SYSBOOT $sysboot
+   web UI:  http://${ip:-<waiting for DHCP>}/
+   ssh:     root@${ip:-?} (no password)
+========================================================"
+    echo "$banner"
+    echo "$banner" > /etc/issue.provision 2>/dev/null
     ;;
   stop) ;;
   *) echo "Usage: $0 {start|stop}"; exit 1 ;;
