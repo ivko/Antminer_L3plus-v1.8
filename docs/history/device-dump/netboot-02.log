@@ -1,0 +1,372 @@
+
+/ # reboot -f
+[  854.016026] reboot: Restarting system
+
+U-Boot SPL 2013.04-dirty (Aug 04 2014 - 11:06:44)
+Control_status {00420313}
+Could not probe the EEPROM; something fundamentally wrong on the I2C bus.
+Could not get board ID.
+default->A335BNLT.
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Peripheral mode controller at 47401000 using PIO, IRQ 0
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Host mode controller at 47401800 using PIO, IRQ 0
+CONFIG_SYS_NAND_U_BOOT_OFFS:80000
+CONFIG_SYS_NAND_PAGE_SIZE:800
+spl_image.size:5cd2c
+spl_image.load_addr:807fffc0
+image entry point: 0x80800000
+
+
+U-Boot 2013.04-dirty (Jan 04 2015 - 17:08:05)
+
+I2C:   ready
+DRAM:  256 MiB
+WARNING: Caches not enabled
+Could not probe the EEPROM; something fundamentally wrong on the I2C bus.
+Could not get board ID.
+NAND:  256 MiB
+MMC:   OMAP SD/MMC: 0, OMAP SD/MMC: 1
+*** Warning - bad CRC, using default environment
+
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Peripheral mode controller at 47401000 using PIO, IRQ 0
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Host mode controller at 47401800 using PIO, IRQ 0
+Net:   <ethaddr> not set. Validating first E-fuse MAC
+cpsw, usb_ether
+Press ESC to abort autoboot in 1 seconds
+U-Boot# <INTERRUPT>
+U-Boot# 
+U-Boot# 
+U-Boot# setenv autoload no
+U-Boot# setenv serverip 192.168.200.104
+U-Boot# dhcp
+cpsw Waiting for PHY auto negotiation to complete.. done
+link up on port 0, speed 100, full duplex
+BOOTP broadcast 1
+DHCP client bound to address 192.168.200.109
+U-Boot# printenv ipaddr serverip ethaddr
+ipaddr=192.168.200.109
+serverip=192.168.200.104
+ethaddr=c4:f3:12:73:1c:92
+U-Boot# md.l 0x50000060 6
+50000060: 00000800 001e1e00 001e1e00 16051807    ................
+50000070: 00151e1e 16000f80                      ........
+U-Boot# tftp 0x82000000 uImage.bin
+link up on port 0, speed 100, full duplex
+Using cpsw device
+TFTP from server 192.168.200.104; our IP address is 192.168.200.109
+Filename 'uImage.bin'.
+Load address: 0x82000000
+Loading: *#################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 ###########################################################
+	 1002.9 KiB/s
+done
+Bytes transferred = 5631312 (55ed50 hex)
+U-Boot# tftp 0x88000000 am335x-antminer.dtb
+link up on port 0, speed 100, full duplex
+Using cpsw device
+TFTP from server 192.168.200.104; our IP address is 192.168.200.109
+Filename 'am335x-antminer.dtb'.
+Load address: 0x88000000
+Loading: *#####
+	 696.3 KiB/s
+done
+Bytes transferred = 70601 (113c9 hex)
+U-Boot# tftp 0x88100000 initramfs.bin.SD
+link up on port 0, speed 100, full duplex
+Using cpsw device
+TFTP from server 192.168.200.104; our IP address is 192.168.200.109
+Filename 'initramfs.bin.SD'.
+Load address: 0x88100000
+Loading: *#################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #####################################
+	 1000 KiB/s
+done
+Bytes transferred = 14844103 (e280c7 hex)
+U-Boot# iminfo 0x82000000
+
+## Checking Image at 82000000 ...
+   Legacy image found
+   Image Name:   Linux-6.12.112-dirty
+   Image Type:   ARM Linux Kernel Image (uncompressed)
+   Data Size:    5631248 Bytes = 5.4 MiB
+   Load Address: 80008000
+   Entry Point:  80008000
+   Verifying Checksum ... OK
+U-Boot# setenv bootargs console=ttyS0,115200n8 earlycon init=/bin/sh
+U-Boot# bootm 0x82000000 0x88100000 0x88000000
+## Booting kernel from Legacy Image at 82000000 ...
+   Image Name:   Linux-6.12.112-dirty
+   Image Type:   ARM Linux Kernel Image (uncompressed)
+   Data Size:    5631248 Bytes = 5.4 MiB
+   Load Address: 80008000
+   Entry Point:  80008000
+   Verifying Checksum ... OK
+## Loading init Ramdisk from Legacy Image at 88100000 ...
+   Image Name:   Angstrom-opkg_m-eglibc-ipk-v
+   Image Type:   ARM Linux RAMDisk Image (gzip compressed)
+   Data Size:    14844039 Bytes = 14.2 MiB
+   Load Address: 00000000
+   Entry Point:  00000000
+   Verifying Checksum ... OK
+## Flattened Device Tree blob at 88000000
+   Booting using the fdt blob at 0x88000000
+   Loading Kernel Image ... OK
+OK
+   Loading Ramdisk to 8e40f000, end 8f237087 ... OK
+   Using Device Tree in place at 88000000, end 880143c8
+
+Starting kernel ...
+
+[    0.000000] Booting Linux on physical CPU 0x0
+[    0.000000] Linux version 6.12.112-dirty (pc@dev-pc) (arm-linux-gnueabihf-gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, GNU ld (GNU Binutils for Ubuntu) 2.42) #2 SMP Mon Oct  5 21:57:02 EEST 2026
+[    0.000000] CPU: ARMv7 Processor [413fc082] revision 2 (ARMv7), cr=10c5387d
+[    0.000000] CPU: PIPT / VIPT nonaliasing data cache, VIPT aliasing instruction cache
+[    0.000000] OF: fdt: Machine model: Bitmain Antminer BB-Black V1.8 (AM3352)
+[    0.000000] earlycon: omap8250 at MMIO 0x44e09000 (options '')
+[    0.000000] printk: legacy bootconsole [omap8250] enabled
+[    0.000000] Memory policy: Data cache writeback
+[    0.000000] cma: Reserved 16 MiB at 0x8d000000 on node -1
+[    0.000000] Zone ranges:
+[    0.000000]   Normal   [mem 0x0000000080000000-0x000000008fdfffff]
+[    0.000000]   HighMem  empty
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000080000000-0x000000008fdfffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000080000000-0x000000008fdfffff]
+[    0.000000] OF: reserved mem: Reserved memory: No reserved-memory node in the DT
+[    0.000000] CPU: All CPU(s) started in SVC mode.
+[    0.000000] AM335X ES2.1 (neon)
+[    0.000000] percpu: Embedded 17 pages/cpu s40716 r8192 d20724 u69632
+[    0.000000] Kernel command line: console=ttyS0,115200n8 earlycon init=/bin/sh
+[    0.000000] Dentry cache hash table entries: 32768 (order: 5, 131072 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 16384 (order: 4, 65536 bytes, linear)
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 65024
+[    0.000000] mem auto-init: stack:all(zero), heap alloc:off, heap free:off
+[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=1, Nodes=1
+[    0.000000] rcu: Hierarchical RCU implementation.
+[    0.000000] rcu: 	RCU event tracing is enabled.
+[    0.000000] rcu: 	RCU restricting CPUs from NR_CPUS=2 to nr_cpu_ids=1.
+[    0.000000] 	Tracing variant of Tasks RCU enabled.
+[    0.000000] rcu: RCU calculated value of scheduler-enlistment delay is 10 jiffies.
+[    0.000000] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=1
+[    0.000000] RCU Tasks Trace: Setting shift to 0 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=1.
+[    0.000000] NR_IRQS: 16, nr_irqs: 16, preallocated irqs: 16
+[    0.000000] IRQ: Found an INTC at 0x(ptrval) (revision 5.0) with 128 interrupts
+[    0.000000] rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[    0.000000] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.000000] TI gptimer clocksource: always-on /ocp/interconnect@44c00000/segment@200000/target-module@31000
+[    0.000004] sched_clock: 32 bits at 24MHz, resolution 41ns, wraps every 89478484971ns
+[    0.008110] clocksource: dmtimer: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 79635851949 ns
+[    0.018431] TI gptimer clockevent: 24000000 Hz at /ocp/interconnect@48000000/segment@0/target-module@40000
+[    0.030900] Console: colour dummy device 80x30
+[    0.035631] Calibrating delay loop... 548.86 BogoMIPS (lpj=2744320)
+[    0.155001] CPU: Testing write buffer coherency: ok
+[    0.160167] CPU0: Spectre v2: using BPIALL workaround
+[    0.165399] pid_max: default: 32768 minimum: 301
+[    0.170378] LSM: initializing lsm=capability
+[    0.175049] Mount-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.182662] Mountpoint-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.192975] CPU0: thread -1, cpu 0, socket -1, mpidr 0
+[    0.201841] Setting up static identity map for 0x80100000 - 0x80100078
+[    0.209223] rcu: Hierarchical SRCU implementation.
+[    0.214192] rcu: 	Max phase no-delay instances is 1000.
+[    0.221422] smp: Bringing up secondary CPUs ...
+[    0.226158] smp: Brought up 1 node, 1 CPU
+[    0.230433] SMP: Total of 1 processors activated (548.86 BogoMIPS).
+[    0.236904] CPU: All CPU(s) started in SVC mode.
+[    0.242015] Memory: 206944K/260096K available (11264K kernel code, 1191K rwdata, 2880K rodata, 1024K init, 283K bss, 35284K reserved, 16384K cma-reserved, 0K highmem)
+[    0.258921] devtmpfs: initialized
+[    0.288168] VFP support v0.3: implementor 41 architecture 3 part 30 variant c rev 3
+[    0.296753] futex hash table entries: 256 (order: 2, 16384 bytes, linear)
+[    0.305684] pinctrl core: initialized pinctrl subsystem
+[    0.314412] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.325084] DMA: preallocated 256 KiB pool for atomic coherent allocations
+[    0.333161] audit: initializing netlink subsys (disabled)
+[    0.340783] thermal_sys: Registered thermal governor 'fair_share'
+[    0.340821] thermal_sys: Registered thermal governor 'step_wise'
+[    0.347125] thermal_sys: Registered thermal governor 'user_space'
+[    0.353563] audit: type=2000 audit(0.310:1): state=initialized audit_enabled=0 res=1
+[    0.368041] cpuidle: using governor menu
+[    0.412202] No ATAGs?
+[    0.414602] hw-breakpoint: debug architecture 0x4 unsupported.
+[    0.424849] kprobes: kprobe jump-optimization is enabled. All kprobes are optimized if possible.
+[    0.444402] iommu: Default domain type: Translated
+[    0.449496] iommu: DMA domain TLB invalidation policy: strict mode
+[    0.480844] SCSI subsystem initialized
+[    0.485863] usbcore: registered new interface driver usbfs
+[    0.491815] usbcore: registered new interface driver hub
+[    0.497398] usbcore: registered new device driver usb
+[    0.503035] pps_core: LinuxPPS API ver. 1 registered
+[    0.508179] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.517685] PTP clock support registered
+[    0.568776] vgaarb: loaded
+[    0.572659] clocksource: Switched to clocksource dmtimer
+[    2.034608] VFS: Disk quotas dquot_6.6.0
+[    2.038766] VFS: Dquot-cache hash table entries: 1024 (order 0, 4096 bytes)
+[    2.069062] NET: Registered PF_INET protocol family
+[    2.074706] IP idents hash table entries: 4096 (order: 3, 32768 bytes, linear)
+[    2.083893] tcp_listen_portaddr_hash hash table entries: 512 (order: 0, 4096 bytes, linear)
+[    2.092643] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    2.100667] TCP established hash table entries: 2048 (order: 1, 8192 bytes, linear)
+[    2.108660] TCP bind hash table entries: 2048 (order: 3, 32768 bytes, linear)
+[    2.116205] TCP: Hash tables configured (established 2048 bind 2048)
+[    2.122988] UDP hash table entries: 256 (order: 1, 8192 bytes, linear)
+[    2.129761] UDP-Lite hash table entries: 256 (order: 1, 8192 bytes, linear)
+[    2.137301] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    2.145044] RPC: Registered named UNIX socket transport module.
+[    2.151183] RPC: Registered udp transport module.
+[    2.156151] RPC: Registered tcp transport module.
+[    2.161006] RPC: Registered tcp-with-tls transport module.
+[    2.166716] RPC: Registered tcp NFSv4.1 backchannel transport module.
+[    2.173454] PCI: CLS 0 bytes, default 64
+[    2.179616] Initialise system trusted keyrings
+[    2.185591] Trying to unpack rootfs image as initramfs...
+[    2.244085] workingset: timestamp_bits=14 max_order=16 bucket_order=2
+[    2.252999] NFS: Registering the id_resolver key type
+[    2.258332] Key type id_resolver registered
+[    2.262758] Key type id_legacy registered
+[    2.266986] jffs2: version 2.2. (NAND) (SUMMARY)  ?? 2001-2006 Red Hat, Inc.
+[    2.293784] Key type asymmetric registered
+[    2.298080] Asymmetric key parser 'x509' registered
+[    2.303445] io scheduler mq-deadline registered
+[    2.308149] io scheduler kyber registered
+[    2.312388] io scheduler bfq registered
+[    2.346386] target-module@4b000000:target-module@140000:pmu@0:fck: device ID is greater than 24
+[    2.374124] ledtrig-cpu: registered to indicate activity on CPUs
+[    2.404307] Serial: 8250/16550 driver, 8 ports, IRQ sharing enabled
+[    2.473474] brd: module loaded
+[    2.507496] loop: module loaded
+[    2.512314] mtdoops: mtd device (mtddev=name/number) must be supplied
+[    2.537399] usbcore: registered new interface driver usb-storage
+[    2.544026] usbcore: registered new interface driver usbserial_generic
+[    2.550838] usbserial: USB Serial support registered for generic
+[    2.557181] usbcore: registered new interface driver ch341
+[    2.562955] usbserial: USB Serial support registered for ch341-uart
+[    2.569506] usbcore: registered new interface driver cp210x
+[    2.575348] usbserial: USB Serial support registered for cp210x
+[    2.581555] usbcore: registered new interface driver ftdi_sio
+[    2.587584] usbserial: USB Serial support registered for FTDI USB Serial Device
+[    2.595541] i2c_dev: i2c /dev entries driver
+[    2.601757] cpuidle: enable-method property 'ti,am3352' found operations
+[    2.609563] sdhci: Secure Digital Host Controller Interface driver
+[    2.616052] sdhci: Copyright(c) Pierre Ossman
+[    2.620885] sdhci-pltfm: SDHCI platform and OF driver helper
+[    2.733501] hw perfevents: enabled with armv7_cortex_a8 PMU driver, 5 (8000000f) counters available
+[    2.743936] Initializing XFRM netlink socket
+[    2.748523] NET: Registered PF_INET6 protocol family
+[    2.774890] Segment Routing with IPv6
+[    2.778849] In-situ OAM (IOAM) with IPv6
+[    2.783254] sit: IPv6, IPv4 and MPLS over IPv4 tunneling driver
+[    2.790785] NET: Registered PF_PACKET protocol family
+[    2.796178] NET: Registered PF_KEY protocol family
+[    2.801374] Key type dns_resolver registered
+[    2.806175] ThumbEE CPU extension supported.
+[    2.810610] Registering SWP/SWPB emulation handler
+[    2.816222] omap_voltage_late_init: Voltage driver support not added
+[    2.823809] SmartReflex Class3 initialized
+[    2.924174] Loading compiled-in X.509 certificates
+[    3.070439] /ocp/interconnect@44c00000/segment@200000/target-module@10000/scm@0/pinmux@800: Fixed dependency cycle(s) with /ocp/interconnect@44c00000/segment@200000/target-module@10000/scm@0/pinmux@800/plc-gpio-pins
+[    3.090599] /ocp/interconnect@44c00000/segment@200000/target-module@10000/scm@0/pinmux@800: Fixed dependency cycle(s) with /ocp/interconnect@44c00000/segment@200000/target-module@10000/scm@0/pinmux@800/hashboard-gpio-pins
+[    3.111939] pinctrl-single 44e10800.pinmux: 142 pins, size 568
+[    3.193684] omap_wdt: OMAP Watchdog Timer Rev 0x01: initial timeout 60 sec
+[    3.204949] omap_rtc 44e3e000.rtc: already running
+[    3.234696] omap_rtc 44e3e000.rtc: registered as rtc0
+[    3.240054] omap_rtc 44e3e000.rtc: setting system clock to 2000-01-02T00:26:20 UTC (946772780)
+[    3.286427] 48022000.serial: ttyS1 at MMIO 0x48022000 (irq = 22, base_baud = 3000000) is a 8250
+[    3.315117] 48024000.serial: ttyS2 at MMIO 0x48024000 (irq = 23, base_baud = 3000000) is a 8250
+[    3.393671] OMAP GPIO hardware version 0.1
+[    3.445952] omap_i2c 4819c000.i2c: bus 2 rev0.11 at 100 kHz
+[    3.475639] 481a8000.serial: ttyS4 at MMIO 0x481a8000 (irq = 32, base_baud = 3000000) is a 8250
+[    3.505337] 481aa000.serial: ttyS5 at MMIO 0x481aa000 (irq = 33, base_baud = 3000000) is a 8250
+[    3.560038] 48000000.interconnect:segment@200000:target-module@0:mpu@0:fck: device ID is greater than 24
+[    3.643237] davinci_mdio 4a101000.mdio: davinci mdio revision 1.6, bus freq 1000000
+[    5.300204] Freeing initrd memory: 14500K
+[    5.345386] davinci_mdio 4a101000.mdio: phy[0]: device 4a101000.mdio:00, driver SMSC LAN8710/LAN8720
+[    5.355826] cpsw-switch 4a100000.switch: initialized cpsw ale version 1.4
+[    5.362985] cpsw-switch 4a100000.switch: ALE Table size 1024, Policers 0
+[    5.370394] cpsw-switch 4a100000.switch: cpts: overflow check period 500 (jiffies)
+[    5.378353] cpsw-switch 4a100000.switch: CPTS: ref_clk_freq:250000000 calc_mult:2147483648 calc_shift:29 error:0 nsec/sec
+[    5.389840] cpsw-switch 4a100000.switch: Detected MACID = c4:f3:12:73:1c:92
+[    5.399949] cpsw-switch 4a100000.switch: initialized (regs 0x4a100000, pool size 256) hw_ver:0019010C 1.12 (0)
+[    5.424599] debugfs: Directory '49000000.dma' with parent 'dmaengine' already present!
+[    5.432942] edma 49000000.dma: TI EDMA DMA engine driver
+[    5.471441] omap-gpmc 50000000.gpmc: GPMC revision 6.0
+[    5.477072] gpmc_mem_init: disabling cs 0 mapped at 0x0-0x1000000
+[    5.489167] omap-sham 53100000.sham: hw accel on OMAP rev 4.3
+[    5.496179] omap-sham 53100000.sham: will run requests pump with realtime priority
+[    5.507059] omap-aes 53500000.aes: OMAP AES hw accel rev: 3.2
+[    5.513944] omap-aes 53500000.aes: will run requests pump with realtime priority
+[    5.522483] ti-sysc 44e31000.target-module: Failed to create device link (0x180) with ocp
+[    5.531193] ti-sysc 48040000.target-module: Failed to create device link (0x180) with ocp
+[    5.548647] 44e09000.serial: ttyS0 at MMIO 0x44e09000 (irq = 44, base_baud = 3000000) is a 8250
+[    5.557991] printk: legacy console [ttyS0] enabled
+[    5.557991] printk: legacy console [ttyS0] enabled
+[    5.567851] printk: legacy bootconsole [omap8250] disabled
+[    5.567851] printk: legacy bootconsole [omap8250] disabled
+[    5.603907] tps65217-pmic: Failed to locate of_node [id: -1]
+[    5.610161] tps65217-bl: Failed to locate of_node [id: -1]
+[    5.623868] tps65217 0-0024: TPS65217 ID 0xe version 1.2
+[    5.629556] omap_i2c 44e0b000.i2c: bus 0 rev0.11 at 400 kHz
+[    5.646990] omap_gpio 44e07000.gpio: Could not set line 6 debounce to 200000 microseconds (-22)
+[    5.655948] sdhci-omap 48060000.mmc: Got CD GPIO
+[    5.661122] sdhci-omap 48060000.mmc: supply pbias not found, using dummy regulator
+[    5.670328] nand: device found, Manufacturer ID: 0x2c, Chip ID: 0xda
+[    5.676923] nand: Micron MT29F2G08ABAEAWP
+[    5.680974] nand: 256 MiB, SLC, erase size: 128 KiB, page size: 2048, OOB size: 64
+[    5.688902] nand: using OMAP_ECC_BCH8_CODE_HW ECC scheme
+[    5.694620] 10 fixed-partitions partitions found on MTD device omap2-nand.0
+[    5.701645] Creating 10 MTD partitions on "omap2-nand.0":
+[    5.707156] 0x000000000000-0x000000020000 : "spl"
+[    5.712954] sdhci-omap 48060000.mmc: supply vqmmc not found, using dummy regulator
+[    5.743588] 0x000000020000-0x000000040000 : "spl_backup1"
+[    5.753181] 0x000000040000-0x000000060000 : "spl_backup2"
+[    5.762266] 0x000000060000-0x000000080000 : "spl_backup3"
+[    5.768989] mmc0: SDHCI controller on 48060000.mmc [48060000.mmc] using External DMA
+[    5.780870] 0x000000080000-0x000000240000 : "u-boot"
+[    5.790316] 0x000000240000-0x000000260000 : "bootenv"
+[    5.798955] 0x000000260000-0x000000280000 : "fdt"
+[    5.807275] 0x000000280000-0x000000780000 : "kernel"
+[    5.818266] 0x000000800000-0x000001c00000 : "root"
+[    5.837268] 0x000001c00000-0x000003000000 : "config"
+[    5.864163] cpufreq: cpufreq_online: CPU0: Running at unlisted initial frequency: 550000 KHz, changing to: 600000 KHz
+[    5.879400] clk: Disabling unused clocks
+[    5.883850] PM: genpd: Disabling unused power domains
+[    5.892989] Freeing unused kernel image (initmem) memory: 1024K
+[    5.900433] Run /init as init process
+[    5.904355] Failed to execute /init (error -13)
+[    5.908926] Run /bin/sh as init process
+/bin/sh: can't access tty; job control turned off
+/ # 

@@ -1,0 +1,145 @@
+Pinmux settings per pin
+Format: pin (name): mux_owner gpio_owner hog?
+pin 0 (PIN0): 50000000.gpmc (GPIO UNCLAIMED) function nandflash-pins group nandflash-pins
+pin 1 (PIN1): 50000000.gpmc (GPIO UNCLAIMED) function nandflash-pins group nandflash-pins
+pin 2 (PIN2): 50000000.gpmc (GPIO UNCLAIMED) function nandflash-pins group nandflash-pins
+pin 3 (PIN3): 50000000.gpmc (GPIO UNCLAIMED) function nandflash-pins group nandflash-pins
+pin 4 (PIN4): 50000000.gpmc (GPIO UNCLAIMED) function nandflash-pins group nandflash-pins
+pin 5 (PIN5): 50000000.gpmc (GPIO UNCLAIMED) function nandflash-pins group nandflash-pins
+pin 6 (PIN6): 50000000.gpmc (GPIO UNCLAIMED) function nandflash-pins group nandflash-pins
+pin 7 (PIN7): 50000000.gpmc (GPIO UNCLAIMED) function nandflash-pins group nandflash-pins
+pin 8 (PIN8): 44e10800.pinmux (GPIO UNCLAIMED) function hashboard-gpio-pins group hashboard-gpio-pins
+pin 9 (PIN9): 44e10800.pinmux (GPIO UNCLAIMED) function hashboard-gpio-pins group hashboard-gpio-pins
+pin 10 (PIN10): 44e10800.pinmux (GPIO UNCLAIMED) function hashboard-gpio-pins group hashboard-gpio-pins
+pin 11 (PIN11): 44e10800.pinmux (GPIO UNCLAIMED) function hashboard-gpio-pins group hashboard-gpio-pins
+pin 12 (PIN12): 44e10800.pinmux (GPIO UNCLAIMED) function hashboard-gpio-pins group hashboard-gpio-pins
+pin 13 (PIN13): 44e10800.pinmux (GPIO UNCLAIMED) function hashboard-gpio-pins group hashboard-gpio-pins
+pin 14 (PIN14): 44e10800.pinmux (GPIO UNCLAIMED) function hashboard-gpio-pins group hashboard-gpio-pins
+pin 15 (PIN15): 44e10800.pinmux (GPIO UNCLAIMED) function hashboard-gpio-pins group hashboard-gpio-pins
+pin 16 (PIN16): 44e10800.pinmux (GPIO UNCLAIMED) function hashboard-gpio-pins group hashboard-gpio-pins
+pin 17 (PIN17): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 18 (PIN18): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 19 (PIN19): 44e10800.pinmux (GPIO UNCLAIMED) function hashboard-gpio-pins group hashboard-gpio-pins
+pin 20 (PIN20): 44e10800.pinmux (GPIO UNCLAIMED) function hashboard-gpio-pins group hashboard-gpio-pins
+pin 21 (PIN21): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 22 (PIN22): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 23 (PIN23): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 24 (PIN24): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 25 (PIN25): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 26 (PIN26): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 27 (PIN27): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 28 (PIN28): 50000000.gpmc (GPIO UNCLAIMED) function nandflash-pins group nandflash-pins
+pin 29 (PIN29): 50000000.gpmc (GPIO UNCLAIMED) function nandflash-pins group nandflash-pins
+pin 30 (PIN30): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 31 (PIN31): 50000000.gpmc (GPIO UNCLAIMED) function nandflash-pins group nandflash-pins
+pin 32 (PIN32): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 33 (PIN33): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 34 (PIN34): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 35 (PIN35): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 36 (PIN36): 50000000.gpmc (GPIO UNCLAIMED) function nandflash-pins group nandflash-pins
+pin 37 (PIN37): 50000000.gpmc (GPIO UNCLAIMED) function nandflash-pins group nandflash-pins
+pin 38 (PIN38): 50000000.gpmc (GPIO UNCLAIMED) function nandflash-pins group nandflash-pins
+pin 39 (PIN39): 50000000.gpmc (GPIO UNCLAIMED) function nandflash-pins group nandflash-pins
+pin 40 (PIN40): 44e10800.pinmux (GPIO UNCLAIMED) function plc-gpio-pins group plc-gpio-pins
+pin 41 (PIN41): 44e10800.pinmux (GPIO UNCLAIMED) function plc-gpio-pins group plc-gpio-pins
+pin 42 (PIN42): 44e10800.pinmux (GPIO UNCLAIMED) function plc-gpio-pins group plc-gpio-pins
+pin 43 (PIN43): 44e10800.pinmux (GPIO UNCLAIMED) function plc-gpio-pins group plc-gpio-pins
+pin 44 (PIN44): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 45 (PIN45): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 46 (PIN46): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 47 (PIN47): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 48 (PIN48): 481aa000.serial (GPIO UNCLAIMED) function uart5-pins group uart5-pins
+pin 49 (PIN49): 481aa000.serial (GPIO UNCLAIMED) function uart5-pins group uart5-pins
+pin 50 (PIN50): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 51 (PIN51): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 52 (PIN52): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 53 (PIN53): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 54 (PIN54): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 55 (PIN55): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 56 (PIN56): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 57 (PIN57): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 58 (PIN58): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 59 (PIN59): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 60 (PIN60): 48060000.mmc (GPIO UNCLAIMED) function mmc1-pins group mmc1-pins
+pin 61 (PIN61): 48060000.mmc (GPIO UNCLAIMED) function mmc1-pins group mmc1-pins
+pin 62 (PIN62): 48060000.mmc (GPIO UNCLAIMED) function mmc1-pins group mmc1-pins
+pin 63 (PIN63): 48060000.mmc (GPIO UNCLAIMED) function mmc1-pins group mmc1-pins
+pin 64 (PIN64): 48060000.mmc (GPIO UNCLAIMED) function mmc1-pins group mmc1-pins
+pin 65 (PIN65): 48060000.mmc (GPIO UNCLAIMED) function mmc1-pins group mmc1-pins
+pin 66 (PIN66): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 67 (PIN67): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 68 (PIN68): 4a100000.switch (GPIO UNCLAIMED) function cpsw-default-pins group cpsw-default-pins
+pin 69 (PIN69): 4a100000.switch (GPIO UNCLAIMED) function cpsw-default-pins group cpsw-default-pins
+pin 70 (PIN70): 4a100000.switch (GPIO UNCLAIMED) function cpsw-default-pins group cpsw-default-pins
+pin 71 (PIN71): 4a100000.switch (GPIO UNCLAIMED) function cpsw-default-pins group cpsw-default-pins
+pin 72 (PIN72): 4a100000.switch (GPIO UNCLAIMED) function cpsw-default-pins group cpsw-default-pins
+pin 73 (PIN73): 4a100000.switch (GPIO UNCLAIMED) function cpsw-default-pins group cpsw-default-pins
+pin 74 (PIN74): 4a100000.switch (GPIO UNCLAIMED) function cpsw-default-pins group cpsw-default-pins
+pin 75 (PIN75): 4a100000.switch (GPIO UNCLAIMED) function cpsw-default-pins group cpsw-default-pins
+pin 76 (PIN76): 4a100000.switch (GPIO UNCLAIMED) function cpsw-default-pins group cpsw-default-pins
+pin 77 (PIN77): 4a100000.switch (GPIO UNCLAIMED) function cpsw-default-pins group cpsw-default-pins
+pin 78 (PIN78): 4a100000.switch (GPIO UNCLAIMED) function cpsw-default-pins group cpsw-default-pins
+pin 79 (PIN79): 4a100000.switch (GPIO UNCLAIMED) function cpsw-default-pins group cpsw-default-pins
+pin 80 (PIN80): 4a100000.switch (GPIO UNCLAIMED) function cpsw-default-pins group cpsw-default-pins
+pin 81 (PIN81): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 82 (PIN82): 4a101000.mdio (GPIO UNCLAIMED) function davinci-mdio-default-pins group davinci-mdio-default-pins
+pin 83 (PIN83): 4a101000.mdio (GPIO UNCLAIMED) function davinci-mdio-default-pins group davinci-mdio-default-pins
+pin 84 (PIN84): 48024000.serial (GPIO UNCLAIMED) function uart2-pins group uart2-pins
+pin 85 (PIN85): 48024000.serial (GPIO UNCLAIMED) function uart2-pins group uart2-pins
+pin 86 (PIN86): 44e10800.pinmux (GPIO UNCLAIMED) function hashboard-gpio-pins group hashboard-gpio-pins
+pin 87 (PIN87): 44e10800.pinmux (GPIO UNCLAIMED) function hashboard-gpio-pins group hashboard-gpio-pins
+pin 88 (PIN88): 48060000.mmc (GPIO UNCLAIMED) function mmc1-pins group mmc1-pins
+pin 89 (PIN89): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 90 (PIN90): 481a8000.serial (GPIO UNCLAIMED) function uart4-pins group uart4-pins
+pin 91 (PIN91): 481a8000.serial (GPIO UNCLAIMED) function uart4-pins group uart4-pins
+pin 92 (PIN92): 44e09000.serial (GPIO UNCLAIMED) function uart0-pins group uart0-pins
+pin 93 (PIN93): 44e09000.serial (GPIO UNCLAIMED) function uart0-pins group uart0-pins
+pin 94 (PIN94): 4819c000.i2c (GPIO UNCLAIMED) function i2c2-pins group i2c2-pins
+pin 95 (PIN95): 4819c000.i2c (GPIO UNCLAIMED) function i2c2-pins group i2c2-pins
+pin 96 (PIN96): 48022000.serial (GPIO UNCLAIMED) function uart1-pins group uart1-pins
+pin 97 (PIN97): 48022000.serial (GPIO UNCLAIMED) function uart1-pins group uart1-pins
+pin 98 (PIN98): 44e0b000.i2c (GPIO UNCLAIMED) function i2c0-pins group i2c0-pins
+pin 99 (PIN99): 44e0b000.i2c (GPIO UNCLAIMED) function i2c0-pins group i2c0-pins
+pin 100 (PIN100): 44e10800.pinmux (GPIO UNCLAIMED) function hashboard-gpio-pins group hashboard-gpio-pins
+pin 101 (PIN101): 48300200.pwm (GPIO UNCLAIMED) function ehrpwm0-pins group ehrpwm0-pins
+pin 102 (PIN102): 44e10800.pinmux (GPIO UNCLAIMED) function hashboard-gpio-pins group hashboard-gpio-pins
+pin 103 (PIN103): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 104 (PIN104): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 105 (PIN105): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 106 (PIN106): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 107 (PIN107): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 108 (PIN108): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 109 (PIN109): 44e10800.pinmux (GPIO UNCLAIMED) function hashboard-gpio-pins group hashboard-gpio-pins
+pin 110 (PIN110): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 111 (PIN111): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 112 (PIN112): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 113 (PIN113): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 114 (PIN114): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 115 (PIN115): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 116 (PIN116): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 117 (PIN117): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 118 (PIN118): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 119 (PIN119): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 120 (PIN120): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 121 (PIN121): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 122 (PIN122): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 123 (PIN123): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 124 (PIN124): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 125 (PIN125): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 126 (PIN126): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 127 (PIN127): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 128 (PIN128): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 129 (PIN129): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 130 (PIN130): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 131 (PIN131): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 132 (PIN132): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 133 (PIN133): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 134 (PIN134): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 135 (PIN135): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 136 (PIN136): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 137 (PIN137): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 138 (PIN138): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 139 (PIN139): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 140 (PIN140): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+pin 141 (PIN141): (MUX UNCLAIMED) (GPIO UNCLAIMED)
+/tmp # 

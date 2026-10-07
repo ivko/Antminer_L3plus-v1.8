@@ -127,13 +127,13 @@ TFTP сървърът на PC-то: `python E:\Antminer\repo\mainline\tools\tftp
 
 ## Връщане към оригиналния Bitmain фърмуер
 
-Оригиналните файлове са в `E:\Antminer\nand\recover-nand\` (извън repo-то): `uImage.bin`,
-`initramfs.bin.SD`, `am335x-boneblack-bitmainer.dtb`. Копирай ги в `mainline\out\` и:
+Оригиналните файлове са в `legacy/bitmain-recovery/`: `uImage.bin`, `initramfs.bin.SD`,
+`am335x-boneblack-bitmainer.dtb`. Копирай ги в `mainline\out\` и:
 ```sh
 sh flash-nand.sh <PC> uImage.bin am335x-boneblack-bitmainer.dtb initramfs.bin.SD
 ```
 mtd0-5 не са пипани никога, така че това е пълно връщане (без съдържанието на /config, ако
-е изтрит).
+е изтрит). Не ползвай `runme.sh` от същата папка: той пише и u-boot (виж `legacy/README.md`).
 
 ## Платки със SYSBOOT 0x17 (само SD)
 

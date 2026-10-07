@@ -1,0 +1,148 @@
+
+root@antminer-731c92:~# reboot
+starting pid 293, tty '': '/etc/init.d/rcK'
+root@antminer-731c92:~# Stopping Dropbear SSH server: stopped /usr/sbin/dropbear (pid 243)
+dropbear.
+Stopping OpenPLC runtime
+stopped process in pidfile '/var/run/openplc-webserver.pid' (pid 257)
+stopped process in pidfile '/var/run/antminer-ntpd.pid' (pid 238)
+Stopping syslogd/klogd: stopped syslogd (pid 249)
+stopped klogd (pid 252)
+done
+Unmounting remote filesystems...
+Deconfiguring network interfaces... [  128.327040] cpsw-switch 4a100000.switch eth0: Link is Down
+done.
+starting pid 332, tty '': '/sbin/swapoff -a'
+starting pid 333, tty '': '/bin/umount -a -r'
+umount: devtmpfs busy - remounted read-only
+The system is going down NOW!
+Sent SIGTERM to all processes
+Sent SIGKILL to all processes
+Requesting system reboot
+[  130.383652] reboot: Restarting system
+
+U-Boot SPL 2013.04-dirty (Aug 04 2014 - 11:06:44)
+Control_status {00420313}
+Could not probe the EEPROM; something fundamentally wrong on the I2C bus.
+Could not get board ID.
+default->A335BNLT.
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Peripheral mode controller at 47401000 using PIO, IRQ 0
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Host mode controller at 47401800 using PIO, IRQ 0
+CONFIG_SYS_NAND_U_BOOT_OFFS:80000
+CONFIG_SYS_NAND_PAGE_SIZE:800
+spl_image.size:5cd2c
+spl_image.load_addr:807fffc0
+image entry point: 0x80800000
+
+
+U-Boot 2013.04-dirty (Jan 04 2015 - 17:08:05)
+
+I2C:   ready
+DRAM:  256 MiB
+WARNING: Caches not enabled
+Could not probe the EEPROM; something fundamentally wrong on the I2C bus.
+Could not get board ID.
+NAND:  256 MiB
+MMC:   OMAP SD/MMC: 0, OMAP SD/MMC: 1
+*** Warning - bad CRC, using default environment
+
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Peripheral mode controller at 47401000 using PIO, IRQ 0
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Host mode controller at 47401800 using PIO, IRQ 0
+Net:   <ethaddr> not set. Validating first E-fuse MAC
+cpsw, usb_ether
+Press ESC to abort autoboot in 1 seconds
+U-Boot# <INTERRUPT>
+U-Boot# 
+U-Boot# 
+U-Boot# mmc dev 0
+mmc0 is current device
+U-Boot# mmc info
+mmc - MMC sub system
+
+Usage:
+mmc read addr blk# cnt
+mmc write addr blk# cnt
+mmc erase blk# cnt
+mmc rescan
+mmc part - lists available partition on current mmc device
+mmc dev [dev] [part] - show or set current mmc device [partition]
+mmc list - lists available devices
+mmc rstn - enable hardware reset of emmc
+U-Boot# mmc part
+## Unknown partition table
+U-Boot# fatls mmc 0:1
+** No partition table - mmc 0 **
+U-Boot# fatinfo mmc 0:1
+** No partition table - mmc 0 **
+U-Boot# mmc read 0x82000000 0 1
+
+MMC read: dev # 0, block # 0, count 1 ... 1 blocks read: OK
+U-Boot# md.b 0x820001b0 0x50
+820001b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................
+820001c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................
+820001d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................
+820001e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................
+820001f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................
+U-Boot# boot
+gpio: pin 53 (gpio 53) value is 1
+mmc0 is current device
+micro SD card found
+mmc0 is current device
+gpio: pin 54 (gpio 54) value is 1
+SD/MMC found on device 0
+Failed to mount ext2 filesystem...
+** Unrecognized filesystem type **
+gpio: pin 55 (gpio 55) value is 1
+** No partition table - mmc 0 **
+Booting from nand ...
+
+NAND read: device 0 offset 0x280000, size 0x500000
+ 5242880 bytes read: OK
+gpio: pin 54 (gpio 54) value is 1
+
+NAND read: device 0 offset 0x800000, size 0x1400000
+ 20971520 bytes read: OK
+gpio: pin 55 (gpio 55) value is 1
+
+NAND read: device 0 offset 0x260000, size 0x20000
+ 131072 bytes read: OK
+gpio: pin 56 (gpio 56) value is 1
+## Booting kernel from Legacy Image at 80200000 ...
+   Image Name:   Linux-6.12.112
+   Image Type:   ARM Linux Kernel Image (uncompressed)
+   Data Size:    2587968 Bytes = 2.5 MiB
+   Load Address: 80008000
+   Entry Point:  80008000
+   Verifying Checksum ... OK
+## Loading init Ramdisk from Legacy Image at 81000000 ...
+   Image Name:   antminer-image-antminer-bbb.root
+   Image Type:   ARM Linux RAMDisk Image (uncompressed)
+   Data Size:    5620766 Bytes = 5.4 MiB
+   Load Address: 00000000
+   Entry Point:  00000000
+   Verifying Checksum ... OK
+## Flattened Device Tree blob at 80f80000
+   Booting using the fdt blob at 0x80f80000
+   Loading Kernel Image ... OK
+OK
+   Loading Ramdisk to 8ecdb000, end 8f23741e ... OK
+   Using Device Tree in place at 80f80000, end 80f940b9
+
+Starting kernel ...
+

@@ -2,21 +2,13 @@
 
 Първоначалната работа беше върху оригиналната Bitmain система (Linux 3.8.13, Ångström
 2013.06, login `root` / `admin`): repack на initramfs, стари DTS, libmodbus, OpenPLC върху
-стария кернел. Файловете от този етап са в корена на repo-то:
-
-| път | какво |
-|---|---|
-| `dts/` | DTS/DTSI за 3.8 (част от тях вероятно редактирани при експерименти, не са чист Bitmain) |
-| `images/` | initramfs образи на старата система (original, fixed, nano-mc-opkg) |
-| `scripts/` | repack на initramfs, build на libmodbus, OpenPLC и GPIO инсталатори за Ångström |
-| `packages/` | libmodbus 3.1.10 за armv7ahf-vfp-neon |
-| `diff/` | дъмпове от старата система (dmesg, pinmux) |
-
-Текущият проект (`mainline/`) не ги ползва. Оригиналният Bitmain DTB е декомпилиран в
-`mainline/dts/bitmain/`; оригиналните NAND образи (за връщане към фабричния фърмуер) са извън
-repo-то, в `E:\Antminer\nand\recover-nand\`.
+стария кернел. Файловете от този етап са в `legacy/` (описани в `legacy/README.md`), заедно с
+фабричния фърмуер за връщане (`legacy/bitmain-recovery/`).
 
 `context-2026-08.md` в тази директория е бележка от август 2026, преди mainline порта.
+`device-dump/` съдържа логовете от тестовете на mainline порта (netboot, NAND boot, U-Boot
+сесии, дъмп на оригиналния NAND DTB); дневниците в `mainline/README.md` и
+`mainline/yocto/README.md` ги цитират като `device-dump/...`.
 
 ## Предишният README на repo-то
 

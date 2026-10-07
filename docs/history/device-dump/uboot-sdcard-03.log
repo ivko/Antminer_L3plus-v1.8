@@ -1,0 +1,144 @@
+
+Antminer I/O Module 0.1 antminer-731c92 /dev/ttyS0
+
+antminer-731c92 login: ro
+7[r[999;999H[6n?root@antminer-731c92:~# reboot
+starting pid 268, tty '': '/etc/init.d/rcK'
+root@antminer-731c92:~# Stopping Dropbear SSH server: stopped /usr/sbin/dropbear (pid 243)
+dropbear.
+Stopping OpenPLC runtime
+stopped process in pidfile '/var/run/openplc-webserver.pid' (pid 257)
+stopped process in pidfile '/var/run/antminer-ntpd.pid' (pid 238)
+Stopping syslogd/klogd: stopped syslogd (pid 249)
+stopped klogd (pid 252)
+done
+Unmounting remote filesystems...
+Deconfiguring network interfaces... [   27.837607] cpsw-switch 4a100000.switch eth0: Link is Down
+done.
+starting pid 307, tty '': '/sbin/swapoff -a'
+starting pid 308, tty '': '/bin/umount -a -r'
+umount: devtmpfs busy - remounted read-only
+The system is going down NOW!
+Sent SIGTERM to all processes
+Sent SIGKILL to all processes
+Requesting system reboot
+[   29.886474] reboot: Restarting system
+
+U-Boot SPL 2013.04-dirty (Aug 04 2014 - 11:06:44)
+Control_status {00420313}
+Could not probe the EEPROM; something fundamentally wrong on the I2C bus.
+Could not get board ID.
+default->A335BNLT.
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Peripheral mode controller at 47401000 using PIO, IRQ 0
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Host mode controller at 47401800 using PIO, IRQ 0
+CONFIG_SYS_NAND_U_BOOT_OFFS:80000
+CONFIG_SYS_NAND_PAGE_SIZE:800
+spl_image.size:5cd2c
+spl_image.load_addr:807fffc0
+image entry point: 0x80800000
+
+
+U-Boot 2013.04-dirty (Jan 04 2015 - 17:08:05)
+
+I2C:   ready
+DRAM:  256 MiB
+WARNING: Caches not enabled
+Could not probe the EEPROM; something fundamentally wrong on the I2C bus.
+Could not get board ID.
+NAND:  256 MiB
+MMC:   OMAP SD/MMC: 0, OMAP SD/MMC: 1
+*** Warning - bad CRC, using default environment
+
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Peripheral mode controller at 47401000 using PIO, IRQ 0
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Host mode controller at 47401800 using PIO, IRQ 0
+Net:   <ethaddr> not set. Validating first E-fuse MAC
+cpsw, usb_ether
+Press ESC to abort autoboot in 1 seconds
+U-Boot# <INTERRUPT>
+U-Boot# 
+U-Boot# 
+U-Boot# mmc dev 0
+mmc0 is current device
+U-Boot# mmc rescan
+U-Boot# mmcinfo
+Device: OMAP SD/MMC
+Manufacturer ID: 58
+OEM: 4444
+Name: DDINC 
+Tran Speed: 50000000
+Rd Block Len: 512
+SD version 3.0
+High Capacity: Yes
+Capacity: 14.9 GiB
+Bus Width: 4-bit
+U-Boot# mw.b 0x82000000 0xaa 0x400
+U-Boot# mmc read 0x82000000 0 1
+
+MMC read: dev # 0, block # 0, count 1 ... 1 blocks read: OK
+U-Boot# md.b 0x82000000 0x30
+82000000: aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa    ................
+82000010: aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa    ................
+82000020: aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa    ................
+U-Boot# md.b 0x820001f0 0x10
+820001f0: aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa    ................
+U-Boot# mw.b 0x83000000 0x55 0x400
+U-Boot# mmc read 0x83000000 0x800 1
+
+MMC read: dev # 0, block # 2048, count 1 ... 1 blocks read: OK
+U-Boot# md.b 0x83000000 0x30
+83000000: 22 22 22 22 22 22 22 22 22 22 22 22 22 22 22 22    """"""""""""""""
+83000010: 22 22 22 22 22 22 22 22 22 22 22 22 22 22 22 22    """"""""""""""""
+83000020: 22 22 22 22 22 22 22 22 22 22 22 22 22 22 22 22    """"""""""""""""
+U-Boot# mmc dev 1
+mmc_send_cmd : timeout: No status update
+Card did not respond to voltage select!
+mmc1(part 0) is current device
+U-Boot# mmc rescan
+mmc_send_cmd : timeout: No status update
+Card did not respond to voltage select!
+U-Boot# mmcinfo
+mmc_send_cmd : timeout: No status update
+Card did not respond to voltage select!
+Device: OMAP SD/MMC
+Manufacturer ID: 0
+OEM: 0
+Name: Tran Speed: 0
+Rd Block Len: 0
+MMC version 0.0
+High Capacity: No
+Capacity: 0 Bytes
+Bus Width: 1-bit
+U-Boot# boot
+gpio: pin 53 (gpio 53) value is 1
+mmc0 is current device
+micro SD card found
+mmc0 is current device
+gpio: pin 54 (gpio 54) value is 1
+SD/MMC found on device 0
+Failed to mount ext2 filesystem...
+** Unrecognized filesystem type **
+gpio: pin 55 (gpio 55) value is 1
+** No partition table - mmc 0 **
+Booting from nand ...
+
+NAND read: device 0 offset 0x280000, size 0x500000
+ 5242880 bytes read: OK
+gpio: pin 54 (gpio 54) value is 1
+
+NAND read: device 0 offset 0x800000, size 0x1400000

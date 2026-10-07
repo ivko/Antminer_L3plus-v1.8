@@ -1,0 +1,235 @@
+ls -laR /config/.old_config /config/dts; echo ====; cat /config
+/dts/am3352-antminer-next.dts; echo ====; md5sum /config/dts/*.dtb /config/*.dtb
+ 2>/dev/null; echo ====; cat /www/pages/cgi-bin/get_system_info.cgi
+/config/.old_config:
+drwxr-xr-x    2 root     root             0 Jan  1 14:56 .
+drwxr-xr-x    5 root     root             0 Jan  1  1970 ..
+-r--------    1 root     root           435 Jan  1 14:56 cgminer.conf
+-rw-r--r--    1 root     root            11 Jan  1 14:56 dropbear
+-rw-------    1 root     root           427 Jan  1 14:56 dropbear_rsa_host_key
+-rwxr-xr-x    1 root     root            61 Jan  1 14:56 lighttpd-htdigest.user
+-r--------    1 root     root            28 Jan  1 14:56 network.conf
+-r--------    1 root     root           634 Jan  1 14:56 shadow
+
+/config/dts:
+drwxr-xr-x    2 root     root             0 Feb  5  2025 .
+drwxr-xr-x    5 root     root             0 Jan  1  1970 ..
+-rw-r--r--    1 root     root         21409 Feb  5  2025 am3352-antminer-next.dtb
+-rw-r--r--    1 root     root           419 Feb  5  2025 am3352-antminer-next.dts
+-rw-r--r--    1 root     root          3865 Mar  5  2024 am335x-bone-btm.dtsi
+-rw-r--r--    1 root     root         11670 Feb  5  2025 am335x-bone-common.dtsi
+-rw-r--r--    1 root     root          1354 Mar  5  2024 am335x-boneblac_emmc.dts
+-rw-r--r--    1 root     root         23360 Feb  5  2025 am335x-boneblack-bitmainer.dts
+-rw-r--r--    1 root     root          5168 Feb  5  2025 am335x-boneblack.dtsi
+-rw-r--r--    1 root     root         15323 Feb  5  2025 am33xx.dtsi
+-rw-r--r--    1 root     root           297 Feb  2  2025 skeleton.dtsi
+-rw-r--r--    1 root     root          1034 Feb  2  2025 tps65217.dtsi
+====
+
+
+/dts-v1/;
+
+/include/ "am335x-boneblack.dtsi"
+
+&am33xx_pinmux {
+	uart1_pins: pinmux_uart1_pins {
+		pinctrl-single,pins = <
+			0x184 0x20 /* P9.24 uart1_txd.uart1_txd  OUTPUT  */
+			0x180 0x20 /* P9.26 uart1_rxd.uart1_rxd  INPUT  */
+		>;
+	};
+};
+
+/* Disable internal epprom */
+&i2c0 {
+	status = "disabled";
+};
+
+&uart2 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart1_pins>;
+};====
+0dafc1a29047d2159b124ae4d5636c4e  /config/dts/am3352-antminer-next.dtb
+====
+#!/bin/sh
+
+echo {
+
+# Read network configuration
+ant_minertype=AntMiner-S4
+ant_nettype=
+ant_netdevice=
+ant_macaddr=
+ant_hostname=
+ant_ipaddress=
+ant_netmask=
+ant_gateway=
+ant_dnsservers=
+
+ant_minertype=`sed -n 2p /usr/bin/compile_time`
+ant_system_filesystem_version=`sed -n 1p /usr/bin/compile_time`
+
+if [ -s /config/network.conf ] ; then
+	ant_nettype=`cat /config/network.conf | grep dhcp`
+	if [ -z ant_nettype ]; then
+		ant_nettype="dhcp=false"
+	fi
+	ant_nettype=${ant_nettype/dhcp=/}
+	if [ "${ant_nettype}" == "true" ]; then
+		ant_nettype=DHCP
+	else
+		ant_nettype=Static
+	fi
+	
+	ant_host_name=`cat /config/network.conf | grep hostname`
+	ant_host_name=${ant_host_name/hostname=/}
+	ant_ipaddress=`cat /config/network.conf | grep ipaddress`
+	ant_ipaddress=${ant_ipaddress/ipaddress=/}
+	ant_netmask=`cat /config/network.conf | grep netmask`
+	ant_netmask=${ant_netmask/netmask=/}
+	ant_gateway=`cat /config/network.conf | grep gateway`
+	ant_gateway=${ant_gateway/gateway=/}
+	ant_dnsservers=`cat /config/network.conf | grep dnsservers`
+	ant_dnsservers=${ant_dnsservers/dnsservers=/}
+	ant_dnsservers=${ant_dnsservers//\"/}
+fi
+
+ant_tmp=`ifconfig | grep eth`
+i=0
+for ant_var in ${ant_tmp}
+do
+	case ${i} in
+		0 )
+		ant_netdevice=${ant_var}
+		;;
+		4 )
+		ant_macaddr=${ant_var}
+		;;
+	esac
+	i=`expr $i + 1`
+done
+
+ant_tmp=`ifconfig | grep "inet addr"`
+i=0
+for ant_var in ${ant_tmp}
+do
+	case ${i} in
+		1 )
+		ant_ipaddress=${ant_var}
+		ant_ipaddress=${ant_ipaddress/addr:/}
+		;;
+		3 )
+		ant_netmask=${ant_var}
+		ant_netmask=${ant_netmask/Mask:/}
+		;;
+	esac
+	i=`expr $i + 1`
+done
+
+echo \"minertype\":\"${ant_minertype}\",
+echo \"nettype\":\"${ant_nettype}\",
+echo \"netdevice\":\"${ant_netdevice}\",
+echo \"macaddr\":\"${ant_macaddr}\",
+echo \"hostname\":\"${ant_host_name}\",
+echo \"ipaddress\":\"${ant_ipaddress}\",
+echo \"netmask\":\"${ant_netmask}\",
+echo \"gateway\":\"${ant_gateway}\",
+echo \"dnsservers\":\"${ant_dnsservers}\",
+
+#Read system uptime status
+ant_curtime=
+ant_uptime=
+ant_loadaverage=
+
+ant_tmp=`uptime`
+ant_tmp=${ant_tmp/,/ }
+i=0
+for ant_var in ${ant_tmp}
+do
+	case ${i} in
+		0 )
+		ant_curtime=${ant_var}
+		;;
+		2 )
+		ant_uptime=${ant_var}
+		;;
+	esac
+	i=`expr $i + 1`
+done
+
+ant_loadaverage=${ant_tmp#*average:}
+ant_loadaverage=${ant_loadaverage# }
+ant_loadaverage=${ant_loadaverage% }
+
+echo \"curtime\":\"${ant_curtime}\",
+echo \"uptime\":\"${ant_uptime}\",
+echo \"loadaverage\":\"${ant_loadaverage}\",
+
+#Read system memory
+ant_mem_total=
+ant_mem_used=
+ant_mem_free=
+ant_mem_buffers=
+ant_mem_cached=
+
+ant_tmp=`free | grep Mem:`
+ant_tmp=${ant_tmp/Mem:/}
+i=0
+for ant_var in ${ant_tmp}
+do
+	case ${i} in
+		0 )
+		ant_mem_total=${ant_var}
+		;;
+		1 )
+		ant_mem_used=${ant_var}
+		;;
+		2 )
+		ant_mem_free=${ant_var}
+		;;
+		3)
+		ant_mem_cached=${ant_var}
+		;;
+		4 )
+		ant_mem_buffers=${ant_var}
+		;;
+	esac
+	i=`expr $i + 1`
+done;
+
+echo \"mem_total\":\"${ant_mem_total}\",
+echo \"mem_used\":\"${ant_mem_used}\",
+echo \"mem_free\":\"${ant_mem_free}\",
+echo \"mem_buffers\":\"${ant_mem_buffers}\",
+echo \"mem_cached\":\"${ant_mem_cached}\",
+
+ant_cgminer_version=`cgminer-api -o version`
+if [ "${ant_cgminer_version}" == "Socket connect failed: Connection refused" ]; then
+	ant_cgminer_version=
+else
+	ant_cgminer_version=${ant_cgminer_version#*CGMiner=}
+	ant_cgminer_version=${ant_cgminer_version%%,API=*}
+fi
+
+ant_hwv=x.x.x.x
+ant_hwv=`cgminer-api -o stats`
+if [ "${ant_hwv}" != "Socket connect failed: Connection refused" ]; then
+	ant_hwv=${ant_hwv#*,Miner=}
+	ant_hwv=${ant_hwv%%,CompileTime=*}
+	
+fi
+
+ant_system_mode=`uname -o`
+ant_system_kernel_version=`uname -srv`
+#ant_system_filesystem_version=`cat /usr/bin/compile_time`
+ant_minertype=`sed -n 2p /usr/bin/compile_time`
+ant_system_filesystem_version=`sed -n 1p /usr/bin/compile_time`
+
+echo \"system_mode\":\"${ant_system_mode}\",
+echo \"ant_hwv\":\"${ant_hwv}\",
+echo \"system_kernel_version\":\"${ant_system_kernel_version}\",
+echo \"system_filesystem_version\":\"${ant_system_filesystem_version}\", 
+echo \"cgminer_version\":\"${ant_cgminer_version}\"
+
+echo }

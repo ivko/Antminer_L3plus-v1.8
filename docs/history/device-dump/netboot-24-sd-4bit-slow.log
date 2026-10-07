@@ -1,0 +1,821 @@
+[netboot] something already listens on UDP 69, using it
+
+root@antminer-731c92:~# 
+[netboot] rebooting Linux and waiting for U-Boot...
+reboot
+starting pid 329, tty '': '/etc/init.d/rcK'
+root@antminer-731c92:~# Stopping Dropbear SSH server: stopped /usr/sbin/dropbear (pid 270)
+dropbear.
+Stopping OpenPLC runtime
+stopped process in pidfile '/var/run/openplc-webserver.pid' (pid 284)
+stopped process in pidfile '/var/run/antminer-ntpd.pid' (pid 265)
+Stopping syslogd/klogd: stopped syslogd (pid 276)
+stopped klogd (pid 279)
+done
+Unmounting remote filesystems...
+Deconfiguring network interfaces... [  128.631834] cpsw-switch 4a100000.switch eth0: Link is Down
+done.
+starting pid 368, tty '': '/sbin/swapoff -a'
+starting pid 369, tty '': '/bin/umount -a -r'
+umount: devtmpfs busy - remounted read-only
+The system is going down NOW!
+Sent SIGTERM to all processes
+Sent SIGKILL to all processes
+Requesting system reboot
+[  130.900733] reboot: Restarting system
+
+U-Boot SPL 2013.04-dirty (Aug 04 2014 - 11:06:44)
+Control_status {00420313}
+Could not probe the EEPROM; something fundamentally wrong on the I2C bus.
+Could not get board ID.
+default->A335BNLT.
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Peripheral mode controller at 47401000 using PIO, IRQ 0
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Host mode controller at 47401800 using PIO, IRQ 0
+CONFIG_SYS_NAND_U_BOOT_OFFS:80000
+CONFIG_SYS_NAND_PAGE_SIZE:800
+spl_image.size:5cd2c
+spl_image.load_addr:807fffc0
+image entry point: 0x80800000
+
+
+U-Boot 2013.04-dirty (Jan 04 2015 - 17:08:05)
+
+I2C:   ready
+DRAM:  256 MiB
+WARNING: Caches not enabled
+Could not probe the EEPROM; something fundamentally wrong on the I2C bus.
+Could not get board ID.
+NAND:  256 MiB
+MMC:   OMAP SD/MMC: 0, OMAP SD/MMC: 1
+*** Warning - bad CRC, using default environment
+
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Peripheral mode controller at 47401000 using PIO, IRQ 0
+musb-hdrc: ConfigData=0xde (UTMI-8, dyn FIFOs, HB-ISO Rx, HB-ISO Tx, SoftConn)
+musb-hdrc: MHDRC RTL version 2.0 
+musb-hdrc: setup fifo_mode 4
+musb-hdrc: 28/31 max ep, 16384/16384 memory
+USB Host mode controller at 47401800 using PIO, IRQ 0
+Net:   <ethaddr> not set. Validating first E-fuse MAC
+cpsw, usb_ether
+Press ESC to abort autoboot in 1 seconds
+U-Boot# 
+[netboot] at U-Boot prompt
+<INTERRUPT>
+U-Boot# 
+U-Boot# 
+U-Boot# setenv autoload no
+U-Boot# setenv serverip 192.168.200.104
+U-Boot# dhcp
+cpsw Waiting for PHY auto negotiation to complete.. done
+link up on port 0, speed 100, full duplex
+BOOTP broadcast 1
+DHCP client bound to address 192.168.200.105
+U-Boot# printenv ipaddr serverip ethaddr
+ipaddr=192.168.200.105
+serverip=192.168.200.104
+ethaddr=c4:f3:12:73:1c:92
+U-Boot# md.l 0x50000060 6
+50000060: 00000800 001e1e00 001e1e00 16051807    ................
+50000070: 00151e1e 16000f80                      ........
+U-Boot# tftp 0x82000000 uImage-mmc-test.bin
+link up on port 0, speed 100, full duplex
+Using cpsw device
+TFTP from server 192.168.200.104; our IP address is 192.168.200.105
+Filename 'uImage-mmc-test.bin'.
+Load address: 0x82000000
+Loading: *#################################################################
+	 #################################################################
+	 #####################################################
+	 1 MiB/s
+done
+Bytes transferred = 2681328 (28e9f0 hex)
+U-Boot# tftp 0x88000000 am335x-antminer-mmc4bit-slow.dtb
+link up on port 0, speed 100, full duplex
+Using cpsw device
+TFTP from server 192.168.200.104; our IP address is 192.168.200.105
+Filename 'am335x-antminer-mmc4bit-slow.dtb'.
+Load address: 0x88000000
+Loading: *#####
+	 765.6 KiB/s
+done
+Bytes transferred = 69848 (110d8 hex)
+U-Boot# tftp 0x88100000 antminer-image.cpio.gz.u-boot
+link up on port 0, speed 100, full duplex
+Using cpsw device
+TFTP from server 192.168.200.104; our IP address is 192.168.200.105
+Filename 'antminer-image.cpio.gz.u-boot'.
+Load address: 0x88100000
+Loading: *#################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 ##########################################################
+	 1.1 MiB/s
+done
+Bytes transferred = 5620830 (55c45e hex)
+U-Boot# iminfo 0x82000000
+
+## Checking Image at 82000000 ...
+   Legacy image found
+   Image Name:   Linux-6.12.112
+   Image Type:   ARM Linux Kernel Image (uncompressed)
+   Data Size:    2681264 Bytes = 2.6 MiB
+   Load Address: 80008000
+   Entry Point:  80008000
+   Verifying Checksum ... OK
+U-Boot# setenv bootargs console=ttyS0,115200n8
+U-Boot# 
+[netboot] bootm sent, capturing kernel log for 40s...
+bootm 0x82000000 0x88100000 0x88000000
+## Booting kernel from Legacy Image at 82000000 ...
+   Image Name:   Linux-6.12.112
+   Image Type:   ARM Linux Kernel Image (uncompressed)
+   Data Size:    2681264 Bytes = 2.6 MiB
+   Load Address: 80008000
+   Entry Point:  80008000
+   Verifying Checksum ... OK
+## Loading init Ramdisk from Legacy Image at 88100000 ...
+   Image Name:   antminer-image-antminer-bbb.root
+   Image Type:   ARM Linux RAMDisk Image (uncompressed)
+   Data Size:    5620766 Bytes = 5.4 MiB
+   Load Address: 00000000
+   Entry Point:  00000000
+   Verifying Checksum ... OK
+## Flattened Device Tree blob at 88000000
+   Booting using the fdt blob at 0x88000000
+   Loading Kernel Image ... OK
+OK
+   Loading Ramdisk to 8ecdb000, end 8f23741e ... OK
+   Using Device Tree in place at 88000000, end 880140d7
+
+Starting kernel ...
+
+[    0.000000] Booting Linux on physical CPU 0x0
+[    0.000000] Linux version 6.12.112 (oe-user@oe-host) (arm-poky-linux-gnueabi-gcc (GCC) 13.5.0, GNU ld (GNU Binutils) 2.42.0.20240723) #1 Sat Oct  3 10:36:00 UTC 2026
+[    0.000000] CPU: ARMv7 Processor [413fc082] revision 2 (ARMv7), cr=50c5387d
+[    0.000000] CPU: PIPT / VIPT nonaliasing data cache, VIPT aliasing instruction cache
+[    0.000000] OF: fdt: Machine model: Bitmain Antminer BB-Black V1.8 (AM3352), profile breakout
+[    0.000000] Memory policy: Data cache writeback
+[    0.000000] cma: Reserved 16 MiB at 0x8d800000 on node -1
+[    0.000000] Zone ranges:
+[    0.000000]   Normal   [mem 0x0000000080000000-0x000000008fefffff]
+[    0.000000]   HighMem  empty
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000080000000-0x000000008fefffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000080000000-0x000000008fefffff]
+[    0.000000] OF: reserved mem: Reserved memory: No reserved-memory node in the DT
+[    0.000000] CPU: All CPU(s) started in SVC mode.
+[    0.000000] AM335X ES2.1 (neon)
+[    0.000000] Kernel command line: console=ttyS0,115200n8
+[    0.000000] Dentry cache hash table entries: 32768 (order: 5, 131072 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 16384 (order: 4, 65536 bytes, linear)
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 65280
+[    0.000000] mem auto-init: stack:all(zero), heap alloc:off, heap free:off
+[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=1, Nodes=1
+[    0.000000] NR_IRQS: 16, nr_irqs: 16, preallocated irqs: 16
+[    0.000000] IRQ: Found an INTC at 0x(ptrval) (revision 5.0) with 128 interrupts
+[    0.000000] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.000000] TI gptimer clocksource: always-on /ocp/interconnect@44c00000/segment@200000/target-module@31000
+[    0.000002] sched_clock: 32 bits at 24MHz, resolution 41ns, wraps every 89478484971ns
+[    0.000035] clocksource: dmtimer: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 79635851949 ns
+[    0.000653] TI gptimer clockevent: 24000000 Hz at /ocp/interconnect@48000000/segment@0/target-module@40000
+[    0.002741] Calibrating delay loop... 548.86 BogoMIPS (lpj=2744320)
+[    0.050787] CPU: Testing write buffer coherency: ok
+[    0.050883] CPU0: Spectre v2: using BPIALL workaround
+[    0.050900] pid_max: default: 32768 minimum: 301
+[    0.051116] Mount-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.051146] Mountpoint-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.053629] Setting up static identity map for 0x80100000 - 0x80100054
+[    0.054041] Memory: 228260K/261120K available (4096K kernel code, 373K rwdata, 1636K rodata, 1024K init, 179K bss, 15844K reserved, 16384K cma-reserved, 0K highmem)
+[    0.054664] devtmpfs: initialized
+[    0.082867] VFP support v0.3: implementor 41 architecture 3 part 30 variant c rev 3
+[    0.083302] futex hash table entries: 256 (order: 0, 3072 bytes, linear)
+[    0.084770] pinctrl core: initialized pinctrl subsystem
+[    0.087360] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.090593] DMA: preallocated 256 KiB pool for atomic coherent allocations
+[    0.092552] thermal_sys: Registered thermal governor 'fair_share'
+[    0.092570] thermal_sys: Registered thermal governor 'step_wise'
+[    0.092582] thermal_sys: Registered thermal governor 'user_space'
+[    0.092629] cpuidle: using governor menu
+[    0.136958] pps_core: LinuxPPS API ver. 1 registered
+[    0.136984] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.137025] PTP clock support registered
+[    0.141351] clocksource: Switched to clocksource dmtimer
+[    0.144366] NET: Registered PF_INET protocol family
+[    0.144710] IP idents hash table entries: 4096 (order: 3, 32768 bytes, linear)
+[    0.146087] tcp_listen_portaddr_hash hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.146139] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.146180] TCP established hash table entries: 2048 (order: 1, 8192 bytes, linear)
+[    0.146229] TCP bind hash table entries: 2048 (order: 2, 16384 bytes, linear)
+[    0.146290] TCP: Hash tables configured (established 2048 bind 2048)
+[    0.146422] UDP hash table entries: 256 (order: 0, 4096 bytes, linear)
+[    0.146461] UDP-Lite hash table entries: 256 (order: 0, 4096 bytes, linear)
+[    0.146682] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.148311] Unpacking initramfs...
+[    0.162252] workingset: timestamp_bits=30 max_order=16 bucket_order=0
+[    0.162649] jffs2: version 2.2. (NAND) (SUMMARY)  ?? 2001-2006 Red Hat, Inc.
+[    0.163164] Key type asymmetric registered
+[    0.163186] Asymmetric key parser 'x509' registered
+[    0.163268] io scheduler mq-deadline registered
+[    0.163283] io scheduler kyber registered
+[    0.163338] io scheduler bfq registered
+[    0.165398] target-module@4b000000:target-module@140000:pmu@0:fck: device ID is greater than 24
+[    0.166924] ledtrig-cpu: registered to indicate activity on CPUs
+[    0.172564] Serial: 8250/16550 driver, 8 ports, IRQ sharing enabled
+[    0.197385] i2c_dev: i2c /dev entries driver
+[    0.198730] cpuidle: enable-method property 'ti,am3352' found operations
+[    0.199296] sdhci: Secure Digital Host Controller Interface driver
+[    0.199308] sdhci: Copyright(c) Pierre Ossman
+[    0.199318] sdhci-pltfm: SDHCI platform and OF driver helper
+[    0.200987] Initializing XFRM netlink socket
+[    0.201052] NET: Registered PF_PACKET protocol family
+[    0.201080] NET: Registered PF_KEY protocol family
+[    0.201196] Key type dns_resolver registered
+[    0.201282] ThumbEE CPU extension supported.
+[    0.201303] Registering SWP/SWPB emulation handler
+[    0.202043] omap_voltage_late_init: Voltage driver support not added
+[    0.327160] /ocp/interconnect@44c00000/segment@200000/target-module@10000/scm@0/pinmux@800: Fixed dependency cycle(s) with /ocp/interconnect@44c00000/segment@200000/target-module@10000/scm@0/pinmux@800/unused-pads-pins
+[    0.327250] /ocp/interconnect@44c00000/segment@200000/target-module@10000/scm@0/pinmux@800: Fixed dependency cycle(s) with /ocp/interconnect@44c00000/segment@200000/target-module@10000/scm@0/pinmux@800/board-gpio-pins
+[    0.328178] pinctrl-single 44e10800.pinmux: 142 pins, size 568
+[    0.357296] omap_wdt: OMAP Watchdog Timer Rev 0x01: initial timeout 60 sec
+[    0.360017] omap_rtc 44e3e000.rtc: already running
+[    0.373192] omap_rtc 44e3e000.rtc: registered as rtc0
+[    0.373281] omap_rtc 44e3e000.rtc: setting system clock to 2026-10-06T13:26:54 UTC (1791293214)
+[    0.382665] 48022000.serial: ttyS1 at MMIO 0x48022000 (irq = 21, base_baud = 3000000) is a 8250
+[    0.394529] 48024000.serial: ttyS2 at MMIO 0x48024000 (irq = 22, base_baud = 3000000) is a 8250
+[    0.432849] OMAP GPIO hardware version 0.1
+[    0.483502] pcf857x 2-0020: probe with driver pcf857x failed with error -121
+[    0.484145] lm75 2-0048: supply vs not found, using dummy regulator
+[    0.492433] lm75 2-0048: probe with driver lm75 failed with error -121
+[    0.492525] omap_i2c 4819c000.i2c: bus 2 rev0.11 at 100 kHz
+[    0.500007] 481aa000.serial: ttyS5 at MMIO 0x481aa000 (irq = 31, base_baud = 3000000) is a 8250
+[    0.520977] 48000000.interconnect:segment@200000:target-module@0:mpu@0:fck: device ID is greater than 24
+[    0.581700] davinci_mdio 4a101000.mdio: davinci mdio revision 1.6, bus freq 1000000
+[    1.162318] Freeing initrd memory: 5492K
+[    1.209522] davinci_mdio 4a101000.mdio: phy[0]: device 4a101000.mdio:00, driver SMSC LAN8710/LAN8720
+[    1.210210] cpsw-switch 4a100000.switch: initialized cpsw ale version 1.4
+[    1.210238] cpsw-switch 4a100000.switch: ALE Table size 1024, Policers 0
+[    1.210518] cpsw-switch 4a100000.switch: cpts: overflow check period 500 (jiffies)
+[    1.210546] cpsw-switch 4a100000.switch: CPTS: ref_clk_freq:250000000 calc_mult:2147483648 calc_shift:29 error:0 nsec/sec
+[    1.210626] cpsw-switch 4a100000.switch: Detected MACID = c4:f3:12:73:1c:92
+[    1.212541] cpsw-switch 4a100000.switch: initialized (regs 0x4a100000, pool size 256) hw_ver:0019010C 1.12 (0)
+[    1.224997] debugfs: Directory '49000000.dma' with parent 'dmaengine' already present!
+[    1.225039] edma 49000000.dma: TI EDMA DMA engine driver
+[    1.238324] omap-gpmc 50000000.gpmc: GPMC revision 6.0
+[    1.238362] gpmc_mem_init: disabling cs 0 mapped at 0x0-0x1000000
+[    1.243655] omap-sham 53100000.sham: hw accel on OMAP rev 4.3
+[    1.244106] omap-sham 53100000.sham: will run requests pump with realtime priority
+[    1.245951] omap-aes 53500000.aes: OMAP AES hw accel rev: 3.2
+[    1.246359] omap-aes 53500000.aes: will run requests pump with realtime priority
+[    1.246969] ti-sysc 44e31000.target-module: Failed to create device link (0x180) with ocp
+[    1.247001] ti-sysc 48040000.target-module: Failed to create device link (0x180) with ocp
+[    1.276801] 44e09000.serial: ttyS0 at MMIO 0x44e09000 (irq = 41, base_baud = 3000000) is a 8250
+[    1.276904] printk: legacy console [ttyS0] enabled
+[    2.122065] tps65217-pmic: Failed to locate of_node [id: -1]
+[    2.128093] tps65217-bl: Failed to locate of_node [id: -1]
+[    2.138874] tps65217 0-0024: TPS65217 ID 0xe version 1.2
+[    2.144497] omap_i2c 44e0b000.i2c: bus 0 rev0.11 at 400 kHz
+[    2.157533] omap_gpio 44e07000.gpio: Could not set line 6 debounce to 200000 microseconds (-22)
+[    2.166389] sdhci-omap 48060000.mmc: Got CD GPIO
+[    2.171516] sdhci-omap 48060000.mmc: supply pbias not found, using dummy regulator
+[    2.179783] nand: device found, Manufacturer ID: 0x2c, Chip ID: 0xda
+[    2.186242] nand: Micron MT29F2G08ABAEAWP
+[    2.190287] nand: 256 MiB, SLC, erase size: 128 KiB, page size: 2048, OOB size: 64
+[    2.198114] nand: using OMAP_ECC_BCH8_CODE_HW ECC scheme
+[    2.203742] 11 fixed-partitions partitions found on MTD device omap2-nand.0
+[    2.210761] Creating 11 MTD partitions on "omap2-nand.0":
+[    2.216239] 0x000000000000-0x000000020000 : "spl"
+[    2.221285] sdhci-omap 48060000.mmc: supply vqmmc not found, using dummy regulator
+[    2.261024] 0x000000020000-0x000000040000 : "spl_backup1"
+[    2.298014] 0x000000040000-0x000000060000 : "spl_backup2"
+[    2.307024] 0x000000060000-0x000000080000 : "spl_backup3"
+[    2.315606] 0x000000080000-0x000000240000 : "u-boot"
+[    2.324163] 0x000000240000-0x000000260000 : "bootenv"
+[    2.344406] 0x000000260000-0x000000280000 : "fdt"
+[    2.355626] 0x000000280000-0x000000780000 : "kernel"
+[    2.365903] 0x000000800000-0x000001c00000 : "root"
+[    2.376945] mmc0: SDHCI controller on 48060000.mmc [48060000.mmc] using External DMA
+[    2.393367] 0x000001c00000-0x000003000000 : "config"
+[    2.411813] 0x000003000000-0x000010000000 : "data"
+[    2.433632] mmc0: new high speed SDHC card at address 0007
+[    2.440347] mmcblk0: mmc0:0007 DDINC 14.9 GiB
+[    2.450783] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    2.459479] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    2.465962] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    2.472447] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    2.478931] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000033
+[    2.485414] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    2.491898] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    2.498381] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    2.504864] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000001
+[    2.511347] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    2.517830] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000001
+[    2.524313] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    2.530796] mmc0: sdhci: Cmd:       0x00000c1a | Max curr: 0x00000000
+[    2.537279] mmc0: sdhci: Resp[0]:   0x00000b00 | Resp[1]:  0x00000000
+[    2.543762] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    2.550244] mmc0: sdhci: Host ctl2: 0x00000000
+[    2.554717] mmc0: sdhci: ============================================
+[    2.574969] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    2.583660] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    2.590140] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    2.596624] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    2.603106] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000033
+[    2.609590] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    2.616072] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    2.622555] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    2.629037] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000001
+[    2.635518] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    2.642003] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000001
+[    2.648484] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    2.654966] mmc0: sdhci: Cmd:       0x00000c1a | Max curr: 0x00000000
+[    2.661450] mmc0: sdhci: Resp[0]:   0x00000b00 | Resp[1]:  0x00000000
+[    2.667933] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    2.674414] mmc0: sdhci: Host ctl2: 0x00000000
+[    2.678887] mmc0: sdhci: ============================================
+[    2.742534] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    2.751215] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    2.757696] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    2.764180] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    2.770663] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
+[    2.777144] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    2.783627] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    2.790109] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    2.796591] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    2.803072] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    2.809555] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    2.816036] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    2.822518] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    2.829001] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    2.835482] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    2.841963] mmc0: sdhci: Host ctl2: 0x00000000
+[    2.846436] mmc0: sdhci: ============================================
+[    2.853343] I/O error, dev mmcblk0, sector 0 op 0x0:(READ) flags 0x0 phys_seg 1 prio class 2
+[    2.865645] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    2.874318] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    2.880797] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    2.887280] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    2.893762] mmc0: sdhci: Argument:  0x00000001 | Trn mode: 0x00000013
+[    2.900245] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    2.906729] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    2.913211] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    2.919695] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    2.926177] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    2.932661] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    2.939143] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    2.945626] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    2.952108] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    2.958591] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    2.965072] mmc0: sdhci: Host ctl2: 0x00000000
+[    2.969546] mmc0: sdhci: ============================================
+[    2.976431] I/O error, dev mmcblk0, sector 1 op 0x0:(READ) flags 0x0 phys_seg 1 prio class 2
+[    2.988703] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    2.997376] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    3.003856] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    3.010339] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    3.016822] mmc0: sdhci: Argument:  0x00000002 | Trn mode: 0x00000013
+[    3.023305] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    3.029788] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    3.036269] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    3.042753] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    3.049236] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    3.055719] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    3.062201] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    3.068684] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    3.075167] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    3.081649] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    3.088130] mmc0: sdhci: Host ctl2: 0x00000000
+[    3.092602] mmc0: sdhci: ============================================
+[    3.099499] I/O error, dev mmcblk0, sector 2 op 0x0:(READ) flags 0x0 phys_seg 1 prio class 2
+[    3.111768] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    3.120441] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    3.126922] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    3.133405] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    3.139889] mmc0: sdhci: Argument:  0x00000003 | Trn mode: 0x00000013
+[    3.146371] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    3.152853] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    3.159334] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    3.165817] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    3.172299] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    3.178781] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    3.185263] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    3.191746] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    3.198228] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    3.204710] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    3.211191] mmc0: sdhci: Host ctl2: 0x00000000
+[    3.215664] mmc0: sdhci: ============================================
+[    3.222573] I/O error, dev mmcblk0, sector 3 op 0x0:(READ) flags 0x0 phys_seg 1 prio class 2
+[    3.234821] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    3.243492] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    3.249972] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    3.256456] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    3.262938] mmc0: sdhci: Argument:  0x00000004 | Trn mode: 0x00000013
+[    3.269421] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    3.275903] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    3.282383] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    3.288868] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    3.295350] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    3.301833] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    3.308316] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    3.314798] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    3.321280] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    3.327762] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    3.334243] mmc0: sdhci: Host ctl2: 0x00000000
+[    3.338716] mmc0: sdhci: ============================================
+[    3.345590] I/O error, dev mmcblk0, sector 4 op 0x0:(READ) flags 0x0 phys_seg 1 prio class 2
+[    3.357838] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    3.366509] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    3.372988] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    3.379471] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    3.385954] mmc0: sdhci: Argument:  0x00000005 | Trn mode: 0x00000013
+[    3.392436] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    3.398919] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    3.405400] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    3.411884] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    3.418365] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    3.424849] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    3.431331] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    3.437813] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    3.444295] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    3.450777] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    3.457260] mmc0: sdhci: Host ctl2: 0x00000000
+[    3.461733] mmc0: sdhci: ============================================
+[    3.468687] I/O error, dev mmcblk0, sector 5 op 0x0:(READ) flags 0x0 phys_seg 1 prio class 2
+[    3.480982] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    3.489686] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    3.496167] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    3.502651] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    3.509134] mmc0: sdhci: Argument:  0x00000006 | Trn mode: 0x00000013
+[    3.515616] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    3.522101] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    3.528582] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    3.535064] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    3.541547] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    3.548029] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    3.554511] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    3.560995] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    3.567478] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    3.573961] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    3.580442] mmc0: sdhci: Host ctl2: 0x00000000
+[    3.584916] mmc0: sdhci: ============================================
+[    3.593334] I/O error, dev mmcblk0, sector 6 op 0x0:(READ) flags 0x0 phys_seg 1 prio class 2
+[    3.603762] cpufreq: cpufreq_online: CPU0: Running at unlisted initial frequency: 550000 KHz, changing to: 600000 KHz
+[    3.616000] clk: Disabling unused clocks
+[    3.620155] PM: genpd: Disabling unused power domains
+[    3.625754] I/O error, dev mmcblk0, sector 7 op 0x0:(READ) flags 0x0 phys_seg 1 prio class 2
+[    3.634323] Buffer I/O error on dev mmcblk0, logical block 0, async page read
+[    3.644375] Freeing unused kernel image (initmem) memory: 1024K
+[    3.650857] Run /init as init process
+[    3.658896] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    3.667590] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    3.674061] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    3.680533] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    3.687004] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000033
+[    3.693475] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    3.699948] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    3.706418] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    3.712890] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000001
+[    3.719360] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    3.725832] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000001
+[    3.732304] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    3.738775] mmc0: sdhci: Cmd:       0x00000c1a | Max curr: 0x00000000
+[    3.745246] mmc0: sdhci: Resp[0]:   0x00000b00 | Resp[1]:  0x00000000
+[    3.751717] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    3.758189] mmc0: sdhci: Host ctl2: 0x00000000
+[    3.762653] mmc0: sdhci: ============================================
+[    3.773304] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    3.781998] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    3.788469] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    3.794940] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    3.801411] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000033
+[    3.807882] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    3.814353] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    3.820824] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    3.827294] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000001
+[    3.833765] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    3.840236] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000001
+[    3.846706] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    3.853178] mmc0: sdhci: Cmd:       0x00000c1a | Max curr: 0x00000000
+[    3.859649] mmc0: sdhci: Resp[0]:   0x00000b00 | Resp[1]:  0x00000000
+[    3.866119] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    3.872590] mmc0: sdhci: Host ctl2: 0x00000000
+[    3.877052] mmc0: sdhci: ============================================
+[    3.887469] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    3.896165] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    3.902635] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    3.909106] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    3.915578] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
+[    3.922048] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    3.928520] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    3.934990] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    3.941461] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    3.947932] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    3.954403] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    3.960875] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    3.967346] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    3.973816] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    3.980287] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    3.986757] mmc0: sdhci: Host ctl2: 0x00000000
+[    3.991221] mmc0: sdhci: ============================================
+[    3.998284] I/O error, dev mmcblk0, sector 0 op 0x0:(READ) flags 0x0 phys_seg 1 prio class 2
+[    4.010607] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    4.019299] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    4.025770] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    4.032241] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    4.038712] mmc0: sdhci: Argument:  0x00000001 | Trn mode: 0x00000013
+[    4.045183] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    4.051654] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    4.058125] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    4.064596] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    4.071066] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    4.077538] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    4.084008] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    4.090479] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    4.096950] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    4.103420] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    4.109891] mmc0: sdhci: Host ctl2: 0x00000000
+[    4.114355] mmc0: sdhci: ============================================
+[    4.121531] I/O error, dev mmcblk0, sector 1 op 0x0:(READ) flags 0x0 phys_seg 1 prio class 2
+[    4.133824] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    4.142520] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    4.148991] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    4.155463] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    4.161934] mmc0: sdhci: Argument:  0x00000002 | Trn mode: 0x00000013
+[    4.168405] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    4.174877] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    4.181347] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    4.187818] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    4.194290] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    4.200762] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    4.207232] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    4.213703] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    4.220174] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    4.226644] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    4.233114] mmc0: sdhci: Host ctl2: 0x00000000
+[    4.237578] mmc0: sdhci: ============================================
+[    4.248374] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    4.257072] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    4.263542] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    4.270013] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    4.276486] mmc0: sdhci: Argument:  0x00000003 | Trn mode: 0x00000013
+[    4.282956] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    4.289428] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    4.295898] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    4.302369] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    4.308840] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    4.315311] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    4.321782] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    4.328253] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    4.334724] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    4.341194] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    4.347665] mmc0: sdhci: Host ctl2: 0x00000000
+[    4.352128] mmc0: sdhci: ============================================
+[    4.362921] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    4.371618] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    4.378088] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    4.384559] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    4.391030] mmc0: sdhci: Argument:  0x00000004 | Trn mode: 0x00000013
+[    4.397501] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    4.403974] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    4.410444] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    4.416915] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    4.423386] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    4.429857] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    4.436329] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    4.442800] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    4.449271] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    4.455741] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    4.462212] mmc0: sdhci: Host ctl2: 0x00000000
+[    4.466677] mmc0: sdhci: ============================================
+[    4.474385] watchdog: watchdog0: watchdog did not stop!
+[    4.483585] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    4.492273] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    4.498743] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    4.505215] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    4.511687] mmc0: sdhci: Argument:  0x00000005 | Trn mode: 0x00000013
+[    4.518158] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    4.524629] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    4.531099] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    4.537570] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    4.544040] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    4.550512] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    4.556982] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    4.563453] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    4.569923] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    4.576394] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    4.582864] mmc0: sdhci: Host ctl2: 0x00000000
+[    4.587329] mmc0: sdhci: ============================================
+[    4.608957] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    4.617659] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    4.624129] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    4.630601] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    4.637072] mmc0: sdhci: Argument:  0x00000006 | Trn mode: 0x00000013
+[    4.643543] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    4.650014] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    4.656485] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    4.662956] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    4.669426] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    4.675897] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    4.682369] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    4.688840] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    4.695312] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    4.701783] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    4.708254] mmc0: sdhci: Host ctl2: 0x00000000
+[    4.712718] mmc0: sdhci: ============================================
+[    4.723520] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    4.732215] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    4.738686] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    4.745158] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    4.751629] mmc0: sdhci: Argument:  0x00000007 | Trn mode: 0x00000013
+[    4.758100] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    4.764571] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    4.771042] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    4.777513] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    4.783983] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    4.790455] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    4.796925] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    4.803396] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    4.809868] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    4.816339] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    4.822809] mmc0: sdhci: Host ctl2: 0x00000000
+[    4.827272] mmc0: sdhci: ============================================
+[    4.841734] Buffer I/O error on dev mmcblk0, logical block 0, async page read
+[    4.849021]  mmcblk0: unable to read partition table
+[    4.858503] ubi0: attaching mtd10
+[    5.442479] ubi0: scanning is finished
+[    5.458775] ubi0: attached mtd10 (name "data", size 208 MiB)
+[    5.464592] ubi0: PEB size: 131072 bytes (128 KiB), LEB size: 129024 bytes
+[    5.471537] ubi0: min./max. I/O unit sizes: 2048/2048, sub-page size 512
+[    5.478286] ubi0: VID header offset: 512 (aligned 512), data offset: 2048
+[    5.485138] ubi0: good PEBs: 1664, bad PEBs: 0, corrupted PEBs: 0
+[    5.491278] ubi0: user volume: 1, internal volumes: 1, max. volumes count: 128
+[    5.498587] ubi0: max/mean erase counter: 4/2, WL threshold: 4096, image sequence number: 1509894993
+[    5.507804] ubi0: available PEBs: 0, total reserved PEBs: 1664, PEBs reserved for bad PEB handling: 40
+[    5.517365] ubi0: background thread "ubi_bgt0d" started, PID 62
+[    5.539650] UBIFS (ubi0:0): Mounting in unauthenticated mode
+[    5.545694] UBIFS (ubi0:0): background thread "ubifs_bgt0_0" started, PID 65
+[    5.594009] UBIFS (ubi0:0): recovery needed
+[    5.736730] UBIFS (ubi0:0): recovery completed
+[    5.741373] UBIFS (ubi0:0): UBIFS: mounted UBI device 0, volume 0, name "data"
+[    5.748644] UBIFS (ubi0:0): LEB size: 129024 bytes (126 KiB), min./max. I/O unit sizes: 2048 bytes/2048 bytes
+[    5.758649] UBIFS (ubi0:0): FS size: 207470592 bytes (197 MiB, 1608 LEBs), max 1620 LEBs, journal size 10450944 bytes (9 MiB, 81 LEBs)
+[    5.770816] UBIFS (ubi0:0): reserved for root: 4952683 bytes (4836 KiB)
+[    5.777483] UBIFS (ubi0:0): media format: w5/r0 (latest is w5/r0), UUID 076F54AD-14ED-40F7-A2C5-652E6D3098F5, small LPT model
+init: overlay root on ubi0:data (attempt 1)
+init started: BusyBox v1.36.1 ()
+starting pid 89, tty '': '/bin/mount -t proc proc /proc'
+starting pid 90, tty '': '/bin/mount -t sysfs sysfs /sys'
+starting pid 91, tty '': '/bin/mount -t devtmpfs devtmpfs /dev'
+starting pid 92, tty '': '/bin/mount -o remount,rw /'
+starting pid 93, tty '': '/bin/mkdir -p /dev/pts'
+starting pid 94, tty '': '/bin/mount -t devpts devpts /dev/pts'
+starting pid 95, tty '': '/bin/mount -a'
+[    6.447811] jffs2: notice: (95) jffs2_build_xattr_subsystem: complete building xattr subsystem, 0 of xdatum (0 unchecked, 0 orphan) and 0 of xref (0 dead, 0 orphan) found.
+starting pid 97, tty '': '/sbin/swapon -a'
+starting pid 103, tty '': '/etc/init.d/rcS'
+Starting mdev... OK
+[    7.177864] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    7.186566] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    7.193037] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    7.199510] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    7.205982] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
+[    7.212452] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    7.218923] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    7.225394] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    7.231865] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    7.238335] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    7.244807] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    7.251277] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    7.257748] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    7.264220] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    7.270692] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    7.277162] mmc0: sdhci: Host ctl2: 0x00000000
+[    7.281625] mmc0: sdhci: ============================================
+[    7.292067] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    7.300751] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    7.307222] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    7.313695] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    7.320166] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
+[    7.326637] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    7.333109] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    7.339579] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    7.346050] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    7.352520] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    7.358991] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    7.365462] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    7.371934] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    7.378405] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    7.384876] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    7.391346] mmc0: sdhci: Host ctl2: 0x00000000
+[    7.395810] mmc0: sdhci: ============================================
+[    7.406136] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    7.414813] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    7.421285] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    7.427756] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    7.434227] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
+[    7.440698] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    7.447168] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    7.453639] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    7.460110] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    7.466580] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    7.473051] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    7.479521] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    7.485992] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    7.492463] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    7.498933] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    7.505403] mmc0: sdhci: Host ctl2: 0x00000000
+[    7.509868] mmc0: sdhci: ============================================
+[    7.516967] FAT-fs (mmcblk0): unable to read boot sector
+[    7.526082] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    7.534765] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    7.541235] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    7.547706] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    7.554177] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
+[    7.560648] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    7.567120] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    7.573592] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    7.580063] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    7.586533] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    7.593004] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    7.599475] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    7.605947] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    7.612417] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    7.618888] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    7.625359] mmc0: sdhci: Host ctl2: 0x00000000
+[    7.629822] mmc0: sdhci: ============================================
+[    7.640212] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    7.648894] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    7.655364] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    7.661835] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    7.668306] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
+[    7.674779] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    7.681249] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    7.687720] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    7.694191] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    7.700663] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    7.707134] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    7.713604] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    7.720075] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    7.726546] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    7.733016] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    7.739486] mmc0: sdhci: Host ctl2: 0x00000000
+[    7.743950] mmc0: sdhci: ============================================
+[    7.754358] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+[    7.763042] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[    7.769512] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003101
+[    7.775983] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
+[    7.782454] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
+[    7.788925] mmc0: sdhci: Present:   0x01f70000 | Host ctl: 0x00000002
+[    7.795395] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[    7.801866] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c07
+[    7.808337] mmc0: sdhci: Timeout:   0x00000003 | Int stat: 0x00000000
+[    7.814807] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+[    7.821278] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[    7.827748] mmc0: sdhci: Caps:      0x07e10080 | Caps_1:   0x00000000
+[    7.834219] mmc0: sdhci: Cmd:       0x0000113a | Max curr: 0x00000000
+[    7.840691] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[    7.847162] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[    7.853632] mmc0: sdhci: Host ctl2: 0x00000000
+[    7.858096] mmc0: sdhci: ============================================
+[    7.865073] blk_print_req_error: 7 callbacks suppressed
+[    7.865092] I/O error, dev mmcblk0, sector 0 op 0x0:(READ) flags 0x0 phys_seg 1 prio class 2
+[    7.878900] FAT-fs (mmcblk0): unable to read boot sector
+Starting hardware watchdog (60 s)
+[   10.951386] random: crng init done
+antminer-config: hostname antminer-731c92 (mac c4f312731c92)
+Configuring network interfaces... [   11.223578] cpsw-switch 4a100000.switch: starting ndev. mode: dual_mac
+[   11.302490] SMSC LAN8710/LAN8720 4a101000.mdio:00: attached PHY driver (mii_bus:phy_addr=4a101000.mdio:00, irq=POLL)
+udhcpc: started, v1.36.1
+udhcpc: broadcasting discover
+udhcpc: broadcasting discover
+[   14.482287] cpsw-switch 4a100000.switch eth0: Link is Up - 100Mbps/Full - flow control off
+udhcpc: broadcasting discover
+udhcpc: broadcasting select for 192.168.200.105, server 192.168.200.1
+udhcpc: lease of 192.168.200.105 obtained from 192.168.200.1, lease time 7200
+/etc/udhcpc.d/50default: Adding DNS 192.168.200.1
+done.
+Starting ntpd (server pool.ntp.org)
+Starting Dropbear SSH server: dropbear.
+Starting syslogd/klogd: done
+Starting OpenPLC runtime (http://antminer-731c92:8080)
+starting pid 277, tty '/dev/ttyS0': '/usr/sbin/ttyrun ttyS0 /sbin/getty 115200 ttyS0'
+
+Antminer I/O Module 0.1 antminer-731c92 /dev/ttyS0
+
+antminer-731c92 login: 
+[netboot] done
+errors: 0

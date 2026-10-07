@@ -38,8 +38,8 @@ Modbus TCP/RTU, OpenPLC, web интерфейс за провизиране и �
 | `mainline/kernel/` | `defconfig` на кернела (той е източникът за Yocto) |
 | `hardware/breakout/` | KiCad проект на тестова платка с входове/изходи |
 | `docs/` | тези ръководства + справочници (BBB_Pins.xlsx, pinmux PDF-и) |
-| `docs/history/` | бележки от предишни етапи (Ångström 3.8) |
-| `dts/`, `images/`, `scripts/`, `packages/`, `diff/` | **legacy**: работа върху оригиналната Ångström 3.8 система (repack на initramfs, стари DTS). Не се ползват от mainline |
+| `docs/history/` | бележки от предишни етапи, логове от тестовете (`device-dump/`) |
+| `legacy/` | оригиналната Bitmain система: фабричният фърмуер за връщане, стари DTS, скриптове и образи от Ångström етапа. Не се ползва от mainline |
 
 `mainline/README.md` и `mainline/yocto/README.md` са дневник на разработката (какво е
 пробвано, защо, с какви резултати). Полезни за "защо е така", не за "как да".
