@@ -50,6 +50,7 @@ GND (P9.1) ───────────────────────
 | 6L | as 6 under load: 2 CPU hogs, UBIFS write loop, 3000 UDP pkt/s (`latency-load.sh` + `latency-flood.py`) | 6.12.112 PREEMPT | 146 µs | 173 µs | 1.22 ms | 1.45 ms | 189 µs | `2026-10-07-linux-edge-preempt-load.csv` (534 edges, 200 MHz) |
 | 5cL | as 5c under the same load (plain kernel) | 6.12.112 (PREEMPT none) | 148 µs | 178 µs | 983 µs | 1.41 ms | 186 µs | `2026-10-07-linux-edge-load.csv` (534 edges, 200 MHz) |
 | 5cL-net | as 5cL without the NAND writes (2 CPU hogs + 3000 UDP pkt/s) | 6.12.112 (PREEMPT none) | 61 µs | 77 µs | 539 µs | 817 µs | 91 µs | `2026-10-07-linux-edge-load-net.csv` (534 edges, 200 MHz) |
+| 5cL-nand | as 5c with only the UBIFS write loop (no hogs, no network) | 6.12.112 (PREEMPT none) | 149 µs | 213 µs | 310 µs | 325 µs (1.26 ms seen by the program outside the capture) | 31 µs | `2026-10-07-linux-edge-load-nand.csv` (533 edges, 200 MHz) |
 
 Reading variant 1: the distribution is flat from 1.9 to 51.8 ms, i.e. uniform over one 50 ms
 cycle (the edge arrives at a random phase of the cycle) plus a fixed ~1.9 ms for the cycle's own
@@ -112,7 +113,29 @@ Reading 5cL-net: without flash writes the median halves (178 -> 77 us) and the t
 from 1.41 to 0.82 ms. The network softirq at 3000 pkt/s alone still produces a sub-millisecond
 tail; the NAND write path adds the rest.
 
-Planned variants: 5cL-nand (NAND writes only, no hogs, no network); the same on a PREEMPT_RT
+Reading 5cL-nand: flash writes do not produce rare long spikes like the network does; they
+raise the whole floor by ~130 us (compact distribution shifted from 49 to 213 us median). The
+NAND driver keeps the CPU in non-preemptible sections of about that length while a write is
+in progress, and UBIFS/dd keep writes going continuously.
+
+## Conclusions so far (2026-10-07, all on Linux 6.12)
+
+1. The kernel is not the limit on an idle system: 5 us busy-poll, 15 us timer wake-up, 49 us
+   interrupt wake-up (with a fixed CPU frequency). CONFIG_PREEMPT changes none of these.
+2. Two settings of the fleet image matter more than any kernel option: cpufreq `performance`/a
+   fixed OPP (ondemand costs ~100 us on every wake-up) and keeping `mpu_gate` is fine.
+3. OpenPLC v3 costs ~1.3 ms per cycle on this CPU regardless of the task interval; it is the
+   floor for anything built on it. Its hardware layer reads 8 ADC channels through sysfs every
+   cycle; that is the first thing to optimise if OpenPLC stays.
+4. Under load the tail is set by non-preemptible kernel work, not by scheduling: network RX
+   softirqs (sub-millisecond spikes at 3000 pkt/s) and NAND writes (+130 us on every event).
+   CONFIG_PREEMPT does not help; PREEMPT_RT (threaded softirqs, the external 6.12-rt patches on
+   32-bit ARM) is the Linux-side lever left to test. Design-wise: no flash writes during control,
+   and rate-limit or isolate network traffic.
+5. For hard bounds below ~100 us under load, Linux on this single-core A8 is not enough;
+   that is the case for the bare-metal / RTOS track.
+
+Planned variants: PREEMPT_RT kernel (6.12-rt) under the same loads; the same on a PREEMPT_RT
 kernel (needs the external 6.12-rt patches: 32-bit ARM has no ARCH_SUPPORTS_RT in 6.12); bare metal / RTOS on
 the A8 loaded by U-Boot (no Linux). The AM3352 has no PRU (verified: the PRU-ICSS address space
 gives a bus error and its PRCM module never leaves the disabled state), so a PRU variant is not
