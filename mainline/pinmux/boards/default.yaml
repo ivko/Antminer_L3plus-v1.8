@@ -1,7 +1,14 @@
 # Default profile for the Antminer BB-Black V1.8 I/O module.
 # This is what dts/am335x-antminer.dts is generated from (the image's built-in DTB).
-# It keeps the four UARTs the Bitmain hash board connectors expose, I2C2, the fan PWM pad
-# and four GPIO outputs on the LCD data pads that were used as PLC outputs in earlier tests.
+#
+# It mirrors the wiring of the original Bitmain carrier board (the hash-board controller the
+# BB-Black plugs into), taken from the stock device tree:
+#   dts/bitmain/am335x-boneblack-bitmainer.dts  (dtc -I dtb of nand/recover-nand/*.dtb)
+# Register values below match that DTB pad for pad (comments: Bitmain value).
+# Note: the Bitmain gpio-leds node has wrong line numbers (e.g. plug0 = gpio1_26, fan_speed0 =
+# gpio3_15); the pinmux group and Bitmain's init scripts are authoritative and are used here.
+# Not taken over: pinmux_emmc2_pin (eMMC on the GPMC pads, collides with NAND, node disabled
+# in the stock DT) and rstctl gpio1_20 (BBB eMMC reset, no eMMC on this board).
 #
 # Pad reference: pinmux/am335x-bbb-pins.json (P8/P9 names) + EXTRA_PADS in gen-dts.py.
 # Reserved by the fixed part: NAND, Ethernet, UART0 console, I2C0 PMIC, microSD, user LEDs.
@@ -9,30 +16,48 @@
 name: default
 
 pins:
-  # --- UARTs on the hash board connectors (TTL, 3.3 V) ---------------------------
-  P9.24: uart1_txd
-  P9.26: uart1_rxd
-  P9.21: uart2_txd           # spi0_d0 pad
-  P9.22: uart2_rxd           # spi0_sclk pad
-  uart0_rtsn: uart4_txd      # not on P8/P9
-  uart0_ctsn: uart4_rxd
-  P8.37: uart5_txd           # lcd_data8
-  P8.38: uart5_rxd           # lcd_data9
+  # --- hash board UARTs (TTL, 3.3 V). Bitmain/3.8 uartN = mainline uart(N-1) -------------
+  P9.24: {func: uart1_txd, comment: "chain UART1 TX (Bitmain bb_uart2: 0x184=0x00)"}
+  P9.26: {func: uart1_rxd, comment: "chain UART1 RX (0x180=0x30)"}
+  P9.21: {func: uart2_txd, comment: "chain UART2 TX, spi0_d0 pad (bb_uart3: 0x154=0x01)"}
+  P9.22: {func: uart2_rxd, comment: "chain UART2 RX, spi0_sclk pad (0x150=0x31)"}
+  uart0_rtsn: {func: uart4_txd, comment: "chain UART4 TX, not on P8/P9 (bb_uart5: 0x16c=0x01)"}
+  uart0_ctsn: {func: uart4_rxd, comment: "chain UART4 RX (0x168=0x31)"}
+  P8.37: {func: uart5_txd, comment: "chain UART5 TX, lcd_data8 (bb_uart6: 0xc0=0x04)"}
+  P8.38: {func: uart5_rxd, comment: "chain UART5 RX, lcd_data9 (0xc4=0x34)"}
 
-  # --- I2C2 (P9.19 / P9.20), 100 kHz ------------------------------------------------
-  P9.19: i2c2_scl
-  P9.20: i2c2_sda
+  # --- hash board reset lines, outputs, active low: 0 = board held in reset (safe) -------
+  P9.17: {func: gpio, dir: out, init: 0, name: RST0, comment: "spi0_cs0 gpio0_5 (0x15c=0x27)"}
+  P9.18: {func: gpio, dir: out, init: 0, name: RST1, comment: "spi0_d1 gpio0_4 (0x158=0x27)"}
+  P8.17: {func: gpio, dir: out, init: 0, name: RST2, comment: "gpmc_ad11 gpio0_27 (0x2c=0x27)"}
+  P8.19: {func: gpio, dir: out, init: 0, name: RST3, comment: "gpmc_ad8 gpio0_22 (0x20=0x27)"}
 
-  # --- PWM: ehrpwm0B on mcasp0_fsx (Bitmain fan PWM) ---------------------------------
-  P9.29: ehrpwm0b
+  # --- hash board present inputs (pull-down as in the stock DT) -------------------------
+  P9.16: {func: gpio, dir: in, pull: down, name: PLUG0, comment: "gpmc_a3 gpio1_19 (0x4c=0x27)"}
+  P9.15: {func: gpio, dir: in, pull: down, name: PLUG1, comment: "gpmc_a0 gpio1_16 (0x40=0x27)"}
+  P8.15: {func: gpio, dir: in, pull: down, name: PLUG2, comment: "gpmc_ad15 gpio1_15 (0x3c=0x27)"}
+  P8.12: {func: gpio, dir: in, pull: down, name: PLUG3, comment: "gpmc_ad12 gpio1_12 (0x30=0x27)"}
 
-  # --- GPIO outputs Q0..Q3 (safe level low until userspace drives them) ---------------
+  # --- front panel ------------------------------------------------------------------------
+  P8.13: {func: gpio, dir: out, init: 1, pull: down, name: LED_GREEN, comment: "gpmc_ad9 gpio0_23, active low (0x24=0x27)"}
+  P8.11: {func: gpio, dir: out, init: 1, pull: down, name: LED_RED, comment: "gpmc_ad13 gpio1_13, active low (0x34=0x27)"}
+  P8.16: {func: gpio, dir: in, pull: up, name: RECOVERY, comment: "IP/recovery key, gpmc_ad14 gpio1_14 (0x38=0x37)"}
+  P8.14: {func: gpio, dir: in, pull: up, name: IP_SIG, comment: "gpmc_ad10 gpio0_26 (0x28=0x37)"}
+
+  # --- fans: PWM out + two tach inputs --------------------------------------------------
+  P9.29: {func: ehrpwm0b, comment: "fan PWM, mcasp0_fsx (bb_ehrpwm0: 0x194=0x01)"}
+  P9.30: {func: gpio, dir: in, pull: down, name: FAN_SPEED0, comment: "mcasp0_axr0 gpio3_16 (0x198=0x27)"}
+  P9.31: {func: gpio, dir: in, pull: down, name: FAN_SPEED1, comment: "mcasp0_aclkx gpio3_14 (0x190=0x27)"}
+
+  # --- I2C2 on the uart1 flow-control pads, 100 kHz ---------------------------------------
+  P9.19: {func: i2c2_scl, slew: slow, comment: "uart1_rtsn pad (0x17c=0x73)"}
+  P9.20: {func: i2c2_sda, slew: slow, comment: "uart1_ctsn pad (0x178=0x73)"}
+
+  # --- PLC I/O on the LCD data pads (not used by the Bitmain carrier) --------------------
   P8.43: {func: gpio, dir: out, init: 0, name: Q0}
   P8.44: {func: gpio, dir: out, init: 0, name: Q1}
   P8.45: {func: gpio, dir: out, init: 0, name: Q2}
   P8.46: {func: gpio, dir: out, init: 0, name: Q3}
-
-  # --- GPIO inputs I0..I3 with pull-ups ---------------------------------------------
   P8.39: {func: gpio, dir: in, pull: up, name: I0}
   P8.40: {func: gpio, dir: in, pull: up, name: I1}
   P8.41: {func: gpio, dir: in, pull: up, name: I2}

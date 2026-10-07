@@ -5,7 +5,7 @@ model = {"name": str, "pins": {"P8.43": {"func", "dir", "init", "pull", "name", 
 The YAML written back is generated (hand comments are lost) but each pin's `comment:` field is
 kept and also emitted as an end-of-line comment, so notes survive both editors.
 """
-import os
+import json
 import re
 
 import yaml
@@ -48,7 +48,9 @@ def _scalar(v):
     if isinstance(v, bool):
         return "true" if v else "false"
     s = str(v)
-    return s if re.match(r"^[A-Za-z0-9_./+-]+$", s) else yaml.safe_dump(s, default_flow_style=True).strip()
+    if re.match(r"^[A-Za-z0-9_./+-]+$", s) and s.lower() not in ("true", "false", "yes", "no", "on", "off", "null", "~"):
+        return s
+    return json.dumps(s, ensure_ascii=False)     # a JSON string is a valid YAML double-quoted scalar
 
 
 def dump(model):
@@ -68,19 +70,18 @@ def dump(model):
                 p = {"func": p}
             if not isinstance(p, dict):
                 raise ValueError(f"pin {key}: spec must be a string or a mapping")
-            comment = p.get("comment")
-            # keep 0 (init: 0 matters), drop None / "" / false flags
+            # keep 0 (init: 0 matters), drop None / "" / false flags; comment is a real field
+            # (the generator ignores it) so it survives YAML -> editor -> YAML
             fields = {k: p[k] for k in PIN_KEYS
-                      if k in p and k != "comment" and p[k] is not None and p[k] != ""
+                      if k in p and p[k] is not None and p[k] != ""
                       and not (isinstance(p[k], bool) and not p[k])}
+            if "comment" in fields:
+                fields["comment"] = str(fields["comment"]).replace("\n", " ")
             if list(fields) == ["func"]:
                 body = _scalar(fields["func"])
             else:
                 body = "{" + ", ".join(f"{k}: {_scalar(v)}" for k, v in fields.items()) + "}"
-            line = f"  {key}: {body}"
-            if comment:
-                line = f"{line:<52s} # {str(comment).replace(chr(10), ' ')}"
-            out.append(line)
+            out.append(f"  {key}: {body}")
         out.append("")
     adc = model.get("adc") or []
     out.append("adc: [" + ", ".join(str(int(c)) for c in adc) + "]")
