@@ -47,6 +47,7 @@ GND (P9.1) ───────────────────────
 | 5b | as 5, cpuidle state1 `mpu_gate` (130 µs exit latency) disabled | 6.12.112 (PREEMPT none) | 120 µs | 144 µs | 182 µs | 390 µs | 22 µs | `2026-10-07-linux-edge-noidle.csv` (534 edges; one 60-edge glitch burst filtered) |
 | 5c | as 5b plus cpufreq governor `performance` (1 GHz fixed) | 6.12.112 (PREEMPT none) | 40.9 µs | 48.9 µs | 65.3 µs | 71.6 µs | 5.2 µs | `2026-10-07-linux-edge-perf.csv` (533 edges, 200 MHz) |
 | 6 | as 5c on a CONFIG_PREEMPT kernel (netbooted, same config otherwise) | 6.12.112 PREEMPT | 41.1 µs | 49.3 µs | 63.8 µs | 85.7 µs | 5.0 µs | `2026-10-07-linux-edge-preempt.csv` (534 edges, 200 MHz) |
+| 6L | as 6 under load: 2 CPU hogs, UBIFS write loop, 3000 UDP pkt/s (`latency-load.sh` + `latency-flood.py`) | 6.12.112 PREEMPT | 146 µs | 173 µs | 1.22 ms | 1.45 ms | 189 µs | `2026-10-07-linux-edge-preempt-load.csv` (534 edges, 200 MHz) |
 
 Reading variant 1: the distribution is flat from 1.9 to 51.8 ms, i.e. uniform over one 50 ms
 cycle (the edge arrives at a random phase of the cycle) plus a fixed ~1.9 ms for the cycle's own
@@ -92,7 +93,14 @@ there is nothing to preempt; the ~34 us are the intrinsic cost of the gpiolib th
 (hard IRQ -> IRQ thread -> kfifo -> poll wake-up -> user thread) at 1 GHz. Preemption models
 can only show a difference under load, which is what the next variants measure.
 
-Planned variants: 5c and 6 under load (CPU hogs, UBIFS writes, network flood); the same on a PREEMPT_RT
+Reading variant 6L: under load the median is 3.5x the idle value and the tail reaches 1.45 ms;
+`latency-echo` shows all of it in IRQ -> thread (min 95, mean 177, max 1451 us). The hard IRQ
+still fires on time; the gpiolib IRQ thread (SCHED_FIFO 50 by default) and the network softirqs
+compete with the user thread for the single core. Levers to test: raise the IRQ thread's
+priority above the user thread, PREEMPT_RT (softirqs become preemptible threads), or avoid the
+threaded path with a tiny in-kernel handler.
+
+Planned variants: 5cL = 5c under the same load (plain kernel); the same on a PREEMPT_RT
 kernel (needs the external 6.12-rt patches: 32-bit ARM has no ARCH_SUPPORTS_RT in 6.12); bare metal / RTOS on
 the A8 loaded by U-Boot (no Linux). The AM3352 has no PRU (verified: the PRU-ICSS address space
 gives a bus error and its PRCM module never leaves the disabled state), so a PRU variant is not
