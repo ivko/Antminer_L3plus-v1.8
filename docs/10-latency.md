@@ -46,6 +46,7 @@ GND (P9.1) ───────────────────────
 | 5 | `latency-echo -e`: sleep in the kernel, wake on the I0 edge event, SCHED_FIFO 80 | 6.12.112 (PREEMPT none) | 122 µs | 128 µs | 174 µs | 284 µs | 11.7 µs | `2026-10-07-linux-edge.csv` (534 edges, 200 MHz) |
 | 5b | as 5, cpuidle state1 `mpu_gate` (130 µs exit latency) disabled | 6.12.112 (PREEMPT none) | 120 µs | 144 µs | 182 µs | 390 µs | 22 µs | `2026-10-07-linux-edge-noidle.csv` (534 edges; one 60-edge glitch burst filtered) |
 | 5c | as 5b plus cpufreq governor `performance` (1 GHz fixed) | 6.12.112 (PREEMPT none) | 40.9 µs | 48.9 µs | 65.3 µs | 71.6 µs | 5.2 µs | `2026-10-07-linux-edge-perf.csv` (533 edges, 200 MHz) |
+| 6 | as 5c on a CONFIG_PREEMPT kernel (netbooted, same config otherwise) | 6.12.112 PREEMPT | 41.1 µs | 49.3 µs | 63.8 µs | 85.7 µs | 5.0 µs | `2026-10-07-linux-edge-preempt.csv` (534 edges, 200 MHz) |
 
 Reading variant 1: the distribution is flat from 1.9 to 51.8 ms, i.e. uniform over one 50 ms
 cycle (the edge arrives at a random phase of the cycle) plus a fixed ~1.9 ms for the cycle's own
@@ -86,8 +87,12 @@ kernel without preemption), ~2 us the two ioctls, and ~13 us input synchronisati
 A fleet image should therefore ship `performance` (or a fixed OPP) and keep `mpu_gate`;
 the next lever is kernel preemption.
 
-Planned variants: 6 = 5c on a CONFIG_PREEMPT kernel (in-tree full preemption; PREEMPT_RT needs
-the external 6.12-rt patches on 32-bit ARM); the same on a PREEMPT_RT
+Reading variant 6: identical to 5c (IRQ to thread mean 34.5 vs 34.3 us). On an idle system
+there is nothing to preempt; the ~34 us are the intrinsic cost of the gpiolib threaded IRQ path
+(hard IRQ -> IRQ thread -> kfifo -> poll wake-up -> user thread) at 1 GHz. Preemption models
+can only show a difference under load, which is what the next variants measure.
+
+Planned variants: 5c and 6 under load (CPU hogs, UBIFS writes, network flood); the same on a PREEMPT_RT
 kernel (needs the external 6.12-rt patches: 32-bit ARM has no ARCH_SUPPORTS_RT in 6.12); bare metal / RTOS on
 the A8 loaded by U-Boot (no Linux). The AM3352 has no PRU (verified: the PRU-ICSS address space
 gives a bus error and its PRCM module never leaves the disabled state), so a PRU variant is not
