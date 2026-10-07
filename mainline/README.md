@@ -70,9 +70,7 @@ cycle 82 ns, oe-off 54, access 64, `ti,nand-xfer-type = "prefetch-dma"`.
 | път | за какво |
 |---|---|
 | `dts/am335x-antminer.dts` | mainline DTS за платката, строен върху `am335x-bone-common.dtsi` |
-| `kernel/antminer.config` | Kconfig fragment върху `omap2plus_defconfig`, всичко нужно вградено |
-| `kernel/antminer-slim.config` | втори fragment: само AM33xx, без USB/видео/звук/IPv6, XZ, Thumb-2, -Os (`SLIM=0` го пропуска) |
-| `kernel/antminer_defconfig.generated` | `make savedefconfig` резултат от последния билд, за справка |
+| `kernel/defconfig` | единственият кернел конфиг. Първоначално беше `savedefconfig` от omap2plus + два фрагмента (`antminer.config`, `antminer-slim.config`); фрагментите са махнати на 2026-10-07, защото се бяха разминали с него |
 | `tools/netboot.ps1`, `tools/tftp-server.py`, `tools/uboot-cmd.ps1` | netboot без SD карта и U-Boot команди през COM3 |
 | `sdcard/uEnv.txt` | U-Boot env за SD boot с новите адреси и `console=ttyS0` |
 | `build-kernel.sh` | WSL2 скрипт: toolchain, clone linux-6.12.y, config, build, mkimage, копира в `out/` |

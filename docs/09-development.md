@@ -4,9 +4,8 @@
 
 | път | роля |
 |---|---|
-| `kernel/defconfig` | конфигурацията на кернела, която ползва Yocto. Промени тук и пребилдвай `linux-antminer` |
-| `kernel/antminer.config`, `antminer-slim.config` | фрагменти за `build-kernel.sh` (кернел извън Yocto); Yocto **не** ги чете |
-| `build-kernel.sh` | бърз кернел + DTB без Yocto (клонира linux-6.12.y в `~/antminer/linux`); за експерименти |
+| `kernel/defconfig` | **единственият** кернел конфиг: ползват го и Yocto, и `build-kernel.sh` |
+| `build-kernel.sh` | бърз кернел + DTB без Yocto (клонира linux-6.12.y в `~/antminer/linux`); `menuconfig` режим за промяна на defconfig |
 | `dts/am335x-antminer-base.dtsi` | фиксираната част на DTB: NAND и дяловете, Ethernet, конзола, PMIC, SD, LED-ове, изключени блокове |
 | `dts/am335x-antminer.dts` | **генериран** от `pinmux/boards/default.yaml`; не се редактира на ръка |
 | `dts/bitmain/` | дъмп на оригиналното Bitmain DTB, справочник за разводката |
@@ -65,9 +64,9 @@
 **Пакет в NAND образа.** `CORE_IMAGE_EXTRA_INSTALL` в `antminer-image.bb`. Внимавай за лимита
 20 MB (билдът спира над него). По-големите неща → feed (`antminer-feed-extras.bb`).
 
-**Кернел опция.** `bash mainline/yocto/build.sh linux-antminer -c menuconfig`, после
-`... -c savedefconfig`, копирай резултата в `mainline/kernel/defconfig`. Модули не се
-пакетират: всичко трябва да е `=y`.
+**Кернел опция.** `bash mainline/build-kernel.sh menuconfig` (записва обратно в
+`mainline/kernel/defconfig`), после пребилд на `linux-antminer`. Модули не се пакетират:
+всичко трябва да е `=y`. Лимитът за кернела в NAND е 5 MB.
 
 **Нов pin профил.** Създай от редактора (записва в `/config/pinmux/` на платката) и го свали
 с Export YAML в `mainline/pinmux/boards/`, за да влезе в образите и на картата.

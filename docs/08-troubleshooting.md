@@ -86,5 +86,6 @@
 **ParseError: unparsed line.** Bitbake не допуска коментар на реда на присвояване
 (`X = "y"  # коментар`); коментарът трябва да е на отделен ред.
 
-**Промяна в кернел конфига не влиза.** Yocto чете само `mainline/kernel/defconfig`;
-`antminer.config` и `antminer-slim.config` са за стария `build-kernel.sh`.
+**Промяна в кернел конфига не влиза.** Единственият кернел конфиг е `mainline/kernel/defconfig`;
+промени го с `bash mainline/build-kernel.sh menuconfig` или `build.sh linux-antminer -c menuconfig`.
+Опции като модули (`=m`) не влизат в образа: всичко трябва да е `=y`.

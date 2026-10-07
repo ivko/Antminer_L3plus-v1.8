@@ -1,17 +1,19 @@
 #!/bin/bash
-# Build a mainline LTS kernel + DTB for the Antminer BB-Black V1.8 inside WSL2 Ubuntu.
+# Quick kernel + DTB build without Yocto (inside WSL2 / Linux), for kernel experiments.
+# Uses the same kernel/defconfig as the Yocto recipe: that file is the only kernel config.
 #
-#   bash /mnt/e/Antminer/repo/mainline/build-kernel.sh            # clone + build
-#   KVER=6.6.y bash .../build-kernel.sh                            # other stable branch
-#   bash .../build-kernel.sh dtb                                   # only rebuild the DTB
+#   bash build-kernel.sh              # clone linux-6.12.y (once) + build -> ../out/uImage.bin, am335x-antminer.dtb
+#   bash build-kernel.sh dtb          # only rebuild the DTB
+#   bash build-kernel.sh menuconfig   # change options, then writes the result back to kernel/defconfig
+#   KVER=6.6.y bash build-kernel.sh   # other stable branch
 #
 # Sources and build tree live in $WORK (ext4 inside WSL, NOT /mnt/e - 9P is far too slow).
-# Results are copied to $REPO/mainline/out/.
+# Results are copied to $REPO/mainline/out/. Test them with tools/netboot.ps1.
 set -euo pipefail
 
 KVER="${KVER:-6.12.y}"
 WORK="${WORK:-$HOME/antminer}"
-REPO="${REPO:-/mnt/e/Antminer/repo}"
+REPO="${REPO:-$(cd "$(dirname "$0")/.." && pwd)}"
 JOBS="${JOBS:-$(nproc)}"
 OUT="$REPO/mainline/out"
 DTS_DIR="arch/arm/boot/dts/ti/omap"
@@ -48,21 +50,15 @@ if [ "${1:-}" = "dtb" ]; then
     exit 0
 fi
 
-echo ">> configuring"
-make omap2plus_defconfig
-scripts/kconfig/merge_config.sh -m .config "$REPO/mainline/kernel/antminer.config"
-# SLIM=0 skips the size-trimming fragment (full omap2plus-based kernel, > 5 MiB, netboot only)
-if [ "${SLIM:-1}" = "1" ] && [ -f "$REPO/mainline/kernel/antminer-slim.config" ]; then
-    scripts/kconfig/merge_config.sh -m .config "$REPO/mainline/kernel/antminer-slim.config"
-fi
+echo ">> configuring from mainline/kernel/defconfig"
+cp "$REPO/mainline/kernel/defconfig" .config
 make olddefconfig
-# minimal defconfig of the result; this is what the Yocto kernel recipe (yocto/meta-antminer) builds from
-make savedefconfig && cp defconfig "$REPO/mainline/kernel/defconfig"
-# show what the fragment asked for but did not stick (renamed/missing symbols)
-echo ">> fragment check (symbols that did not end up as requested):"
-grep -E '^CONFIG_' "$REPO/mainline/kernel/antminer.config" | while read -r line; do
-    grep -qxF "$line" .config || echo "   $line"
-done || true
+if [ "${1:-}" = "menuconfig" ]; then
+    make menuconfig
+    make savedefconfig && cp defconfig "$REPO/mainline/kernel/defconfig"
+    echo ">> written back to mainline/kernel/defconfig (commit it; Yocto builds from it)"
+    exit 0
+fi
 
 echo ">> building zImage + dtbs with -j$JOBS"
 make -j"$JOBS" zImage dtbs
@@ -75,13 +71,8 @@ mkimage -A arm -O linux -T kernel -C none -a 0x80008000 -e 0x80008000 \
 cp arch/arm/boot/zImage "$OUT/zImage"
 cp "$DTS_DIR/am335x-antminer.dtb" "$OUT/"
 cp .config "$OUT/config-$REL"
-cp "$REPO/mainline/sdcard/uEnv.txt" "$OUT/"
-cp "$REPO/images/initramfs.bin.SD-fixed" "$OUT/initramfs.bin.SD"
 
 SZ=$(stat -c %s "$OUT/uImage.bin"); LIMIT=$((0x500000))
 echo ">> uImage.bin: $SZ bytes, NAND kernel partition limit $LIMIT bytes, margin $((LIMIT - SZ)) bytes"
 [ "$SZ" -le "$LIMIT" ] && echo ">> FITS in NAND kernel partition" || echo ">> TOO BIG for NAND kernel partition (netboot only)"
-
-echo
-echo ">> done. Copy the contents of $OUT to the FAT partition of the SD card:"
-ls -la "$OUT"
+echo ">> test without flashing: tools/netboot.ps1 -Kernel uImage.bin -Dtb am335x-antminer.dtb -Initrd antminer-image.cpio.gz.u-boot"
