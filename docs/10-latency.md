@@ -119,6 +119,40 @@ raise the whole floor by ~130 us (compact distribution shifted from 49 to 213 us
 NAND driver keeps the CPU in non-preemptible sections of about that length while a write is
 in progress, and UBIFS/dd keep writes going continuously.
 
+## Summary (2026-10-07)
+
+Same board, same wiring, same stimulus; only the software changes. "x bare metal" is the median
+relative to variant 7.
+
+| variant | median | max | x bare metal |
+|---|---|---|---|
+| OpenPLC v3, 50 ms task (1) | 26.8 ms | 51.8 ms | 48 000 |
+| OpenPLC v3, 1 ms task (2) | 1.97 ms | 2.8 ms | 3 500 |
+| Linux, C echo, 1 ms periodic (4) | 507 µs | 999 µs | 900 |
+| Linux, C echo, interrupt wake-up, `ondemand` (5) | 128 µs | 284 µs | 230 |
+| Linux, C echo, interrupt wake-up, `performance` (5c, 6) | 49 µs | 72-86 µs | 88 |
+| Linux, interrupt wake-up under load (5cL, 6L) | ~175 µs | ~1.4 ms | 310 (median) / 1 650 (max) |
+| Linux, interrupt wake-up, NAND writes only (5cL-nand) | 213 µs | 325 µs | 380 |
+| Linux, interrupt wake-up, CPU + network only (5cL-net) | 77 µs | 817 µs | 140 |
+| Linux, C echo, busy poll (3) | 5.0 µs | 9.2 µs | 9 |
+| **bare metal, busy poll, 550 MHz (7)** | **560 ns** | **850 ns** | **1** |
+
+What moved the numbers, in order of size: the PLC runtime (OpenPLC cycle ~1.3 ms); the cycle
+model itself (a periodic cycle adds a uniform 0..period); the cpufreq governor (~100 µs per
+wake-up with `ondemand`); non-preemptible kernel work under load (network softirqs: rare
+sub-millisecond spikes, NAND writes: +130 µs on every event); the gpiolib threaded-IRQ path
+(~34 µs). What did not move them: CONFIG_PREEMPT (idle or loaded), cpuidle `mpu_gate`.
+
+What this means for the project:
+
+- A module with guaranteed microsecond reaction (fast counters, protections, synchronous tasks)
+  is realistic on this A8 with bare metal or an RTOS, with 256 MB RAM and Ethernet available.
+- A classic PLC with a 1-10 ms cycle is fine on Linux, but not through OpenPLC v3 as it is
+  (1.3 ms per cycle); a lean runtime or an optimised hardware layer would give cycles well under
+  100 µs.
+- A hybrid "Linux for configuration and network + deterministic core for I/O" has nowhere to
+  live on this chip (no PRU, one core): it is either/or, or two controllers.
+
 ## Conclusions so far (2026-10-07, all on Linux 6.12)
 
 1. The kernel is not the limit on an idle system: 5 us busy-poll, 15 us timer wake-up, 49 us
