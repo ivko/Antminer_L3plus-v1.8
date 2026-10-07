@@ -69,12 +69,24 @@ int main(int argc, char **argv)
     printf("mode: %s, SCHED_FIFO 80\n", edge_mode ? "edge events" : period_us ? "periodic poll" : "busy poll");
 
     unsigned long cycles = 0;
+    /* edge mode diagnostics: kernel timestamp of the edge (taken in the hard IRQ) vs. the moment
+     * this thread runs again -> how much of the latency is IRQ -> thread wake-up */
+    long wake_min = 1L << 30, wake_max = 0; double wake_sum = 0; unsigned long wake_n = 0;
     struct gpiod_edge_event_buffer *buf = edge_mode ? gpiod_edge_event_buffer_new(16) : NULL;
     struct timespec next; clock_gettime(CLOCK_MONOTONIC, &next);
     while (!stop) {
         if (edge_mode) {
             if (gpiod_line_request_wait_edge_events(in, 1000000000) <= 0) continue;
-            gpiod_line_request_read_edge_events(in, buf, 16);
+            int n = gpiod_line_request_read_edge_events(in, buf, 16);
+            if (n > 0) {
+                struct timespec now; clock_gettime(CLOCK_MONOTONIC, &now);
+                long ev = (long)(gpiod_edge_event_get_timestamp_ns(gpiod_edge_event_buffer_get_event(buf, n - 1)) % 1000000000000LL);
+                long t = (long)((now.tv_sec * 1000000000LL + now.tv_nsec) % 1000000000000LL) - ev;
+                if (t < 0) t += 1000000000000LL;
+                if (t < wake_min) wake_min = t;
+                if (t > wake_max) wake_max = t;
+                wake_sum += t; wake_n++;
+            }
         } else if (period_us) {
             next.tv_nsec += period_us * 1000;
             while (next.tv_nsec >= 1000000000L) { next.tv_nsec -= 1000000000L; next.tv_sec++; }
@@ -85,6 +97,9 @@ int main(int argc, char **argv)
         cycles++;
     }
     printf("\n%lu cycles\n", cycles);
+    if (wake_n)
+        printf("edge IRQ -> thread awake: min %ld us, mean %.1f us, max %ld us over %lu events\n",
+               wake_min / 1000, wake_sum / wake_n / 1000.0, wake_max / 1000, wake_n);
     gpiod_line_request_release(in); gpiod_line_request_release(out);
     gpiod_chip_close(ci); gpiod_chip_close(co);
     return 0;
