@@ -31,10 +31,10 @@ antminer-data status        # трябва: "root: overlay on ubi0:data"
 Feed-ът е `~/antminer/yocto/build/tmp/deploy/` във WSL, сервиран по HTTP на порт 8000.
 
 ```sh
-python mainline/tools/antminer.py feed start     # във фон, връща веднага
-python mainline/tools/antminer.py feed status
-python mainline/tools/antminer.py feed stop
-python mainline/tools/antminer.py feed serve     # на преден план, Ctrl-C спира
+python firmware/tools/antminer.py feed start     # във фон, връща веднага
+python firmware/tools/antminer.py feed status
+python firmware/tools/antminer.py feed stop
+python firmware/tools/antminer.py feed serve     # на преден план, Ctrl-C спира
 ```
 
 Работи и на Windows (чете feed-а от WSL през `\\wsl$`), и на Linux. Портът е `FEED_PORT` от
@@ -45,7 +45,7 @@ netsh advfirewall firewall add rule name="opkg feed" dir=in action=allow protoco
 Проверка от браузър: `http://<PC>:8000/ipk/all/Packages.gz` се сваля.
 
 След всеки билд индексът се обновява от `package-index` (част от пълния билд). Ако си
-билдвал само една рецепта: `bash mainline/yocto/build.sh package-index`.
+билдвал само една рецепта: `bash firmware/yocto/build.sh package-index`.
 
 ### Feed адресът
 
@@ -81,7 +81,7 @@ opkg remove <пакет>
 | `i2c-tools`, `libgpiod-tools`, `mtd-utils` | вече са в образа |
 
 Пълният списък пакети, които билдът гарантира във feed-а, е в
-`mainline/yocto/meta-antminer/recipes-core/packagegroups/antminer-feed-extras.bb`. Във feed-а
+`firmware/yocto/meta-antminer/recipes-core/packagegroups/antminer-feed-extras.bb`. Във feed-а
 има и всичко, което билдът е минал по пътя (~2200 пакета), но не всичко е тествано.
 
 ## Кешът на opkg

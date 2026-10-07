@@ -17,7 +17,7 @@
 Repo-то може да е където и да е; скриптовете намират пътя сами. Примерите тук ползват
 `E:\Antminer\repo` (във WSL `/mnt/e/Antminer/repo`).
 
-## Настройки на PC-то: `mainline/tools/site.conf`
+## Настройки на PC-то: `firmware/tools/site.conf`
 
 IP-то на PC-то в мрежата на платките, серийният порт, портът на feed-а и пътят до Yocto
 дървото са на едно място. Не редактирай `site.conf`; създай до него `site.local.conf` (не е в
@@ -26,14 +26,14 @@ git) само с това, което е различно:
 PC_IP=192.168.1.20
 SERIAL_PORT=/dev/ttyUSB0
 ```
-Празен `PC_IP` = автоматично. Проверка: `python mainline/tools/antminer.py config`.
+Празен `PC_IP` = автоматично. Проверка: `python firmware/tools/antminer.py config`.
 `antminer.py` иска Python 3.8+ и `pip install pyserial`.
 
 ## Първи билд
 
 ```sh
 # във WSL
-bash /mnt/e/Antminer/repo/mainline/yocto/setup-yocto.sh
+bash /mnt/e/Antminer/repo/firmware/yocto/setup-yocto.sh
 ```
 
 Скриптът:
@@ -50,7 +50,7 @@ bash /mnt/e/Antminer/repo/mainline/yocto/setup-yocto.sh
 Първият билд отнема 2-4 часа. Следене:
 
 ```sh
-bash /mnt/e/Antminer/repo/mainline/yocto/build.sh status      # работи ли + последните редове
+bash /mnt/e/Antminer/repo/firmware/yocto/build.sh status      # работи ли + последните редове
 tail -f ~/antminer/yocto/build/bitbake.log
 ```
 
@@ -59,9 +59,9 @@ tail -f ~/antminer/yocto/build/bitbake.log
 ## Следващи билдове
 
 ```sh
-bash /mnt/e/Antminer/repo/mainline/yocto/build.sh            # всичко, във фон
-bash /mnt/e/Antminer/repo/mainline/yocto/build.sh fg         # всичко, на преден план
-bash /mnt/e/Antminer/repo/mainline/yocto/build.sh antminer-provision-image   # само един образ
+bash /mnt/e/Antminer/repo/firmware/yocto/build.sh            # всичко, във фон
+bash /mnt/e/Antminer/repo/firmware/yocto/build.sh fg         # всичко, на преден план
+bash /mnt/e/Antminer/repo/firmware/yocto/build.sh antminer-provision-image   # само един образ
 ```
 
 „Всичко“ е: `antminer-image`, `antminer-provision-image`, `antminer-feed-image` и
@@ -76,7 +76,7 @@ bash /mnt/e/Antminer/repo/mainline/yocto/build.sh antminer-provision-image   # �
 |---|---|
 | `uImage` | кернел → NAND mtd7 |
 | `am335x-antminer.dtb` | DTB на профила `default` → NAND mtd6 |
-| `profile-<име>.dtb` | DTB на всеки профил от `mainline/pinmux/boards/` |
+| `profile-<име>.dtb` | DTB на всеки профил от `firmware/pinmux/boards/` |
 | `antminer-image-antminer-bbb.rootfs.cpio.gz.u-boot` | initramfs → NAND mtd8 |
 | `antminer-provision-image-antminer-bbb.rootfs.wic` | цялата провизираща SD карта |
 
@@ -86,10 +86,10 @@ bash /mnt/e/Antminer/repo/mainline/yocto/build.sh antminer-provision-image   # �
 symlink-овете често не се отварят; ползвай файла с датата или копирай с:
 
 ```sh
-python mainline/tools/antminer.py stage        # или във WSL: bash mainline/tools/stage-out.sh
+python firmware/tools/antminer.py stage        # или във WSL: bash firmware/tools/stage-out.sh
 ```
 
-Той слага последните резултати в `mainline/out/` под постоянни имена (`uImage-yocto.bin`,
+Той слага последните резултати в `firmware/out/` под постоянни имена (`uImage-yocto.bin`,
 `am335x-antminer-<профил>.dtb`, `antminer-image.cpio.gz.u-boot`, `antminer-provision.wic`,
 `flash-nand.sh`), които ползват netboot, deploy-dtb и write-sd.
 
@@ -101,12 +101,12 @@ python mainline/tools/antminer.py stage        # или във WSL: bash mainlin
   счупи нещо, `git checkout` на тези commit-и в `~/antminer/yocto/poky` и `meta-openembedded`.
 - OpenPLC е фиксиран по commit (`SRCREV` в `openplc-runtime_git.bb`).
 - `~/antminer/yocto/downloads` съдържа всички сорсове (~2 GB). С него билдът минава без интернет
-  и без риск upstream да е изчезнал. `bash mainline/yocto/backup-downloads.sh` го копира до repo-то
+  и без риск upstream да е изчезнал. `bash firmware/yocto/backup-downloads.sh` го копира до repo-то
   (`E:\Antminer\backup\yocto-downloads`); на нова машина `... restore` преди `setup-yocto.sh`.
 
 ## Почистване
 
 ```sh
-bash /mnt/e/Antminer/repo/mainline/yocto/build.sh <рецепта> -c cleansstate   # една рецепта наново
+bash /mnt/e/Antminer/repo/firmware/yocto/build.sh <рецепта> -c cleansstate   # една рецепта наново
 rm -rf ~/antminer/yocto/build/tmp                                            # всичко наново (sstate остава, бързо е)
 ```

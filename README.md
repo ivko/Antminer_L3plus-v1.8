@@ -20,8 +20,8 @@ Modbus TCP/RTU, OpenPLC, web интерфейс за провизиране и �
 | променя кода, рецептите или UI-а | [docs/09-development.md](docs/09-development.md) |
 
 Най-краткият път до работеща платка:
-1. Билд (WSL): `bash mainline/yocto/setup-yocto.sh` (първият път ~2-4 ч).
-2. Запиши картата: `powershell -File mainline\tools\write-sd.ps1`.
+1. Билд (WSL): `bash firmware/yocto/setup-yocto.sh` (първият път ~2-4 ч).
+2. Запиши картата: `powershell -File firmware\tools\write-sd.ps1`.
 3. Сложи картата в платката и я включи. Отвори адреса от банера на конзолата (`http://<ip>/`).
 4. В web UI-а: NAND → Flash, Init, Enable. Изключи, извади картата, включи.
 
@@ -29,19 +29,19 @@ Modbus TCP/RTU, OpenPLC, web интерфейс за провизиране и �
 
 | път | какво е |
 |---|---|
-| `mainline/` | **текущият проект**: кернел конфиг, DTS, Yocto слой, pinmux генератор, web UI, инструменти |
-| `mainline/yocto/meta-antminer/` | Yocto слоят: машина, дистро, рецепти, образи |
-| `mainline/pinmux/` | YAML профили на пиновете и генераторът им към device tree |
-| `mainline/web/` | web UI-ът (Flask + Lit компонент) |
-| `mainline/tools/` | инструменти за PC-то: netboot, запис на SD, feed сървър, флаш, OpenPLC тест |
-| `mainline/dts/` | device tree: фиксираната част (`am335x-antminer-base.dtsi`), генерираният `am335x-antminer.dts`, дъмп на оригиналния Bitmain DTB |
-| `mainline/kernel/` | `defconfig` на кернела (той е източникът за Yocto) |
+| `firmware/` | **текущият проект**: кернел конфиг, DTS, Yocto слой, pinmux генератор, web UI, инструменти |
+| `firmware/yocto/meta-antminer/` | Yocto слоят: машина, дистро, рецепти, образи |
+| `firmware/pinmux/` | YAML профили на пиновете и генераторът им към device tree |
+| `firmware/web/` | web UI-ът (Flask + Lit компонент) |
+| `firmware/tools/` | инструменти за PC-то: netboot, запис на SD, feed сървър, флаш, OpenPLC тест |
+| `firmware/dts/` | device tree: фиксираната част (`am335x-antminer-base.dtsi`), генерираният `am335x-antminer.dts`, дъмп на оригиналния Bitmain DTB |
+| `firmware/kernel/` | `defconfig` на кернела (той е източникът за Yocto) |
 | `hardware/breakout/` | KiCad проект на тестова платка с входове/изходи |
 | `docs/` | тези ръководства + справочници (BBB_Pins.xlsx, pinmux PDF-и) |
 | `docs/history/` | бележки от предишни етапи, логове от тестовете (`device-dump/`) |
-| `legacy/` | оригиналната Bitmain система: фабричният фърмуер за връщане, стари DTS, скриптове и образи от Ångström етапа. Не се ползва от mainline |
+| `legacy/` | оригиналната Bitmain система: фабричният фърмуер за връщане, стари DTS, скриптове и образи от Ångström етапа. Не се ползва от `firmware/` |
 
-`mainline/README.md` и `mainline/yocto/README.md` са дневник на разработката (какво е
+`firmware/README.md` и `firmware/yocto/README.md` са дневник на разработката (какво е
 пробвано, защо, с какви резултати). Полезни за "защо е така", не за "как да".
 
 ## Важни правила

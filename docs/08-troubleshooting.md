@@ -11,7 +11,7 @@
 **Нищо на конзолата.** 115200 8N1, без flow control. TX/RX кръстосани, общ GND, 3.3 V
 нива (не RS-232).
 
-**netboot не тегли файлове.** Firewall за UDP 69; файловете трябва да са в `mainline/out/`
+**netboot не тегли файлове.** Firewall за UDP 69; файловете трябва да са в `firmware/out/`
 (`antminer.py stage`); `PC_IP` (`antminer.py config`) трябва да е IP-то на PC-то в мрежата на
 платката, иначе го задай в `tools/site.local.conf`.
 
@@ -90,6 +90,6 @@
 **ParseError: unparsed line.** Bitbake не допуска коментар на реда на присвояване
 (`X = "y"  # коментар`); коментарът трябва да е на отделен ред.
 
-**Промяна в кернел конфига не влиза.** Единственият кернел конфиг е `mainline/kernel/defconfig`;
-промени го с `bash mainline/build-kernel.sh menuconfig` или `build.sh linux-antminer -c menuconfig`.
+**Промяна в кернел конфига не влиза.** Единственият кернел конфиг е `firmware/kernel/defconfig`;
+промени го с `bash firmware/build-kernel.sh menuconfig` или `build.sh linux-antminer -c menuconfig`.
 Опции като модули (`=m`) не влизат в образа: всичко трябва да е `=y`.

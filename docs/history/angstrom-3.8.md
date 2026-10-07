@@ -7,8 +7,8 @@
 
 `context-2026-08.md` в тази директория е бележка от август 2026, преди mainline порта.
 `device-dump/` съдържа логовете от тестовете на mainline порта (netboot, NAND boot, U-Boot
-сесии, дъмп на оригиналния NAND DTB); дневниците в `mainline/README.md` и
-`mainline/yocto/README.md` ги цитират като `device-dump/...`.
+сесии, дъмп на оригиналния NAND DTB); дневниците в `firmware/README.md` и
+`firmware/yocto/README.md` ги цитират като `device-dump/...`.
 
 ## Предишният README на repo-то
 

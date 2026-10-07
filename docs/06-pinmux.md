@@ -15,7 +15,7 @@ DTB-то се генерира от **профил**: YAML файл, в койт
 
 | профил | за | файл |
 |---|---|---|
-| `default` | оригиналната Bitmain платка: 4 UART-а към хеш платките, RST0-3, PLUG0-3, LED-ове, бутон, вентилатори, I2C2; плюс Q0-3 / I0-3 на LCD pad-овете. Вграден в образа | `mainline/pinmux/boards/default.yaml` |
+| `default` | оригиналната Bitmain платка: 4 UART-а към хеш платките, RST0-3, PLUG0-3, LED-ове, бутон, вентилатори, I2C2; плюс Q0-3 / I0-3 на LCD pad-овете. Вграден в образа | `firmware/pinmux/boards/default.yaml` |
 | `breakout` | тестовата платка от `hardware/breakout`: 8 изхода, 8 входа, 2 x RS-485, ADC, I2C експандер и температура | `.../breakout.yaml` |
 | `example-modbus-rtu` | Modbus RTU шлюз с 4 RS-485 канала | `.../example-modbus-rtu.yaml` |
 
@@ -58,12 +58,12 @@ reboot
 
 На PC-то (WSL/Linux; kernel tree-то се взима от Yocto билда или от `~/antminer/linux`, или `KSRC=`):
 ```sh
-cd /mnt/e/Antminer/repo/mainline/pinmux
-bash build-dtb.sh boards/breakout.yaml              # -> mainline/out/am335x-antminer-breakout.dtb
+cd /mnt/e/Antminer/repo/firmware/pinmux
+bash build-dtb.sh boards/breakout.yaml              # -> firmware/out/am335x-antminer-breakout.dtb
 ```
 ```sh
-python mainline/tools/antminer.py deploy-dtb breakout --netboot-only   # проба от RAM
-python mainline/tools/antminer.py deploy-dtb breakout                  # запис в mtd6 + reboot
+python firmware/tools/antminer.py deploy-dtb breakout --netboot-only   # проба от RAM
+python firmware/tools/antminer.py deploy-dtb breakout                  # запис в mtd6 + reboot
 ```
 
 Всички пътища дават едно и също DTB (проверено байт по байт).
@@ -91,7 +91,7 @@ spi: {spi1: {spidev: [0], max-frequency: 16000000}}
 unused: default            # останалите свободни pad-ове -> GPIO вход pull-down; keep = не ги пипай
 ```
 
-Пълното описание на опциите и вътрешността на генератора: `mainline/pinmux/README.md`.
+Пълното описание на опциите и вътрешността на генератора: `firmware/pinmux/README.md`.
 Таблица P8/P9 с функциите на всеки pad: web UI → Pinmux → „Header pin table“, или
 `docs/BBB_Pins.xlsx`.
 
@@ -109,7 +109,7 @@ cat /sys/kernel/debug/pinctrl/44e10800.pinmux-pinctrl-single/pins | grep 8a8   #
 
 ## Капани
 
-- Профилът `default` е и вграденото DTB на образа (`mainline/dts/am335x-antminer.dts` се генерира
+- Профилът `default` е и вграденото DTB на образа (`firmware/dts/am335x-antminer.dts` се генерира
   от него). Промяна в `default.yaml` в repo-то иска `bash build-dtb.sh boards/default.yaml` и
   пребилд, за да влезе в образите.
 - ADC входовете са **1.8 V**. 3.3 V на AIN пин го поврежда.

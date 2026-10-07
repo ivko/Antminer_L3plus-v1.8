@@ -1,6 +1,6 @@
 # 9. Разработка
 
-## Къде е какво (`mainline/`)
+## Къде е какво (`firmware/`)
 
 | път | роля |
 |---|---|
@@ -42,7 +42,7 @@
 | `recipes-core/{busybox,dropbear,init-ifupdown}` | bbappend-и: busybox аплети (watchdog, ntpd, devmem...), dropbear ключ на /config, interfaces |
 
 Слоят се чете директно от repo-то (`bblayers.conf` сочи към `/mnt/e/.../meta-antminer`), и
-рецептите взимат файлове от `mainline/` чрез `ANTMINER_MAINLINE_DIR`: няма копия.
+рецептите взимат файлове от `firmware/` чрез `ANTMINER_FIRMWARE_DIR`: няма копия.
 
 ### Инструменти (`tools/`)
 
@@ -62,19 +62,19 @@
 **Пакет в NAND образа.** `CORE_IMAGE_EXTRA_INSTALL` в `antminer-image.bb`. Внимавай за лимита
 20 MB (билдът спира над него). По-големите неща → feed (`antminer-feed-extras.bb`).
 
-**Кернел опция.** `bash mainline/build-kernel.sh menuconfig` (записва обратно в
-`mainline/kernel/defconfig`), после пребилд на `linux-antminer`. Модули не се пакетират:
+**Кернел опция.** `bash firmware/build-kernel.sh menuconfig` (записва обратно в
+`firmware/kernel/defconfig`), после пребилд на `linux-antminer`. Модули не се пакетират:
 всичко трябва да е `=y`. Лимитът за кернела в NAND е 5 MB.
 
 **Нов pin профил.** Създай от редактора (записва в `/config/pinmux/` на платката) и го свали
-с Export YAML в `mainline/pinmux/boards/`, за да влезе в образите и на картата.
+с Export YAML в `firmware/pinmux/boards/`, за да влезе в образите и на картата.
 
 **Промяна на фиксираната част на DTB.** `dts/am335x-antminer-base.dtsi`. Ако заемаш нов pad,
 добави го в `RESERVED` в `gen-dts.py`, за да не го дава генераторът на профилите.
 
 **Web UI.** Разработва се на PC-то срещу файловете в repo-то:
 ```sh
-cd /mnt/e/Antminer/repo/mainline/web
+cd /mnt/e/Antminer/repo/firmware/web
 ANTMINER_PINMUX=../pinmux ANTMINER_CONFIG=/tmp/cfg ANTMINER_PAYLOAD=../out/sdcard python3 run.py --port 8088
 python3 test_smoke.py          # всички страници + YAML кръгово преобразуване на профилите
 ```
@@ -85,9 +85,9 @@ python3 test_smoke.py          # всички страници + YAML кръго
 ## Проверки преди commit
 
 ```sh
-python3 mainline/web/test_smoke.py
-bash mainline/pinmux/build-dtb.sh mainline/pinmux/boards/default.yaml   # регенерира am335x-antminer.dts
-bash mainline/yocto/build.sh fg
+python3 firmware/web/test_smoke.py
+bash firmware/pinmux/build-dtb.sh firmware/pinmux/boards/default.yaml   # регенерира am335x-antminer.dts
+bash firmware/yocto/build.sh fg
 ```
 Ако `default.yaml` е променен, `dts/am335x-antminer.dts` трябва да е в същия commit.
 
@@ -97,4 +97,4 @@ bash mainline/yocto/build.sh fg
 - NAND таймингите в DTS са от am335x-evm; тези на Bitmain дават повредени данни с новия драйвер.
 - U-Boot 2013.04 няма `bootz`: кернелът е uImage, load адрес 0x80008000.
 - ADC е 1.8 V, 12 bit; `ti,am335-sdhci` (не omap_hsmmc) е драйверът за microSD в 6.12.
-- Подробната история (какво е пробвано и защо) е в `mainline/README.md` и `mainline/yocto/README.md`.
+- Подробната история (какво е пробвано и защо) е в `firmware/README.md` и `firmware/yocto/README.md`.

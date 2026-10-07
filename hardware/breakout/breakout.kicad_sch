@@ -4966,7 +4966,7 @@
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 	)
-	(text "P8.3-10, P8.22-26, P9.11, P9.13: NAND (do not use). Other NC pins are free, see mainline/pinmux." (exclude_from_sim no) (at 40 150 0)
+	(text "P8.3-10, P8.22-26, P9.11, P9.13: NAND (do not use). Other NC pins are free, see firmware/pinmux." (exclude_from_sim no) (at 40 150 0)
 		(effects (font (size 1.27 1.27)) (justify left bottom))
 		(uuid "1ce38225-33b6-49a3-93f1-59265c2a29a4")
 	)
