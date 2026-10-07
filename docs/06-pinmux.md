@@ -1,84 +1,84 @@
-# 6. Пиновете: pinmux профили
+# 6. The pins: pinmux profiles
 
-## Идеята
+## The idea
 
-Всеки pad на AM3352 има до 8 функции (GPIO, UART, I2C, SPI, PWM...). Коя е избрана, се решава
-в device tree (DTB), който U-Boot зарежда от NAND mtd6. Кернелът и initramfs-ът са еднакви за
-всички платки; различни са само DTB-тата.
+Each pad of the AM3352 has up to 8 functions (GPIO, UART, I2C, SPI, PWM...). Which one is selected
+is decided in the device tree (DTB), which U-Boot loads from NAND mtd6. The kernel and the
+initramfs are the same for all boards; only the DTBs differ.
 
-DTB-то се генерира от **профил**: YAML файл, в който пише кой пин каква функция има. Няма
-`config-pin` и нищо не се превключва по време на работа: пиновете са в правилното състояние
-от момента, в който кернелът тръгне, и след всеки рестарт. Всеки pad, който не е в профила, се
-задава като GPIO вход с pull-down (безопасното състояние).
+The DTB is generated from a **profile**: a YAML file that states which function each pin has.
+There is no `config-pin` and nothing is switched at runtime: the pins are in the correct state
+from the moment the kernel starts, and after every restart. Every pad that is not in the profile
+is set as a GPIO input with pull-down (the safe state).
 
-## Готови профили
+## Ready-made profiles
 
-| профил | за | файл |
+| profile | for | file |
 |---|---|---|
-| `default` | оригиналната Bitmain платка: 4 UART-а към хеш платките, RST0-3, PLUG0-3, LED-ове, бутон, вентилатори, I2C2; плюс Q0-3 / I0-3 на LCD pad-овете. Вграден в образа | `firmware/pinmux/boards/default.yaml` |
-| `breakout` | тестовата платка от `hardware/breakout`: 8 изхода, 8 входа, 2 x RS-485, ADC, I2C експандер и температура | `.../breakout.yaml` |
-| `example-modbus-rtu` | Modbus RTU шлюз с 4 RS-485 канала | `.../example-modbus-rtu.yaml` |
+| `default` | the original Bitmain board: 4 UARTs to the hash boards, RST0-3, PLUG0-3, LEDs, button, fans, I2C2; plus Q0-3 / I0-3 on the LCD pads. Built into the image | `firmware/pinmux/boards/default.yaml` |
+| `breakout` | the test board from `hardware/breakout`: 8 outputs, 8 inputs, 2 x RS-485, ADC, I2C expander and temperature | `.../breakout.yaml` |
+| `example-modbus-rtu` | Modbus RTU gateway with 4 RS-485 channels | `.../example-modbus-rtu.yaml` |
 
-Локални профили, правени на конкретна платка, стоят в `/config/pinmux/` на нея.
+Local profiles made on a specific board are stored in `/config/pinmux/` on that board.
 
-Кой профил е активен: `antminer-dtb current`, или „active on this board“ в редактора.
+Which profile is active: `antminer-dtb current`, or "active on this board" in the editor.
 
-## Визуалният редактор
+## The visual editor
 
-`http://<ip>/pinmux` → избери профил → **board editor** (или създай нов по име).
+`http://<ip>/pinmux` → choose a profile → **board editor** (or create a new one by name).
 
-- P9 вляво, P8 вдясно, както са на платката. Цветът показва функцията; щрихованите с катинар
-  са заети от системата (NAND, Ethernet, конзола, SD) и не могат да се ползват.
-- Клик на пин: функция (само тези, които pad-ът поддържа), за GPIO посока, начално ниво, pull,
-  **име на линията**, hog, бележка. Името е важно: OpenPLC използва линиите `I0..`, `Q0..`
-  (виж 07-openplc), а програмите ти могат да ги търсят по име (`gpioset Q0=1`).
-- AIN плочките включват/изключват аналоговите входове (1.8 V максимум!).
-- „Pads outside the headers“ са pad-овете, изведени към Bitmain конекторите (UART4 и др.).
-- „I2C devices“: за всяка включена I2C шина устройства (GPIO експандери, температурни сензори)
-  с адрес и имена на линиите.
-- Жълта точка = променено, червено = грешка от проверката, оранжево = непълна периферия
-  (например UART само с TX).
-- **Validate & build** генерира и компилира DTB-то на самата платка (~2 s) и показва грешките
-  по пин. **Save** записва в `/config/pinmux/`. **Save + flash to mtd6** записва DTB-то в NAND;
-  важи от следващия рестарт. **Export YAML** сваля профила.
+- P9 on the left, P8 on the right, as on the board. The color shows the function; the hatched
+  pins with a padlock are used by the system (NAND, Ethernet, console, SD) and cannot be used.
+- Click on a pin: function (only those the pad supports), and for GPIO: direction, initial level,
+  pull, **line name**, hog, note. The name matters: OpenPLC uses the lines `I0..`, `Q0..`
+  (see 07-openplc), and your programs can look them up by name (`gpioset Q0=1`).
+- The AIN tiles enable/disable the analog inputs (1.8 V maximum!).
+- "Pads outside the headers" are the pads routed to the Bitmain connectors (UART4 etc.).
+- "I2C devices": for each enabled I2C bus, the devices (GPIO expanders, temperature sensors)
+  with address and line names.
+- Yellow dot = changed, red = validation error, orange = incomplete peripheral
+  (for example a UART with TX only).
+- **Validate & build** generates and compiles the DTB on the board itself (~2 s) and shows the
+  errors per pin. **Save** writes to `/config/pinmux/`. **Save + flash to mtd6** writes the DTB to
+  NAND; it takes effect from the next restart. **Export YAML** downloads the profile.
 
-„YAML (advanced)“ отваря профила като текст за неща, които редакторът не покрива (SPI, CAN,
+"YAML (advanced)" opens the profile as text, for things the editor does not cover (SPI, CAN,
 `unused: keep`).
 
-## От командния ред
+## From the command line
 
-На платката (пакет `antminer-pinmux`):
+On the board (package `antminer-pinmux`):
 ```sh
-antminer-dtb list                                   # профилите
+antminer-dtb list                                   # the profiles
 antminer-dtb build breakout                         # -> /tmp/am335x-antminer-breakout.dtb (+ .dts, .json)
 antminer-dtb build /config/pinmux/my.yaml
-antminer-dtb flash /tmp/am335x-antminer-breakout.dtb    # mtd6, с проверка
+antminer-dtb flash /tmp/am335x-antminer-breakout.dtb    # mtd6, with verification
 reboot
 ```
 
-На PC-то (WSL/Linux; kernel tree-то се взима от Yocto билда или от `~/antminer/linux`, или `KSRC=`):
+On the PC (WSL/Linux; the kernel tree is taken from the Yocto build or from `~/antminer/linux`, or `KSRC=`):
 ```sh
 cd /mnt/e/Antminer/repo/firmware/pinmux
 bash build-dtb.sh boards/breakout.yaml              # -> firmware/out/am335x-antminer-breakout.dtb
 ```
 ```sh
-python firmware/tools/antminer.py deploy-dtb breakout --netboot-only   # проба от RAM
-python firmware/tools/antminer.py deploy-dtb breakout                  # запис в mtd6 + reboot
+python firmware/tools/antminer.py deploy-dtb breakout --netboot-only   # test from RAM
+python firmware/tools/antminer.py deploy-dtb breakout                  # write to mtd6 + reboot
 ```
 
-Всички пътища дават едно и също DTB (проверено байт по байт).
+All paths produce the same DTB (verified byte by byte).
 
-## Формат на профила
+## Profile format
 
 ```yaml
 name: my-board
 pins:
-  P9.24: uart1_txd                                    # само функция
+  P9.24: uart1_txd                                    # function only
   P9.26: {func: uart1_rxd, pull: up}
-  uart0_ctsn: uart4_rxd                               # pad извън хедърите, по име
-  P8.43: {func: gpio, dir: out, init: 0, name: Q0}    # изход, ниско при старт
-  P8.39: {func: gpio, dir: in, pull: up, name: I0, comment: "бутон старт"}
-  P9.17: {func: gpio, dir: out, init: 1, name: RS485_DE, hog: true}   # кернелът държи линията
+  uart0_ctsn: uart4_rxd                               # pad outside the headers, by name
+  P8.43: {func: gpio, dir: out, init: 0, name: Q0}    # output, low at start
+  P8.39: {func: gpio, dir: in, pull: up, name: I0, comment: "start button"}
+  P9.17: {func: gpio, dir: out, init: 1, name: RS485_DE, hog: true}   # the kernel holds the line
 adc: [0, 1, 2, 3]
 i2c:
   i2c2:
@@ -88,31 +88,31 @@ i2c:
          gpio-line-names: [EXP0, EXP1, EXP2, EXP3, EXP4, EXP5, EXP6, EXP7]}}
       - {compatible: "ti,tmp1075", reg: 0x48}
 spi: {spi1: {spidev: [0], max-frequency: 16000000}}
-unused: default            # останалите свободни pad-ове -> GPIO вход pull-down; keep = не ги пипай
+unused: default            # remaining free pads -> GPIO input pull-down; keep = do not touch them
 ```
 
-Пълното описание на опциите и вътрешността на генератора: `firmware/pinmux/README.md`.
-Таблица P8/P9 с функциите на всеки pad: web UI → Pinmux → „Header pin table“, или
+Full description of the options and the generator internals: `firmware/pinmux/README.md`.
+P8/P9 table with the functions of each pad: web UI → Pinmux → "Header pin table", or
 `docs/BBB_Pins.xlsx`.
 
-## Проверка на платката
+## Checking on the board
 
 ```sh
 antminer-dtb current
-gpioinfo                                     # линиите с имената от профила
+gpioinfo                                     # the lines with the names from the profile
 gpioset -t0 Q0=1 && gpioget I0
 cat /sys/bus/iio/devices/iio:device0/in_voltage0_raw     # AIN0, 0..4095 = 0..1.8 V
 ls /dev/ttyS* /dev/i2c-*
 i2cdetect -y 2
-cat /sys/kernel/debug/pinctrl/44e10800.pinmux-pinctrl-single/pins | grep 8a8   # реалният регистър
+cat /sys/kernel/debug/pinctrl/44e10800.pinmux-pinctrl-single/pins | grep 8a8   # the actual register
 ```
 
-## Капани
+## Pitfalls
 
-- Профилът `default` е и вграденото DTB на образа (`firmware/dts/am335x-antminer.dts` се генерира
-  от него). Промяна в `default.yaml` в repo-то иска `bash build-dtb.sh boards/default.yaml` и
-  пребилд, за да влезе в образите.
-- ADC входовете са **1.8 V**. 3.3 V на AIN пин го поврежда.
-- RST линиите в `default` тръгват с 0 (хеш платките в reset), LED-овете са активни на ниско ниво.
-- I2C устройство без драйвер в кернела не дава грешка: просто не се появява. Шаблоните в
-  редактора са само за драйвери, които кернелът има (PCF857x, LM75/TMP1075 семейството).
+- The `default` profile is also the built-in DTB of the image (`firmware/dts/am335x-antminer.dts`
+  is generated from it). A change to `default.yaml` in the repo requires
+  `bash build-dtb.sh boards/default.yaml` and a rebuild to get into the images.
+- The ADC inputs are **1.8 V**. 3.3 V on an AIN pin damages it.
+- The RST lines in `default` start at 0 (hash boards in reset); the LEDs are active low.
+- An I2C device without a driver in the kernel gives no error: it simply does not appear. The
+  templates in the editor are only for drivers the kernel has (PCF857x, the LM75/TMP1075 family).

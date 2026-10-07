@@ -1,100 +1,101 @@
-# 9. Разработка
+# 9. Development
 
-## Къде е какво (`firmware/`)
+## What is where (`firmware/`)
 
-| път | роля |
+| path | role |
 |---|---|
-| `kernel/defconfig` | **единственият** кернел конфиг: ползват го и Yocto, и `build-kernel.sh` |
-| `build-kernel.sh` | бърз кернел + DTB без Yocto (клонира linux-6.12.y в `~/antminer/linux`); `menuconfig` режим за промяна на defconfig |
-| `dts/am335x-antminer-base.dtsi` | фиксираната част на DTB: NAND и дяловете, Ethernet, конзола, PMIC, SD, LED-ове, изключени блокове |
-| `dts/am335x-antminer.dts` | **генериран** от `pinmux/boards/default.yaml`; не се редактира на ръка |
-| `dts/bitmain/` | дъмп на оригиналното Bitmain DTB, справочник за разводката |
-| `pinmux/gen-dts.py` | генераторът YAML → DTS (pad база, запазени pad-ове, проверки, `--flat`, `--json`) |
-| `pinmux/am335x-bbb-pins.json` | pad базата, извлечена от `docs/BBB_Pins.xlsx` с `extract-pins.py` |
-| `pinmux/boards/*.yaml` | профилите |
-| `pinmux/build-dtb.sh`, `make-base-pp.sh`, `build-dtb-flat.sh` | билд на DTB на PC-то (cpp) / preprocessed база / билд както на платката (само dtc) |
-| `web/` | web UI-ът: `antminer_web/` (Flask), `static/board-editor.js` (Lit компонент), `test_smoke.py`, `render_page.py` |
-| `yocto/meta-antminer/` | Yocto слоят (виж по-долу) |
-| `yocto/setup-yocto.sh`, `build.sh` | настройка и билд |
-| `tools/` | инструменти за PC-то (виж по-долу) |
-| `sdcard/uEnv-sd.txt` | `uEnv.txt` на провизиращата карта |
-| `boot/bitmain/` | оригиналните MLO и u-boot.img (за картата) |
-| `openplc/examples/` | ST програми |
-| `out/` | билд резултати за TFTP/netboot (в .gitignore) |
+| `kernel/defconfig` | the **only** kernel config: used by both Yocto and `build-kernel.sh` |
+| `build-kernel.sh` | fast kernel + DTB without Yocto (clones linux-6.12.y into `~/antminer/linux`); `menuconfig` mode for changing the defconfig |
+| `dts/am335x-antminer-base.dtsi` | the fixed part of the DTB: NAND and partitions, Ethernet, console, PMIC, SD, LEDs, disabled blocks |
+| `dts/am335x-antminer.dts` | **generated** from `pinmux/boards/default.yaml`; do not edit by hand |
+| `dts/bitmain/` | dump of the original Bitmain DTB, reference for the wiring |
+| `pinmux/gen-dts.py` | the YAML → DTS generator (pad database, reserved pads, checks, `--flat`, `--json`) |
+| `pinmux/am335x-bbb-pins.json` | the pad database, extracted from `docs/BBB_Pins.xlsx` with `extract-pins.py` |
+| `pinmux/boards/*.yaml` | the profiles |
+| `pinmux/build-dtb.sh`, `make-base-pp.sh`, `build-dtb-flat.sh` | DTB build on the PC (cpp) / preprocessed base / build as on the board (dtc only) |
+| `web/` | the web UI: `antminer_web/` (Flask), `static/board-editor.js` (Lit component), `test_smoke.py`, `render_page.py` |
+| `yocto/meta-antminer/` | the Yocto layer (see below) |
+| `yocto/setup-yocto.sh`, `build.sh` | setup and build |
+| `tools/` | tools for the PC (see below) |
+| `sdcard/uEnv-sd.txt` | `uEnv.txt` of the provisioning card |
+| `boot/bitmain/` | the original MLO and u-boot.img (for the card) |
+| `openplc/examples/` | ST programs |
+| `out/` | build results for TFTP/netboot (in .gitignore) |
 
-### Yocto слоят
+### The Yocto layer
 
 | | |
 |---|---|
-| `conf/machine/antminer-bbb.conf` | cortexa8hf-neon, uImage на 0x80008000, DTB, initramfs формат |
-| `conf/distro/antminer.conf` | poky + busybox init/mdev, glibc, ipk, `sysvinit` в DISTRO_FEATURES |
-| `recipes-kernel/linux/linux-antminer_6.12.bb` | кернел от tarball + `kernel/defconfig` + DTS-ите от repo-то |
-| `recipes-core/images/antminer-image.bb` | NAND образът (проверява лимита от 20 MB) |
-| `recipes-core/images/antminer-provision-image.bb` + `wic/antminer-sd.wks` | SD картата |
-| `recipes-core/images/antminer-feed-image.bb` | фиктивен образ, кара bitbake да запише ipk-тата на feed пакетите |
-| `recipes-core/packagegroups/antminer-feed-extras.bb` | кои пакети гарантирано са във feed-а |
-| `recipes-core/antminer-base/` | `/init` (overlay, SD root, watchdog), `antminer-data`, rcS скриптове, fstab, opkg настройки |
-| `recipes-core/antminer-pinmux/` | генераторът, профилите и `antminer-dtb` на платката |
-| `recipes-core/antminer-web/`, `antminer-provision/` | web UI-ът, банер и /boot на картата |
-| `recipes-bsp/antminer-sd-boot/` | MLO, u-boot.img, uEnv.txt за wic |
-| `recipes-openplc/` | OpenPLC runtime (с hardware layer-а `files/antminer.cpp`) и matiec |
-| `recipes-python/` | pymodbus 2.5.3, python-dotenv, pyjwt без cryptography |
-| `recipes-core/{busybox,dropbear,init-ifupdown}` | bbappend-и: busybox аплети (watchdog, ntpd, devmem...), dropbear ключ на /config, interfaces |
+| `conf/machine/antminer-bbb.conf` | cortexa8hf-neon, uImage at 0x80008000, DTB, initramfs format |
+| `conf/distro/antminer.conf` | poky + busybox init/mdev, glibc, ipk, `sysvinit` in DISTRO_FEATURES |
+| `recipes-kernel/linux/linux-antminer_6.12.bb` | kernel from tarball + `kernel/defconfig` + the DTS files from the repo |
+| `recipes-core/images/antminer-image.bb` | the NAND image (checks the 20 MB limit) |
+| `recipes-core/images/antminer-provision-image.bb` + `wic/antminer-sd.wks` | the SD card |
+| `recipes-core/images/antminer-feed-image.bb` | dummy image, makes bitbake write the ipk files of the feed packages |
+| `recipes-core/packagegroups/antminer-feed-extras.bb` | which packages are guaranteed to be in the feed |
+| `recipes-core/antminer-base/` | `/init` (overlay, SD root, watchdog), `antminer-data`, rcS scripts, fstab, opkg settings |
+| `recipes-core/antminer-pinmux/` | the generator, the profiles and `antminer-dtb` on the board |
+| `recipes-core/antminer-web/`, `antminer-provision/` | the web UI, banner and /boot on the card |
+| `recipes-bsp/antminer-sd-boot/` | MLO, u-boot.img, uEnv.txt for wic |
+| `recipes-openplc/` | OpenPLC runtime (with the hardware layer `files/antminer.cpp`) and matiec |
+| `recipes-python/` | pymodbus 2.5.3, python-dotenv, pyjwt without cryptography |
+| `recipes-core/{busybox,dropbear,init-ifupdown}` | bbappends: busybox applets (watchdog, ntpd, devmem...), dropbear key on /config, interfaces |
 
-Слоят се чете директно от repo-то (`bblayers.conf` сочи към `/mnt/e/.../meta-antminer`), и
-рецептите взимат файлове от `firmware/` чрез `ANTMINER_FIRMWARE_DIR`: няма копия.
+The layer is read directly from the repo (`bblayers.conf` points to `/mnt/e/.../meta-antminer`),
+and the recipes take files from `firmware/` via `ANTMINER_FIRMWARE_DIR`: there are no copies.
 
-### Инструменти (`tools/`)
+### Tools (`tools/`)
 
-| | къде | какво |
+| | where | what |
 |---|---|---|
-| `antminer.py` | Windows, Linux | всичко с платката от PC-то: `config`, `console`, `uboot`, `netboot`, `deploy-dtb`, `feed`, `tftp`, `stage` |
-| `site.conf` (+ `site.local.conf`) | | настройките на PC-то: IP, сериен порт, feed порт, Yocto път |
-| `stage-out.sh` | WSL/Linux | копира резултатите от билда в `out/` (`antminer.py stage` го вика) |
-| `write-sd.ps1` | Windows | записва `.wic` на SD карта (на Linux: `dd`) |
-| `tftp-server.py` | | TFTP сървърът, който `antminer.py` ползва (може и самостоятелно) |
-| `*.ps1` (netboot, deploy-dtb, uboot-cmd, serial, feed-server-*, serve-feed) | Windows | предишните версии на `antminer.py`; ще отпаднат |
-| `flash-nand.sh` | платката | флаш на mtd6/7/8 от TFTP или локална директория (= `antminer-flash-nand`) |
-| `openplc-test.py` | PC | качва/компилира/стартира OpenPLC програма, чете Modbus |
+| `antminer.py` | Windows, Linux | everything with the board from the PC: `config`, `console`, `uboot`, `netboot`, `deploy-dtb`, `feed`, `tftp`, `stage` |
+| `site.conf` (+ `site.local.conf`) | | the PC settings: IP, serial port, feed port, Yocto path |
+| `stage-out.sh` | WSL/Linux | copies the build results into `out/` (called by `antminer.py stage`) |
+| `write-sd.ps1` | Windows | writes a `.wic` to an SD card (on Linux: `dd`) |
+| `tftp-server.py` | | the TFTP server that `antminer.py` uses (can also run standalone) |
+| `*.ps1` (netboot, deploy-dtb, uboot-cmd, serial, feed-server-*, serve-feed) | Windows | the previous versions of `antminer.py`; will be removed |
+| `flash-nand.sh` | the board | flashes mtd6/7/8 from TFTP or a local directory (= `antminer-flash-nand`) |
+| `openplc-test.py` | PC | uploads/compiles/starts an OpenPLC program, reads Modbus |
 
-## Чести промени
+## Common changes
 
-**Пакет в NAND образа.** `CORE_IMAGE_EXTRA_INSTALL` в `antminer-image.bb`. Внимавай за лимита
-20 MB (билдът спира над него). По-големите неща → feed (`antminer-feed-extras.bb`).
+**Package in the NAND image.** `CORE_IMAGE_EXTRA_INSTALL` in `antminer-image.bb`. Watch the
+20 MB limit (the build stops above it). Larger things → feed (`antminer-feed-extras.bb`).
 
-**Кернел опция.** `bash firmware/build-kernel.sh menuconfig` (записва обратно в
-`firmware/kernel/defconfig`), после пребилд на `linux-antminer`. Модули не се пакетират:
-всичко трябва да е `=y`. Лимитът за кернела в NAND е 5 MB.
+**Kernel option.** `bash firmware/build-kernel.sh menuconfig` (writes back to
+`firmware/kernel/defconfig`), then rebuild `linux-antminer`. Modules are not packaged:
+everything must be `=y`. The kernel limit in NAND is 5 MB.
 
-**Нов pin профил.** Създай от редактора (записва в `/config/pinmux/` на платката) и го свали
-с Export YAML в `firmware/pinmux/boards/`, за да влезе в образите и на картата.
+**New pin profile.** Create it in the editor (it saves to `/config/pinmux/` on the board) and
+download it with Export YAML into `firmware/pinmux/boards/`, so that it gets into the images and
+onto the card.
 
-**Промяна на фиксираната част на DTB.** `dts/am335x-antminer-base.dtsi`. Ако заемаш нов pad,
-добави го в `RESERVED` в `gen-dts.py`, за да не го дава генераторът на профилите.
+**Changing the fixed part of the DTB.** `dts/am335x-antminer-base.dtsi`. If you take a new pad,
+add it to `RESERVED` in `gen-dts.py`, so the generator does not give it to the profiles.
 
-**Web UI.** Разработва се на PC-то срещу файловете в repo-то:
+**Web UI.** Developed on the PC against the files in the repo:
 ```sh
 cd /mnt/e/Antminer/repo/firmware/web
 ANTMINER_PINMUX=../pinmux ANTMINER_CONFIG=/tmp/cfg ANTMINER_PAYLOAD=../out/sdcard python3 run.py --port 8088
-python3 test_smoke.py          # всички страници + YAML кръгово преобразуване на профилите
+python3 test_smoke.py          # all pages + YAML round-trip conversion of the profiles
 ```
-Нужни са `python3-flask` и `python3-yaml` във WSL. NAND страниците и build на профил искат
-`antminer-dtb`/`mtd` и работят само на платката. Бързо качване на платка без пребилд:
-`scp` на файловете в `/usr/share/antminer/web/antminer_web/` и `/etc/init.d/antminer-web restart`.
+`python3-flask` and `python3-yaml` are needed in WSL. The NAND pages and profile build require
+`antminer-dtb`/`mtd` and only work on the board. Quick upload to a board without a rebuild:
+`scp` the files to `/usr/share/antminer/web/antminer_web/` and `/etc/init.d/antminer-web restart`.
 
-## Проверки преди commit
+## Checks before commit
 
 ```sh
 python3 firmware/web/test_smoke.py
-bash firmware/pinmux/build-dtb.sh firmware/pinmux/boards/default.yaml   # регенерира am335x-antminer.dts
+bash firmware/pinmux/build-dtb.sh firmware/pinmux/boards/default.yaml   # regenerates am335x-antminer.dts
 bash firmware/yocto/build.sh fg
 ```
-Ако `default.yaml` е променен, `dts/am335x-antminer.dts` трябва да е в същия commit.
+If `default.yaml` is changed, `dts/am335x-antminer.dts` must be in the same commit.
 
-## Хардуерни факти, които не се виждат от кода
+## Hardware facts not visible from the code
 
-- 3.8 кернелът на Bitmain номерира `uart1..6` и `gpio1..4`; mainline е `uart0..5`, `gpio0..3`.
-- NAND таймингите в DTS са от am335x-evm; тези на Bitmain дават повредени данни с новия драйвер.
-- U-Boot 2013.04 няма `bootz`: кернелът е uImage, load адрес 0x80008000.
-- ADC е 1.8 V, 12 bit; `ti,am335-sdhci` (не omap_hsmmc) е драйверът за microSD в 6.12.
-- Подробната история (какво е пробвано и защо) е в `firmware/README.md` и `firmware/yocto/README.md`.
+- The Bitmain 3.8 kernel numbers `uart1..6` and `gpio1..4`; mainline uses `uart0..5`, `gpio0..3`.
+- The NAND timings in the DTS are from am335x-evm; the Bitmain ones give corrupted data with the new driver.
+- U-Boot 2013.04 has no `bootz`: the kernel is a uImage, load address 0x80008000.
+- The ADC is 1.8 V, 12 bit; `ti,am335-sdhci` (not omap_hsmmc) is the microSD driver in 6.12.
+- The detailed history (what was tried and why) is in `firmware/README.md` and `firmware/yocto/README.md`.

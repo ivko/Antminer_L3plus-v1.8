@@ -1,29 +1,29 @@
-# legacy — оригиналната Bitmain система (Linux 3.8, Ångström 2013.06)
+# legacy — the original Bitmain system (Linux 3.8, Ångström 2013.06)
 
-Нищо тук не се ползва от текущия проект (`firmware/`). Пази се за справка и за връщане към
-фабричния фърмуер.
+Nothing here is used by the current project (`firmware/`). It is kept for reference and for reverting to
+the factory firmware.
 
-| път | какво |
+| path | what |
 |---|---|
-| `bitmain-recovery/` | фабричният фърмуер на контролера: кернел 3.8, initramfs, DTB, uEnv.txt и `runme.sh` от Bitmain recovery картата. MLO и u-boot.img са в `firmware/boot/bitmain/` |
-| `dts/` | DTS/DTSI за 3.8. Част от тях вероятно са редактирани при стари експерименти; чистият Bitmain DTB е декомпилиран в `firmware/dts/bitmain/` |
-| `images/` | initramfs образи на старата система (original, fixed, nano-mc-opkg) |
-| `scripts/` | repack на initramfs, libmodbus, OpenPLC и GPIO инсталатори за Ångström |
-| `packages/` | libmodbus 3.1.10 за armv7ahf-vfp-neon |
-| `diff/` | дъмпове от старата система (dmesg, pinmux) |
+| `bitmain-recovery/` | the factory firmware of the controller: kernel 3.8, initramfs, DTB, uEnv.txt and `runme.sh` from the Bitmain recovery card. MLO and u-boot.img are in `firmware/boot/bitmain/` |
+| `dts/` | DTS/DTSI for 3.8. Some of them were probably edited during old experiments; the clean Bitmain DTB is decompiled in `firmware/dts/bitmain/` |
+| `images/` | initramfs images of the old system (original, fixed, nano-mc-opkg) |
+| `scripts/` | initramfs repack, libmodbus, OpenPLC and GPIO installers for Ångström |
+| `packages/` | libmodbus 3.1.10 for armv7ahf-vfp-neon |
+| `diff/` | dumps from the old system (dmesg, pinmux) |
 
-Login на старата система: `root` / `admin`.
+Login on the old system: `root` / `admin`.
 
-## Връщане към фабричния фърмуер
+## Reverting to the factory firmware
 
-От работеща платка (Yocto системата или SD картата), с TFTP сървър, който сервира
-`legacy/bitmain-recovery/` (или файловете копирани в `firmware/out/`):
+From a running board (the Yocto system or the SD card), with a TFTP server serving
+`legacy/bitmain-recovery/` (or the files copied into `firmware/out/`):
 ```sh
 cd /tmp && tftp -g -r flash-nand.sh <PC>
 sh flash-nand.sh <PC> uImage.bin am335x-boneblack-bitmainer.dtb initramfs.bin.SD
 ```
-Пише само mtd6/7/8. `flash-nand.sh` е в `firmware/tools/`.
+Writes only mtd6/7/8. `flash-nand.sh` is in `firmware/tools/`.
 
-**Не пускай `runme.sh`.** Това е скриптът на Bitmain recovery картата: освен кернела и
-initramfs-а записва и **u-boot (mtd4) и изтрива env-а (mtd5)**. Ако u-boot.img е повреден или
-не е за тази платка, платката няма как да тръгне без сериен или JTAG ремонт.
+**Do not run `runme.sh`.** This is the script of the Bitmain recovery card: besides the kernel and
+the initramfs it also writes **u-boot (mtd4) and erases the env (mtd5)**. If u-boot.img is corrupted or
+not meant for this board, the board cannot start without a serial or JTAG repair.

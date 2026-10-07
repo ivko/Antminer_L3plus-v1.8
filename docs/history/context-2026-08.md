@@ -1,217 +1,217 @@
 # DIY from Scrap --- Context dump
 
-Дата: 2026-08-19
+Date: 2026-08-19
 
-## Проект: ANTMINER BB-Black V1.8 / L3+ като общ embedded Linux контролер
+## Project: ANTMINER BB-Black V1.8 / L3+ as a general-purpose embedded Linux controller
 
-### 1. Хардуер
+### 1. Hardware
 
--   Платка: ANTMINER BB-Black V1.8.
+-   Board: ANTMINER BB-Black V1.8.
 -   SoC: TI AM3352 / AM335x, ARM Cortex-A8.
--   Платката е BeagleBone Black-подобна, но не е стандартен BBB.
--   Няма стандартния BeagleBone baseboard EEPROM.
--   Device tree описва 256 MiB RAM: memory { device_type = "memory"; reg
+-   The board is BeagleBone Black-like, but it is not a standard BBB.
+-   It does not have the standard BeagleBone baseboard EEPROM.
+-   The device tree describes 256 MiB RAM: memory { device_type = "memory"; reg
     = \<0x80000000 0x10000000\>; };
--   Използва NAND/GPMC вместо стандартната BBB eMMC конфигурация.
--   Налични/описани периферии: Ethernet, USB, MMC/microSD, NAND, GPIO,
+-   It uses NAND/GPMC instead of the standard BBB eMMC configuration.
+-   Available/described peripherals: Ethernet, USB, MMC/microSD, NAND, GPIO,
     UART, I2C, SPI, PWM, timers, AES/SHA.
--   Описани, но disabled в разглеждания DT: PRUSS, CAN0, CAN1, ADC, LCD
-    и част от PWM блоковете.
--   Има pinmux конфликти: едни и същи AM335x pads могат да бъдат
-    UART/I2C/SPI и не могат да се активират едновременно без избор на
+-   Described but disabled in the examined DT: PRUSS, CAN0, CAN1, ADC, LCD
+    and some of the PWM blocks.
+-   There are pinmux conflicts: the same AM335x pads can be
+    UART/I2C/SPI and cannot be activated simultaneously without choosing a
     mux.
 
 ### 2. Hash boards
 
--   Налични са Antminer L3+/L3++ hash boards.
--   Свързани са с идеята BB-Black да се използва и извън оригиналната
-    mining функция.
+-   Antminer L3+/L3++ hash boards are available.
+-   They are related to the idea of using the BB-Black outside of its original
+    mining function as well.
 
-### 3. Оригинална ОС
+### 3. Original OS
 
--   Стар Bitmain firmware, базиран на Ångström/OpenEmbedded.
--   Пакетен мениджър: opkg.
--   Старият публичен feeds.angstrom-distribution.org вече не е наличен.
--   Намерен е архив на Ångström v2013.06 binary feeds.
--   Видяна структура: feeds/v2013.06/ipk/eglibc/ sdk/ armv7ahf-vfp-neon/
+-   Old Bitmain firmware, based on Ångström/OpenEmbedded.
+-   Package manager: opkg.
+-   The old public feeds.angstrom-distribution.org is no longer available.
+-   An archive of the Ångström v2013.06 binary feeds has been found.
+-   Observed structure: feeds/v2013.06/ipk/eglibc/ sdk/ armv7ahf-vfp-neon/
     all/
--   Това позволява да се направи собствен локален HTTP mirror и да се
-    възстанови opkg.
+-   This makes it possible to set up an own local HTTP mirror and to
+    restore opkg.
 
-### 4. Скрипт за обезвреждане на mining логиката
+### 4. Script for neutralizing the mining logic
 
-Потребителят е автор на скрипт, който: - заменя /sbin/monitorcg с
-бездействащ loop; - спира cgminer; - убива monitorcg; - инсталира
-angstrom-feed-configs; - изпълнява opkg update; - инсталира
-update-alternatives, ca-certificates, wget; - настройва wget CA
-certificate; - стартира dropbear; - инсталира dtc/dtc-dev.
+The user is the author of a script that: - replaces /sbin/monitorcg with
+an idle loop; - stops cgminer; - kills monitorcg; - installs
+angstrom-feed-configs; - runs opkg update; - installs
+update-alternatives, ca-certificates, wget; - configures the wget CA
+certificate; - starts dropbear; - installs dtc/dtc-dev.
 
-Оригиналната зависимост към:
-http://feeds.angstrom-distribution.org/feeds/v2013.06/... вече е счупена
-и трябва да се замени с локален mirror.
+The original dependency on:
+http://feeds.angstrom-distribution.org/feeds/v2013.06/... is now broken
+and has to be replaced with a local mirror.
 
 ### 5. Native build environment
 
-Потребителят има build-libmodbus.sh, който директно върху Antminer
-инсталира: - update-alternatives - wget - autoconf - automake -
+The user has build-libmodbus.sh, which installs directly on the
+Antminer: - update-alternatives - wget - autoconf - automake -
 libtool - gcc-dev - gcc-symlinks - cpp-symlinks - g++-symlinks -
 binutils - make - tar
 
-След това сваля и компилира libmodbus 3.1.10: ./configure --prefix=/usr
+It then downloads and compiles libmodbus 3.1.10: ./configure --prefix=/usr
 --sysconfdir=/etc make && make install
 
-Примерно приложение: gcc test.c -o test -I/usr/include/modbus/ -lmodbus
+Example application: gcc test.c -o test -I/usr/include/modbus/ -lmodbus
 
-Цел: BB-Black да може да служи като общ embedded/industrial Linux
-controller, включително Modbus.
+Goal: the BB-Black should be able to serve as a general embedded/industrial Linux
+controller, including Modbus.
 
 ### 6. Initramfs/NAND repack workflow
 
-Потребителят има собствен Bash repacker.
+The user has an own Bash repacker.
 
-Вход: - оригинален initramfs.bin.SD; - new-files.tgz; - optional image
+Input: - original initramfs.bin.SD; - new-files.tgz; - optional image
 name; - optional output filename.
 
-Workflow: 1. Премахва 64-byte U-Boot legacy image header чрез tail
--c+65. 2. Разархивира gzip/cpio. 3. Използва fakeroot. 4. Прилага
-delete.list.txt. 5. Наслагва файловете от new-files.tgz. 6. Repack в
-newc cpio + gzip. 7. Създава нов U-Boot ramdisk image чрез mkimage -A
-arm -O linux -T ramdisk. 8. Git се използва за управление на промените
-по filesystem-а.
+Workflow: 1. Strips the 64-byte U-Boot legacy image header via tail
+-c+65. 2. Extracts the gzip/cpio. 3. Uses fakeroot. 4. Applies
+delete.list.txt. 5. Overlays the files from new-files.tgz. 6. Repacks into
+newc cpio + gzip. 7. Creates a new U-Boot ramdisk image via mkimage -A
+arm -O linux -T ramdisk. 8. Git is used to manage the changes
+to the filesystem.
 
-Важно: този workflow вече работи и засега не е приоритет да бъде
-оптимизиран.
+Important: this workflow already works and for now it is not a priority to
+optimize it.
 
 ### 7. Device Tree workflow
 
-Потребителят компилира собствен DTB: dtc am3352-antminer-next.dts -O dtb
+The user compiles an own DTB: dtc am3352-antminer-next.dts -O dtb
 -o am3352-antminer-next.dtb
 
-После го записва директно: flash_erase /dev/mtd6 0x0 0x1 nandwrite -p
+Then writes it directly: flash_erase /dev/mtd6 0x0 0x1 nandwrite -p
 /dev/mtd6 am3352-antminer-next.dtb
 
-### 8. NAND layout от DTS
+### 8. NAND layout from the DTS
 
-Описани са: - spl: 0x000000, size 0x020000 - spl_backup1: 0x020000, size
+Described are: - spl: 0x000000, size 0x020000 - spl_backup1: 0x020000, size
 0x020000 - spl_backup2: 0x040000, size 0x020000 - spl_backup3: 0x060000,
 size 0x020000 - u-boot: 0x080000, size 0x1c0000 - bootenv: 0x240000,
 size 0x020000 - fdt: 0x260000, size 0x020000 - kernel: 0x280000, size
 0x500000 - root: 0x800000, size 0x1400000 - config: 0x1c00000, size
 0x1400000
 
-Следователно /dev/mtd6 е fdt partition.
+Therefore /dev/mtd6 is the fdt partition.
 
 Boot chain: AM3352 ROM -\> SPL -\> U-Boot -\> FDT -\> kernel -\>
 initramfs/rootfs.
 
-### 9. Device tree файлове
+### 9. Device tree files
 
-Разглеждани са: - am3352-antminer-next.dts - am335x-boneblack.dtsi -
+Examined: - am3352-antminer-next.dts - am335x-boneblack.dtsi -
 am335x-bone-common.dtsi - am335x-bone-btm.dtsi -
 am335x-boneblack-bitmainer.dts
 
-Важно: Не е известно със сигурност кое в локалните DTS/DTSI файлове е
-оригинално Bitmain и кое е редактирано от потребителя при стари
-експерименти с EEPROM. Не трябва автоматично да се приема всичко за
+Important: It is not known for certain what in the local DTS/DTSI files is
+original Bitmain and what was edited by the user during old
+experiments with the EEPROM. Not everything should automatically be assumed to be
 factory source.
 
 ### 10. am3352-antminer-next.dts
 
-Изглежда като експериментален wrapper върху am335x-boneblack.dtsi. Има/е
-имало промени около: - disable на i2c0 / internal EEPROM; - активиране
-на допълнителен UART. Това вероятно е част от експериментите на
-потребителя.
+Looks like an experimental wrapper over am335x-boneblack.dtsi. There are/were
+changes around: - disabling i2c0 / internal EEPROM; - enabling
+an additional UART. This is probably part of the user's
+experiments.
 
 ### 11. am335x-bone-btm.dtsi
 
-Съдържа SPI0/SPI1 pinmux и spidev. SPI max frequency: 16 MHz.
+Contains SPI0/SPI1 pinmux and spidev. SPI max frequency: 16 MHz.
 
-Има I2C1 конфигурация върху pads 0x180/0x184 и описан PCA9547 на 0x70 с
-до шест канала, всеки с 24c256 EEPROM на 0x50. Самият i2c1 е оставен
-disabled. Тази I2C/PCA9547/EEPROM част е подозирана като стара
-потребителска експериментална промяна, не е доказано че е Bitmain
-оригинал.
+There is an I2C1 configuration on pads 0x180/0x184 and a described PCA9547 at 0x70 with
+up to six channels, each with a 24c256 EEPROM at 0x50. i2c1 itself is left
+disabled. This I2C/PCA9547/EEPROM part is suspected to be an old
+experimental change by the user; it is not proven to be Bitmain
+original.
 
-### 12. EEPROM проблемът
+### 12. The EEPROM problem
 
-Трябва да се разграничават две нива:
+Two levels have to be distinguished:
 
-Kernel/device-tree: - Linux не е задължително да има baseboard EEPROM. -
-Хардуерът може да бъде описан директно чрез DT. - Старото BBB tree
-съдържа наследена cape/EEPROM инфраструктура, която може да бъде
+Kernel/device-tree: - Linux does not necessarily need a baseboard EEPROM. -
+The hardware can be described directly via DT. - The old BBB tree
+contains inherited cape/EEPROM infrastructure that can be
 disabled.
 
-SPL/U-Boot: - Това е по-важният неизвестен слой. - Стандартният BBB boot
-flow може да използва EEPROM за board detection и избор на DDR
-configuration. - Antminer BB-Black V1.8 очевидно boot-ва без стандартен
-BBB EEPROM. - Следователно Bitmain SPL/U-Boot вероятно има hardcoded
-board/DDR настройка или друга адаптация.
+SPL/U-Boot: - This is the more important unknown layer. - The standard BBB boot
+flow can use the EEPROM for board detection and for selecting the DDR
+configuration. - The Antminer BB-Black V1.8 evidently boots without a standard
+BBB EEPROM. - Therefore the Bitmain SPL/U-Boot probably has a hardcoded
+board/DDR setting or some other adaptation.
 
-### 13. Основна посока за модернизация
+### 13. Main direction for modernization
 
-Най-нискорисков първи вариант: оригинален Bitmain SPL/U-Boot -\>
-собствен DTB -\> по-нов Linux kernel -\> Debian/Buildroot/друг rootfs,
-вероятно от microSD
+Lowest-risk first option: original Bitmain SPL/U-Boot -\>
+own DTB -\> newer Linux kernel -\> Debian/Buildroot/other rootfs,
+probably from microSD
 
-Предимство: Не се налага веднага да решаваме DDR initialization и EEPROM
-board detection в нов SPL.
+Advantage: We do not immediately have to solve DDR initialization and EEPROM
+board detection in a new SPL.
 
-Следваща фаза: AM3352 ROM -\> собствен/по-нов SPL -\> нов U-Boot -\>
-mainline DTB -\> съвременен Linux
+Next phase: AM3352 ROM -\> own/newer SPL -\> new U-Boot -\>
+mainline DTB -\> modern Linux
 
-За това трябва първо да се анализира оригиналният Bitmain U-Boot/SPL.
+For this, the original Bitmain U-Boot/SPL has to be analyzed first.
 
-### 14. Какво трябва да се установи в U-Boot/SPL
+### 14. What has to be established in U-Boot/SPL
 
--   Как се инициализират 256 MiB DDR.
--   Как се заобикаля липсващият BBB EEPROM.
+-   How the 256 MiB DDR is initialized.
+-   How the missing BBB EEPROM is bypassed.
 -   NAND geometry.
--   BCH/ECC настройки.
+-   BCH/ECC settings.
 -   bootcmd / environment.
--   Как се зареждат FDT и kernel.
--   Дали старият U-Boot може директно да boot-ва съвременен kernel.
--   Дали може безопасно да се boot-ва от microSD без промяна на NAND.
+-   How the FDT and kernel are loaded.
+-   Whether the old U-Boot can directly boot a modern kernel.
+-   Whether it can safely boot from microSD without changing the NAND.
 
 ### 15. BBB_Pins.xlsx
 
-Качен е файл BBB_Pins.xlsx. Съдържа листове: - P8 - P9 - Pin Mode
+A file BBB_Pins.xlsx has been uploaded. It contains sheets: - P8 - P9 - Pin Mode
 Register Value - Offsets
 
-Използва се като AM335x/BBB pinmux справочник: - физически P8/P9 pin; -
+It is used as an AM335x/BBB pinmux reference: - physical P8/P9 pin; -
 ZCZ ball; - signal name; - DT offset; - Mode 0-7; - pin control register
 values; - pad offsets.
 
-Полезен е за превод: DTS offset/value -\> AM335x pad -\> mux функция -\>
-физически pin, както и обратно.
+It is useful for translating: DTS offset/value -\> AM335x pad -\> mux function -\>
+physical pin, and vice versa.
 
 ### 16. GitHub repository
 
-Използван е repository: ivko/Antminer_L3plus-v1.8
+Repository used: ivko/Antminer_L3plus-v1.8
 
-Споделяни са raw GitHub линкове към DTS/DTSI файловете. Някои URL-и
-съдържаха временни token параметри; не трябва да се използват като
-постоянен архив.
+Raw GitHub links to the DTS/DTSI files were shared. Some URLs
+contained temporary token parameters; they should not be used as a
+permanent archive.
 
-### 17. Важен принцип за следваща работа
+### 17. Important principle for further work
 
--   Да не се променя работещият initramfs/repack workflow без конкретна
-    причина.
--   Да не се приема, че всички DTS/DTSI части са factory Bitmain.
--   Да се използват файловете като hardware map и да се сравняват с
-    оригинални източници/история, когато е възможно.
--   Следващият голям обект за reverse engineering е U-Boot/SPL.
--   Крайната DIY цел е платката да се използва като евтин общ
-    Linux/industrial controller, с особен интерес към UART, GPIO, SPI,
-    I2C и Modbus.
+-   Do not change the working initramfs/repack workflow without a specific
+    reason.
+-   Do not assume that all DTS/DTSI parts are factory Bitmain.
+-   Use the files as a hardware map and compare them with
+    original sources/history when possible.
+-   The next big target for reverse engineering is U-Boot/SPL.
+-   The final DIY goal is to use the board as a cheap general-purpose
+    Linux/industrial controller, with particular interest in UART, GPIO, SPI,
+    I2C and Modbus.
 
-### 18. Свързани налични ресурси
+### 18. Related available resources
 
-Потребителят разполага поне с: - ANTMINER BB-Black V1.8 платка/платки; -
-L3+ hash boards; - стар Bitmain/Ångström firmware; - DTS/DTSI source
-collection; - собствен firmware/initramfs modification workflow; -
+The user has at least: - ANTMINER BB-Black V1.8 board/boards; -
+L3+ hash boards; - old Bitmain/Ångström firmware; - DTS/DTSI source
+collection; - own firmware/initramfs modification workflow; -
 Git-based filesystem modifications; - Ångström v2013.06 binary feed
 archive; - native GCC build setup; - libmodbus build script; - DTB
 compile/flash workflow; - BBB_Pins.xlsx pinmux reference.
 
-Този файл е snapshot на текущия разговорен/технически контекст и е
-предназначен да може да бъде подаден обратно в бъдеща сесия.
+This file is a snapshot of the current conversational/technical context and is
+intended to be fed back into a future session.

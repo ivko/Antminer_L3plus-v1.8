@@ -1,37 +1,37 @@
-# 5. Настройка: мрежа, услуги, достъп
+# 5. Configuration: network, services, access
 
-## Достъп до платката
+## Accessing the board
 
-| как | данни |
+| how | details |
 |---|---|
-| конзола | COM порт на USB-serial адаптера, 115200 8N1 (PuTTY). Login `root`, без парола |
-| SSH | `ssh root@<ip>`, без парола (по подразбиране) |
-| web UI | `http://<ip>/` (SD системата винаги; NAND системата след `opkg install antminer-web`) |
+| console | COM port of the USB-serial adapter, 115200 8N1 (PuTTY). Login `root`, no password |
+| SSH | `ssh root@<ip>`, no password (by default) |
+| web UI | `http://<ip>/` (always on the SD system; on the NAND system after `opkg install antminer-web`) |
 | OpenPLC | `http://<ip>:8080/`, `openplc` / `openplc` |
 
-Hostname-ът е `antminer-<последните 6 hex на MAC>`, например `antminer-731c92`.
+The hostname is `antminer-<last 6 hex digits of the MAC>`, for example `antminer-731c92`.
 
-## Къде са настройките
+## Where the settings live
 
-Всичко, което е специфично за една платка, е на дяла `/config` (NAND mtd9, jffs2). Той не се
-трие при флаш на системата (освен с `--wipe-config` / отметката в UI-а) и е общ за NAND и SD
-системите. Файловете се четат при boot от `/etc/init.d/antminer-config`.
+Everything specific to one board is on the `/config` partition (NAND mtd9, jffs2). It is not
+erased when the system is flashed (except with `--wipe-config` / the checkbox in the UI), and it
+is shared by the NAND and SD systems. The files are read at boot by `/etc/init.d/antminer-config`.
 
-| файл | какво | пример |
+| file | what | example |
 |---|---|---|
-| `/config/hostname` | друг hostname вместо този от MAC | `pump-station-3` |
-| `/config/network` | статичен IP; без файла е DHCP | виж по-долу |
-| `/config/ntp-server` | NTP сървър (първият ред) | `192.168.200.1` |
-| `/config/ssh/authorized_keys` | публични SSH ключове за root | `ssh-ed25519 AAAA...` |
-| `/config/ssh/` | SSH host ключът на платката (да не се сменя при всеки флаш) | |
-| `/config/web-password` | паролата на web UI-а (хеш); без файла UI-ът е отворен | |
-| `/config/pinmux/*.yaml` | локални pinmux профили, записани от редактора | |
+| `/config/hostname` | a hostname to use instead of the MAC-based one | `pump-station-3` |
+| `/config/network` | static IP; without this file DHCP is used | see below |
+| `/config/ntp-server` | NTP server (first line) | `192.168.200.1` |
+| `/config/ssh/authorized_keys` | public SSH keys for root | `ssh-ed25519 AAAA...` |
+| `/config/ssh/` | the board's SSH host key (so it does not change on every flash) | |
+| `/config/web-password` | the web UI password (hash); without this file the UI is open | |
+| `/config/pinmux/*.yaml` | local pinmux profiles saved by the editor | |
 
-Всичко това се настройва и от web UI-а, страница **Services**.
+All of this can also be set from the web UI, page **Services**.
 
-### Статичен IP
+### Static IP
 
-`/config/network` (shell синтаксис):
+`/config/network` (shell syntax):
 ```sh
 MODE="static"
 ADDRESS="192.168.1.50"
@@ -39,63 +39,64 @@ NETMASK="255.255.255.0"
 GATEWAY="192.168.1.1"
 DNS="192.168.1.1"
 ```
-Прилага се при следващия boot (или `/etc/init.d/antminer-config start && /etc/init.d/networking restart`).
-За обратно към DHCP изтрий файла.
+It is applied at the next boot (or `/etc/init.d/antminer-config start && /etc/init.d/networking restart`).
+To go back to DHCP, delete the file.
 
-### Часовник
+### Clock
 
-Платката няма батерия за RTC: без мрежа часовникът тръгва от последния записан час.
-`antminer-ntp` пуска `ntpd` при boot и записва верния час в RTC. Без интернет задай NTP
-сървър в локалната мрежа в `/config/ntp-server`. Грешен час чупи login-а в OpenPLC
-(cookie-то изтича веднага).
+The board has no RTC battery: without a network, the clock starts from the last saved time.
+`antminer-ntp` starts `ntpd` at boot and writes the correct time to the RTC. Without internet
+access, set an NTP server on the local network in `/config/ntp-server`. A wrong time breaks the
+OpenPLC login (the cookie expires immediately).
 
-## Услуги
+## Services
 
-Busybox init + SysV скриптове. Управление: `/etc/init.d/<име> start|stop|restart|status`.
+Busybox init + SysV scripts. Control: `/etc/init.d/<name> start|stop|restart|status`.
 
-| ред | скрипт | какво прави |
+| order | script | what it does |
 |---|---|---|
-| rcS S04 | `mdev` | устройства в /dev |
-| rcS S36 | `antminer-early` | директории в /var, **watchdog** демона (60 s таймаут) |
-| rcS S41 | `antminer-config` | монтира /config, hostname, мрежа, SSH ключове |
-| rc5 S01 | `networking` | eth0 (DHCP или статичен) |
+| rcS S04 | `mdev` | devices in /dev |
+| rcS S36 | `antminer-early` | directories in /var, the **watchdog** daemon (60 s timeout) |
+| rcS S41 | `antminer-config` | mounts /config, hostname, network, SSH keys |
+| rc5 S01 | `networking` | eth0 (DHCP or static) |
 | rc5 S05 | `antminer-ntp` | ntpd + RTC |
 | rc5 S10 | `dropbear` | SSH |
-| rc5 S20 | `syslog` | `/var/log/messages` (в RAM) |
-| rc5 S20 | `antminer-provision` | само на SD картата: монтира /boot, показва банера |
-| rc5 S50 | `antminer-web` | web UI на порт 80 (ако е инсталиран) |
-| rc5 S90 | `openplc` | OpenPLC (ако е инсталиран) |
-| rc5 S99 | `antminer-boot-ok` | маркира успешен boot (нулира брояча на overlay-а) |
+| rc5 S20 | `syslog` | `/var/log/messages` (in RAM) |
+| rc5 S20 | `antminer-provision` | SD card only: mounts /boot, shows the banner |
+| rc5 S50 | `antminer-web` | web UI on port 80 (if installed) |
+| rc5 S90 | `openplc` | OpenPLC (if installed) |
+| rc5 S99 | `antminer-boot-ok` | marks a successful boot (resets the overlay counter) |
 
-Нова услуга на платката: скрипт в `/etc/init.d/`, после `update-rc.d <име> defaults`. В Yocto
-рецепта: `inherit update-rc.d` (виж `antminer-web.bb` като пример).
+New service on the board: a script in `/etc/init.d/`, then `update-rc.d <name> defaults`. In a
+Yocto recipe: `inherit update-rc.d` (see `antminer-web.bb` as an example).
 
 ### Watchdog
 
-`/init` включва hardware watchdog-а още преди услугите, а `antminer-early` пуска демона, който
-го храни. Ако системата увисне за 60 s, платката се рестартира сама. Не го изключвай: платката
-няма Reset бутон. За продължителна работа без демона (дебъг) `/etc/init.d/antminer-early`
-може да се редактира, но платката ще рестартира 60 s след спирането му.
+`/init` enables the hardware watchdog before the services start, and `antminer-early` starts the
+daemon that feeds it. If the system hangs for 60 s, the board restarts by itself. Do not disable
+it: the board has no Reset button. For long work without the daemon (debugging),
+`/etc/init.d/antminer-early` can be edited, but the board will restart 60 s after the daemon stops.
 
-## Логове
+## Logs
 
 ```sh
 dmesg | tail
-tail -f /var/log/messages          # syslog, в RAM, губи се при рестарт
+tail -f /var/log/messages          # syslog, in RAM, lost on restart
 cat /var/log/antminer-web.log      # web UI
 ```
 
-## Сигурност
+## Security
 
-Образите се билдват с `debug-tweaks`: root без парола по SSH и конзола, web UI-ът без парола.
-Това е удобно в лабораторията и неприемливо в реална мрежа. Минимумът преди разгръщане:
+The images are built with `debug-tweaks`: root has no password on SSH and the console, and the web
+UI has no password. This is convenient in the lab and unacceptable on a real network. The minimum
+before deployment:
 
-1. Сложи SSH ключ в `/config/ssh/authorized_keys` и парола на web UI-а (Services).
-2. Смени паролата на OpenPLC (`openplc`/`openplc`) от неговия UI.
-3. Махни `debug-tweaks` от `IMAGE_FEATURES` в
-   `firmware/yocto/meta-antminer/recipes-core/images/antminer-image.bb` и добави root парола
-   през `EXTRA_USERS_PARAMS` (`inherit extrausers`), пребилдвай и флашни. `passwd` на самата
-   платка работи само при overlay и не оцелява при `antminer-data wipe`.
-4. Feed сървърът е обикновен HTTP без автентикация; дръж го само в доверена мрежа.
+1. Put an SSH key in `/config/ssh/authorized_keys` and set a web UI password (Services).
+2. Change the OpenPLC password (`openplc`/`openplc`) from its UI.
+3. Remove `debug-tweaks` from `IMAGE_FEATURES` in
+   `firmware/yocto/meta-antminer/recipes-core/images/antminer-image.bb` and add a root password
+   via `EXTRA_USERS_PARAMS` (`inherit extrausers`), rebuild and flash. `passwd` on the board itself
+   only works with the overlay and does not survive `antminer-data wipe`.
+4. The feed server is plain HTTP without authentication; keep it on a trusted network only.
 
-Modbus TCP няма автентикация по дизайн: всеки в мрежата може да пише изходи.
+Modbus TCP has no authentication by design: anyone on the network can write outputs.

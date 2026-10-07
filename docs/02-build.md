@@ -1,112 +1,112 @@
-# 2. Билд от нулата
+# 2. Build from scratch
 
-Всичко се билдва с Yocto (scarthgap) в WSL2 на Windows. На обикновен Linux (Ubuntu 22.04/24.04)
-работи по същия начин; `tools/antminer.py` работи и на двете, само `write-sd.ps1` е за Windows.
+Everything is built with Yocto (scarthgap) in WSL2 on Windows. On plain Linux (Ubuntu 22.04/24.04)
+it works the same way; `tools/antminer.py` works on both, only `write-sd.ps1` is Windows-only.
 
-## Какво трябва на PC-то
+## What the PC needs
 
 | | |
 |---|---|
-| ОС | Windows 10/11 с WSL2 и Ubuntu 24.04 (`wsl --install -d Ubuntu-24.04`) |
-| диск | ~60 GB свободни **във WSL** (ext4 диска на дистрибуцията): build ~45 GB, downloads ~2 GB, sstate ~2.5 GB |
-| RAM / CPU | 16 GB+ и колкото повече ядра, толкова по-бързо |
-| мрежа | интернет при първия билд (сорсове) |
-| Windows | Python 3 (за TFTP/HTTP сървърите и тестовете), Git; по желание PuTTY за конзолата |
-| хардуер | USB-serial адаптер 3.3 V към конзолата на платката (COM порт, 115200) |
+| OS | Windows 10/11 with WSL2 and Ubuntu 24.04 (`wsl --install -d Ubuntu-24.04`) |
+| disk | ~60 GB free **inside WSL** (the distribution's ext4 disk): build ~45 GB, downloads ~2 GB, sstate ~2.5 GB |
+| RAM / CPU | 16 GB+, and the more cores the faster |
+| network | internet for the first build (sources) |
+| Windows | Python 3 (for the TFTP/HTTP servers and the tests), Git; optionally PuTTY for the console |
+| hardware | 3.3 V USB-serial adapter to the board console (COM port, 115200) |
 
-Repo-то може да е където и да е; скриптовете намират пътя сами. Примерите тук ползват
-`E:\Antminer\repo` (във WSL `/mnt/e/Antminer/repo`).
+The repo can be anywhere; the scripts find the path themselves. The examples here use
+`E:\Antminer\repo` (in WSL `/mnt/e/Antminer/repo`).
 
-## Настройки на PC-то: `firmware/tools/site.conf`
+## PC settings: `firmware/tools/site.conf`
 
-IP-то на PC-то в мрежата на платките, серийният порт, портът на feed-а и пътят до Yocto
-дървото са на едно място. Не редактирай `site.conf`; създай до него `site.local.conf` (не е в
-git) само с това, което е различно:
+The PC's IP on the boards' network, the serial port, the feed port and the path to the Yocto
+tree are in one place. Do not edit `site.conf`; create `site.local.conf` next to it (not in
+git) with only what differs:
 ```
 PC_IP=192.168.1.20
 SERIAL_PORT=/dev/ttyUSB0
 ```
-Празен `PC_IP` = автоматично. Проверка: `python firmware/tools/antminer.py config`.
-`antminer.py` иска Python 3.8+ и `pip install pyserial`.
+Empty `PC_IP` = automatic. Check: `python firmware/tools/antminer.py config`.
+`antminer.py` needs Python 3.8+ and `pip install pyserial`.
 
-## Първи билд
+## First build
 
 ```sh
-# във WSL
+# in WSL
 bash /mnt/e/Antminer/repo/firmware/yocto/setup-yocto.sh
 ```
 
-Скриптът:
-1. инсталира host пакетите за Yocto (иска `sudo` веднъж);
-2. клонира `poky` и `meta-openembedded` (клон scarthgap) в `~/antminer/yocto`;
-3. сваля кернела 6.12.112 и проверява sha256;
-4. пише `build/conf/local.conf` и `bblayers.conf` (само ако ги няма);
-5. пуска пълния билд във фон.
+The script:
+1. installs the host packages for Yocto (asks for `sudo` once);
+2. clones `poky` and `meta-openembedded` (branch scarthgap) into `~/antminer/yocto`;
+3. downloads kernel 6.12.112 and checks its sha256;
+4. writes `build/conf/local.conf` and `bblayers.conf` (only if they do not exist);
+5. starts the full build in the background.
 
-Адресът на feed-а (`PC_IP:FEED_PORT` от `site.conf`, или `FEED_HOST=ip:порт` пред командата)
-влиза в `/etc/opkg/base-feeds.conf` на всички образи. Ако PC-то е с друг IP по-късно,
-виж [04-packages.md](04-packages.md#feed-адресът).
+The feed address (`PC_IP:FEED_PORT` from `site.conf`, or `FEED_HOST=ip:port` before the command)
+goes into `/etc/opkg/base-feeds.conf` of all images. If the PC has a different IP later,
+see [04-packages.md](04-packages.md#the-feed-address).
 
-Първият билд отнема 2-4 часа. Следене:
+The first build takes 2-4 hours. Monitoring:
 
 ```sh
-bash /mnt/e/Antminer/repo/firmware/yocto/build.sh status      # работи ли + последните редове
+bash /mnt/e/Antminer/repo/firmware/yocto/build.sh status      # is it running + the last lines
 tail -f ~/antminer/yocto/build/bitbake.log
 ```
 
-Последният ред на лога е `BITBAKE_EXIT=0` при успех.
+The last line of the log is `BITBAKE_EXIT=0` on success.
 
-## Следващи билдове
+## Later builds
 
 ```sh
-bash /mnt/e/Antminer/repo/firmware/yocto/build.sh            # всичко, във фон
-bash /mnt/e/Antminer/repo/firmware/yocto/build.sh fg         # всичко, на преден план
-bash /mnt/e/Antminer/repo/firmware/yocto/build.sh antminer-provision-image   # само един образ
+bash /mnt/e/Antminer/repo/firmware/yocto/build.sh            # everything, in the background
+bash /mnt/e/Antminer/repo/firmware/yocto/build.sh fg         # everything, in the foreground
+bash /mnt/e/Antminer/repo/firmware/yocto/build.sh antminer-provision-image   # only one image
 ```
 
-„Всичко“ е: `antminer-image`, `antminer-provision-image`, `antminer-feed-image` и
-`package-index`. Bitbake пребилдва само променените части; промяна в web UI-а е минута,
-промяна в кернела ~10 минути.
+"Everything" is: `antminer-image`, `antminer-provision-image`, `antminer-feed-image` and
+`package-index`. Bitbake rebuilds only the changed parts; a change in the web UI takes a minute,
+a change in the kernel ~10 minutes.
 
-## Какво се получава
+## What you get
 
-В `~/antminer/yocto/build/tmp/deploy/images/antminer-bbb/`:
+In `~/antminer/yocto/build/tmp/deploy/images/antminer-bbb/`:
 
-| файл | за |
+| file | for |
 |---|---|
-| `uImage` | кернел → NAND mtd7 |
-| `am335x-antminer.dtb` | DTB на профила `default` → NAND mtd6 |
-| `profile-<име>.dtb` | DTB на всеки профил от `firmware/pinmux/boards/` |
+| `uImage` | kernel → NAND mtd7 |
+| `am335x-antminer.dtb` | DTB of the `default` profile → NAND mtd6 |
+| `profile-<name>.dtb` | DTB of each profile from `firmware/pinmux/boards/` |
 | `antminer-image-antminer-bbb.rootfs.cpio.gz.u-boot` | initramfs → NAND mtd8 |
-| `antminer-provision-image-antminer-bbb.rootfs.wic` | цялата провизираща SD карта |
+| `antminer-provision-image-antminer-bbb.rootfs.wic` | the whole provisioning SD card |
 
-В `~/antminer/yocto/build/tmp/deploy/ipk/` е feed-ът (виж 04-packages).
+The feed is in `~/antminer/yocto/build/tmp/deploy/ipk/` (see 04-packages).
 
-Повечето имена са symlink-ове към файлове с дата в името. От Windows (`\\wsl$\...`)
-symlink-овете често не се отварят; ползвай файла с датата или копирай с:
+Most names are symlinks to files with a date in the name. From Windows (`\\wsl$\...`)
+the symlinks often do not open; use the dated file or copy with:
 
 ```sh
-python firmware/tools/antminer.py stage        # или във WSL: bash firmware/tools/stage-out.sh
+python firmware/tools/antminer.py stage        # or in WSL: bash firmware/tools/stage-out.sh
 ```
 
-Той слага последните резултати в `firmware/out/` под постоянни имена (`uImage-yocto.bin`,
-`am335x-antminer-<профил>.dtb`, `antminer-image.cpio.gz.u-boot`, `antminer-provision.wic`,
-`flash-nand.sh`), които ползват netboot, deploy-dtb и write-sd.
+It puts the latest results in `firmware/out/` under fixed names (`uImage-yocto.bin`,
+`am335x-antminer-<profile>.dtb`, `antminer-image.cpio.gz.u-boot`, `antminer-provision.wic`,
+`flash-nand.sh`), which netboot, deploy-dtb and write-sd use.
 
-## Възпроизводимост
+## Reproducibility
 
-- Кернелът е фиксиран: 6.12.112, sha256 в `linux-antminer_6.12.bb`.
-- `poky` и `meta-openembedded` се клонират като последното от клон scarthgap. Билдът от
-  2026-10 е с poky `3a3d07f625ae` и meta-openembedded `0f00f8b9a219`. Ако нова версия
-  счупи нещо, `git checkout` на тези commit-и в `~/antminer/yocto/poky` и `meta-openembedded`.
-- OpenPLC е фиксиран по commit (`SRCREV` в `openplc-runtime_git.bb`).
-- `~/antminer/yocto/downloads` съдържа всички сорсове (~2 GB). С него билдът минава без интернет
-  и без риск upstream да е изчезнал. `bash firmware/yocto/backup-downloads.sh` го копира до repo-то
-  (`E:\Antminer\backup\yocto-downloads`); на нова машина `... restore` преди `setup-yocto.sh`.
+- The kernel is pinned: 6.12.112, sha256 in `linux-antminer_6.12.bb`.
+- `poky` and `meta-openembedded` are cloned as the latest of branch scarthgap. The build from
+  2026-10 uses poky `3a3d07f625ae` and meta-openembedded `0f00f8b9a219`. If a new version
+  breaks something, `git checkout` these commits in `~/antminer/yocto/poky` and `meta-openembedded`.
+- OpenPLC is pinned to a commit (`SRCREV` in `openplc-runtime_git.bb`).
+- `~/antminer/yocto/downloads` contains all sources (~2 GB). With it the build works without internet
+  and without the risk that upstream has disappeared. `bash firmware/yocto/backup-downloads.sh` copies it next to the repo
+  (`E:\Antminer\backup\yocto-downloads`); on a new machine run `... restore` before `setup-yocto.sh`.
 
-## Почистване
+## Cleaning
 
 ```sh
-bash /mnt/e/Antminer/repo/firmware/yocto/build.sh <рецепта> -c cleansstate   # една рецепта наново
-rm -rf ~/antminer/yocto/build/tmp                                            # всичко наново (sstate остава, бързо е)
+bash /mnt/e/Antminer/repo/firmware/yocto/build.sh <recipe> -c cleansstate   # rebuild one recipe from scratch
+rm -rf ~/antminer/yocto/build/tmp                                            # rebuild everything (sstate stays, it is fast)
 ```

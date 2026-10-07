@@ -1,100 +1,100 @@
-# 4. Feed сървър и инсталиране на пакети
+# 4. Feed server and installing packages
 
-Образът в NAND е минимален (~5.6 MB). Всичко по-голямо (OpenPLC с компилатора, Python, web UI-а
-на NAND системата, инструменти) се инсталира с `opkg` от feed-а, който билдът прави, и се пази
-на data дяла (overlay).
+The image in NAND is minimal (~5.6 MB). Everything larger (OpenPLC with the compiler, Python, the web UI
+for the NAND system, tools) is installed with `opkg` from the feed that the build produces, and is stored
+on the data partition (overlay).
 
-## Предварително условие: overlay
+## Prerequisite: overlay
 
-Без overlay root-ът е в RAM и всичко инсталирано изчезва при рестарт.
+Without the overlay the root is in RAM and everything installed is lost on restart.
 
 ```sh
-antminer-data status        # трябва: "root: overlay on ubi0:data"
+antminer-data status        # expected: "root: overlay on ubi0:data"
 ```
 
-Ако не е: `antminer-data init` (само на нова платка, трие mtd10), `antminer-data enable`, `reboot`.
-Командите на `antminer-data`:
+If not: `antminer-data init` (only on a new board, erases mtd10), `antminer-data enable`, `reboot`.
+The `antminer-data` commands:
 
-| команда | какво |
+| command | what |
 |---|---|
-| `status` | откъде е root-ът, заето място, брояч на неуспешни boot-ове |
-| `init` | форматира mtd10 като UBIFS (трие всичко там) |
-| `enable` / `disable` | overlay от следващия boot / обратно към чист RAM (данните остават) |
-| `wipe` | изтрива всичко инсталирано (връща фабричния образ); само при изключен overlay |
-| `mount` | монтира `/data` при изключен overlay, за преглед |
+| `status` | where the root comes from, used space, failed boot counter |
+| `init` | formats mtd10 as UBIFS (erases everything there) |
+| `enable` / `disable` | overlay from the next boot / back to plain RAM (the data stays) |
+| `wipe` | deletes everything installed (restores the factory image); only with the overlay disabled |
+| `mount` | mounts `/data` with the overlay disabled, for inspection |
 
-Защита: ако 3 поредни boot-а с overlay не стигнат до края на стартирането, overlay-ът се
-изключва сам и платката тръгва от чистия образ.
+Protection: if 3 consecutive boots with the overlay do not reach the end of startup, the overlay
+disables itself and the board boots from the clean image.
 
-## Feed сървърът
+## The feed server
 
-Feed-ът е `~/antminer/yocto/build/tmp/deploy/` във WSL, сервиран по HTTP на порт 8000.
+The feed is `~/antminer/yocto/build/tmp/deploy/` in WSL, served over HTTP on port 8000.
 
 ```sh
-python firmware/tools/antminer.py feed start     # във фон, връща веднага
+python firmware/tools/antminer.py feed start     # in the background, returns immediately
 python firmware/tools/antminer.py feed status
 python firmware/tools/antminer.py feed stop
-python firmware/tools/antminer.py feed serve     # на преден план, Ctrl-C спира
+python firmware/tools/antminer.py feed serve     # in the foreground, Ctrl-C stops it
 ```
 
-Работи и на Windows (чете feed-а от WSL през `\\wsl$`), и на Linux. Портът е `FEED_PORT` от
-`site.conf`. Windows Firewall трябва да пуска TCP 8000:
+It works both on Windows (reads the feed from WSL through `\\wsl$`) and on Linux. The port is `FEED_PORT` from
+`site.conf`. Windows Firewall must allow TCP 8000:
 ```powershell
 netsh advfirewall firewall add rule name="opkg feed" dir=in action=allow protocol=TCP localport=8000
 ```
-Проверка от браузър: `http://<PC>:8000/ipk/all/Packages.gz` се сваля.
+Check from a browser: `http://<PC>:8000/ipk/all/Packages.gz` downloads.
 
-След всеки билд индексът се обновява от `package-index` (част от пълния билд). Ако си
-билдвал само една рецепта: `bash firmware/yocto/build.sh package-index`.
+After each build the index is updated by `package-index` (part of the full build). If you
+built only one recipe: `bash firmware/yocto/build.sh package-index`.
 
-### Feed адресът
+### The feed address
 
-Платките търсят feed-а на адреса, вграден при билда (`FEED_HOST`, по подразбиране
-`192.168.200.104:8000`), в `/etc/opkg/base-feeds.conf`:
+The boards look for the feed at the address built in at build time (`FEED_HOST`, default
+`192.168.200.104:8000`), in `/etc/opkg/base-feeds.conf`:
 ```
 src/gz uri-all-0 http://192.168.200.104:8000/ipk/all
 src/gz uri-cortexa8hf-neon-0 http://192.168.200.104:8000/ipk/cortexa8hf-neon
 src/gz uri-antminer_bbb-0 http://192.168.200.104:8000/ipk/antminer_bbb
 ```
-Ако PC-то е с друг IP: редактирай файла на платката (при overlay промяната остава), или
-смени `PACKAGE_FEED_URIS` в `~/antminer/yocto/build/conf/local.conf` и пребилдвай образите.
+If the PC has a different IP: edit the file on the board (with the overlay the change persists), or
+change `PACKAGE_FEED_URIS` in `~/antminer/yocto/build/conf/local.conf` and rebuild the images.
 
-## Инсталиране
+## Installing
 
 ```sh
 opkg update
-opkg install openplc-runtime          # OpenPLC + компилатор + Python (~180 пакета, ~86 MB)
-opkg install antminer-web             # web UI-ът и на NAND системата (порт 80)
-opkg list | grep -i <нещо>            # търсене
-opkg remove <пакет>
+opkg install openplc-runtime          # OpenPLC + compiler + Python (~180 packages, ~86 MB)
+opkg install antminer-web             # the web UI on the NAND system too (port 80)
+opkg list | grep -i <something>       # search
+opkg remove <package>
 ```
 
-Полезни пакети от feed-а:
+Useful packages from the feed:
 
-| пакет | какво |
+| package | what |
 |---|---|
-| `openplc-runtime` | OpenPLC v3 с hardware layer за платката, web на 8080, Modbus TCP 502 |
-| `antminer-web` | web UI: NAND, pinmux редактор, настройки (порт 80) |
-| `antminer-pinmux` | `antminer-dtb` и генераторът на DTB (идва с antminer-web) |
-| `libmodbus-dev`, `libgpiod-dev`, `gcc`, `g++`, `make` | за собствени C програми на платката |
-| `python3`, `python3-pymodbus` | Python и Modbus |
-| `i2c-tools`, `libgpiod-tools`, `mtd-utils` | вече са в образа |
+| `openplc-runtime` | OpenPLC v3 with a hardware layer for the board, web on 8080, Modbus TCP 502 |
+| `antminer-web` | web UI: NAND, pinmux editor, settings (port 80) |
+| `antminer-pinmux` | `antminer-dtb` and the DTB generator (comes with antminer-web) |
+| `libmodbus-dev`, `libgpiod-dev`, `gcc`, `g++`, `make` | for your own C programs on the board |
+| `python3`, `python3-pymodbus` | Python and Modbus |
+| `i2c-tools`, `libgpiod-tools`, `mtd-utils` | already in the image |
 
-Пълният списък пакети, които билдът гарантира във feed-а, е в
-`firmware/yocto/meta-antminer/recipes-core/packagegroups/antminer-feed-extras.bb`. Във feed-а
-има и всичко, което билдът е минал по пътя (~2200 пакета), но не всичко е тествано.
+The full list of packages that the build guarantees in the feed is in
+`firmware/yocto/meta-antminer/recipes-core/packagegroups/antminer-feed-extras.bb`. The feed
+also has everything the build produced along the way (~2200 packages), but not all of it is tested.
 
-## Кешът на opkg
+## The opkg cache
 
-Изтеглените пакети се кешират в RAM (`/var/volatile/cache/opkg`, `volatile_cache 1` в
-`/etc/opkg/antminer.conf`) и изчезват при рестарт, за да не пълнят data дяла. Индексите от
-`opkg update` са в `/var/lib/opkg/lists` (на overlay-а, няколко MB):
+Downloaded packages are cached in RAM (`/var/volatile/cache/opkg`, `volatile_cache 1` in
+`/etc/opkg/antminer.conf`) and are lost on restart, so they do not fill the data partition. The indexes from
+`opkg update` are in `/var/lib/opkg/lists` (on the overlay, a few MB):
 ```sh
 rm -rf /var/volatile/cache/opkg/*  /var/lib/opkg/lists/*
 df -h /data
 ```
 
-## Място
+## Space
 
-Data дялът е 185 MB използваеми. OpenPLC заема ~86 MB. При пълен дял `opkg` спира с грешка
-за място; `antminer-data wipe` (при изключен overlay) връща чисто състояние.
+The data partition has 185 MB usable. OpenPLC takes ~86 MB. When the partition is full `opkg` stops with an
+out-of-space error; `antminer-data wipe` (with the overlay disabled) restores a clean state.

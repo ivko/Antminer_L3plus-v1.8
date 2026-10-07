@@ -1,52 +1,52 @@
-# 3. Слагане на системата на платка
+# 3. Putting the system on a board
 
-Четири начина, от най-удобния към най-ниското ниво:
+Four ways, from the most convenient to the lowest level:
 
-| начин | кога | пише в NAND |
+| method | when | writes to NAND |
 |---|---|---|
-| A. Провизираща SD карта + web UI | нова платка, нормалната работа | да, от UI-а |
-| B. netboot по TFTP | разработка, проба на нов кернел/DTB | не |
-| C. `flash-nand.sh` от работеща платка | без карта, по мрежа | да |
-| D. само DTB | смяна на pinmux профил | само mtd6 |
+| A. Provisioning SD card + web UI | new board, normal use | yes, from the UI |
+| B. netboot over TFTP | development, trying a new kernel/DTB | no |
+| C. `flash-nand.sh` from a running board | no card, over the network | yes |
+| D. DTB only | changing the pinmux profile | mtd6 only |
 
-Преди всичко: прочети SYSBOOT на платката (първи ред на конзолата, `Control_status`).
-`…13` = тръгва от NAND (нормалният случай). `…17` = тръгва **само** от SD карта, виж края.
+First of all: read the board's SYSBOOT (first line on the console, `Control_status`).
+`…13` = boots from NAND (the normal case). `…17` = boots **only** from an SD card, see the end.
 
-## A. Провизираща SD карта
+## A. Provisioning SD card
 
-### 1. Запис на картата
+### 1. Writing the card
 
-Билдът дава `antminer-provision-image-antminer-bbb.rootfs.wic` (~620 MB). Става карта от 1 GB
-нагоре; остатъкът от картата не се ползва.
+The build produces `antminer-provision-image-antminer-bbb.rootfs.wic` (~620 MB). Any card of 1 GB
+or more works; the rest of the card is not used.
 
-**Windows** (картата в четец):
+**Windows** (card in a reader):
 ```powershell
-python firmware\tools\antminer.py stage       # слага .wic в firmware\out
+python firmware\tools\antminer.py stage       # puts the .wic in firmware\out
 powershell -File firmware\tools\write-sd.ps1
 ```
-Скриптът показва USB дисковете между 1 и 64 GB, пита кой е картата и иска `YES`. Пуска се
-като администратор (UAC прозорец), изтрива таблицата на картата, пише образа и проверява
-първите 70 MB. Windows ще покаже дял 2 като непознат (ext4) и може да предложи да го
-форматира: откажи.
+The script lists the USB disks between 1 and 64 GB, asks which one is the card and asks for `YES`. It runs
+as administrator (UAC window), wipes the card's partition table, writes the image and verifies
+the first 70 MB. Windows will show partition 2 as unknown (ext4) and may offer to
+format it: decline.
 
-Други начини: Rufus / balenaEtcher (режим „DD image“), или на Linux:
+Other ways: Rufus / balenaEtcher ("DD image" mode), or on Linux:
 ```sh
 sudo dd if=antminer-provision-image-antminer-bbb.rootfs.wic of=/dev/sdX bs=4M conv=fsync status=progress
 ```
 
-**От работеща платка** (без четец; кернелът трябва да има MMC, всички от 2026-10 имат):
+**From a running board** (no reader; the kernel must have MMC, all from 2026-10 do):
 ```sh
-wget -O - http://<PC>:8000/images/antminer-bbb/<файлът с датата>.wic | dd of=/dev/mmcblk0 bs=1M
+wget -O - http://<PC>:8000/images/antminer-bbb/<the dated file>.wic | dd of=/dev/mmcblk0 bs=1M
 sync
 ```
-После кернелът не вижда новите дялове (mdev е монтирал картата): или reboot, или
-`echo mmc0:XXXX > /sys/bus/mmc/drivers/mmcblk/unbind` и същото с `bind`
-(`ls /sys/bus/mmc/drivers/mmcblk/` дава името).
+Afterwards the kernel does not see the new partitions (mdev has mounted the card): either reboot, or
+`echo mmc0:XXXX > /sys/bus/mmc/drivers/mmcblk/unbind` and the same with `bind`
+(`ls /sys/bus/mmc/drivers/mmcblk/` gives the name).
 
-### 2. Boot от картата
+### 2. Booting from the card
 
-Изключена платка → карта в слота → включи. U-Boot от NAND вижда `uEnv.txt` на картата и
-зарежда системата от нея. След ~20 s на конзолата излиза банер:
+Board powered off → card in the slot → power on. U-Boot from NAND sees `uEnv.txt` on the card and
+loads the system from it. After ~20 s a banner appears on the console:
 
 ```
 ========================================================
@@ -57,89 +57,89 @@ sync
 ========================================================
 ```
 
-IP-то е от DHCP. Без конзола: виж DHCP таблицата на рутера; hostname-ът е
-`antminer-<последните 6 hex на MAC>`.
+The IP comes from DHCP. Without a console: check the router's DHCP table; the hostname is
+`antminer-<last 6 hex digits of the MAC>`.
 
-### 3. Флаш на NAND от web UI-а
+### 3. Flashing NAND from the web UI
 
-Отвори `http://<ip>/` → **NAND**:
+Open `http://<ip>/` → **NAND**:
 
-1. **Scan NAND** показва какво има сега в mtd6/7/8 и дали съвпада с файловете на картата.
-2. **Flash**: избери `uImage`, DTB (`am335x-antminer.dtb` = профил default, или `profile-<име>.dtb`),
-   `initramfs.cpio.gz.u-boot`. На нова платка (с Bitmain фърмуер) отметни „also erase /config“,
-   за да изчезнат старите Bitmain настройки. Всеки дял се проверява по md5 след запис.
-3. **Init** (data дяла): форматира mtd10 като UBIFS. Само веднъж за платка; трие всичко там.
-4. **Enable overlay**: от следващия boot root-ът става persistent.
-5. Изключи платката, извади картата, включи. Платката тръгва от NAND (~12 s до login).
+1. **Scan NAND** shows what is currently in mtd6/7/8 and whether it matches the files on the card.
+2. **Flash**: select `uImage`, the DTB (`am335x-antminer.dtb` = profile default, or `profile-<name>.dtb`),
+   `initramfs.cpio.gz.u-boot`. On a new board (with Bitmain firmware) tick "also erase /config"
+   to remove the old Bitmain settings. Each partition is verified by md5 after writing.
+3. **Init** (the data partition): formats mtd10 as UBIFS. Only once per board; erases everything there.
+4. **Enable overlay**: from the next boot the root becomes persistent.
+5. Power off the board, remove the card, power on. The board boots from NAND (~12 s to login).
 
-Същото без UI-а, от shell-а на SD системата:
+The same without the UI, from the shell of the SD system:
 ```sh
 antminer-flash-nand --wipe-config /boot uImage am335x-antminer.dtb initramfs.cpio.gz.u-boot
 antminer-data init && antminer-data enable
 ```
 
-**Картата се вади само при изключена платка.** Ако я извадиш докато системата работи от нея,
-root-ът изчезва и нищо не може да се изпълни; `echo b > /proc/sysrq-trigger` в още отворен
-shell рестартира платката.
+**Remove the card only when the board is powered off.** If you remove it while the system is running from it,
+the root disappears and nothing can be executed; `echo b > /proc/sysrq-trigger` in a shell that is still open
+restarts the board.
 
-### 4. След първия boot от NAND
+### 4. After the first boot from NAND
 
-Пакетите (OpenPLC, web UI на NAND системата) → [04-packages.md](04-packages.md).
-Мрежа, hostname, SSH ключове → [05-configure.md](05-configure.md).
+Packages (OpenPLC, web UI for the NAND system) → [04-packages.md](04-packages.md).
+Network, hostname, SSH keys → [05-configure.md](05-configure.md).
 
-## B. netboot (нищо не се пише)
+## B. netboot (nothing is written)
 
-PC-то пуска TFTP сървър, скриптът рестартира платката през конзолата, спира U-Boot, тегли
-кернел, DTB и initramfs в RAM и ги стартира. Добро за проба на нов кернел или профил.
+The PC runs a TFTP server, the script restarts the board through the console, stops U-Boot, loads
+the kernel, DTB and initramfs into RAM and starts them. Good for trying a new kernel or profile.
 
 ```powershell
 python firmware\tools\antminer.py stage
-python firmware\tools\antminer.py netboot                                    # кернел, default DTB, initramfs
+python firmware\tools\antminer.py netboot                                    # kernel, default DTB, initramfs
 python firmware\tools\antminer.py netboot --dtb am335x-antminer-breakout.dtb --log boot.log
 ```
 
-- Изисква серийният порт да е свободен (затвори PuTTY) и firewall-ът да пуска UDP 69 за python
+- Requires the serial port to be free (close PuTTY) and the firewall to allow UDP 69 for python
   (Windows: `netsh advfirewall firewall add rule name="TFTP in" dir=in action=allow protocol=UDP localport=69`).
-- Файловете се търсят в `firmware/out/`; портът и IP-то са от `site.conf` (`--port` за друг порт).
-- Платката трябва да е включена; инструментът праща `reboot` по конзолата и спира U-Boot.
-- `antminer.py uboot "printenv" --then boot` изпълнява произволни U-Boot команди по същия начин.
+- The files are looked up in `firmware/out/`; the port and IP come from `site.conf` (`--port` for another port).
+- The board must be powered on; the tool sends `reboot` over the console and stops U-Boot.
+- `antminer.py uboot "printenv" --then boot` runs arbitrary U-Boot commands the same way.
 
-## C. Флаш от работеща платка по TFTP
+## C. Flashing from a running board over TFTP
 
-На платката (каквато и да е система: Yocto, SD, дори старият Ångström):
+On the board (any system: Yocto, SD, even the old Ångström):
 ```sh
 cd /tmp
 tftp -g -r flash-nand.sh <PC>
 sh flash-nand.sh [--wipe-config] <PC> uImage-yocto.bin am335x-antminer-yocto.dtb antminer-image.cpio.gz.u-boot
 reboot
 ```
-TFTP сървърът на PC-то: `python firmware/tools/antminer.py tftp` (сервира `firmware/out/`;
-netboot и deploy-dtb го пускат сами). Скриптът отказва, ако дяловете не са на очакваните места, ако
-файл не се събира, или ако DTB-то не е DTB.
+The TFTP server on the PC: `python firmware/tools/antminer.py tftp` (serves `firmware/out/`;
+netboot and deploy-dtb start it themselves). The script refuses if the partitions are not where expected, if
+a file does not fit, or if the DTB is not a DTB.
 
-## D. Само DTB (друг pinmux профил)
+## D. DTB only (another pinmux profile)
 
-- от web UI-а: Pinmux → профил → **Save + flash to mtd6**;
-- на платката: `antminer-dtb build <профил> && antminer-dtb flash /tmp/am335x-antminer-<профил>.dtb`;
-- от PC-то: `python firmware/tools/antminer.py deploy-dtb <профил>` (`--netboot-only` за проба от RAM).
+- from the web UI: Pinmux → profile → **Save + flash to mtd6**;
+- on the board: `antminer-dtb build <profile> && antminer-dtb flash /tmp/am335x-antminer-<profile>.dtb`;
+- from the PC: `python firmware/tools/antminer.py deploy-dtb <profile>` (`--netboot-only` to try it from RAM).
 
-Подробно в [06-pinmux.md](06-pinmux.md). Ефект след рестарт.
+Details in [06-pinmux.md](06-pinmux.md). Takes effect after a restart.
 
-## Връщане към оригиналния Bitmain фърмуер
+## Going back to the original Bitmain firmware
 
-Оригиналните файлове са в `legacy/bitmain-recovery/`: `uImage.bin`, `initramfs.bin.SD`,
-`am335x-boneblack-bitmainer.dtb`. Копирай ги в `firmware\out\` и:
+The original files are in `legacy/bitmain-recovery/`: `uImage.bin`, `initramfs.bin.SD`,
+`am335x-boneblack-bitmainer.dtb`. Copy them to `firmware\out\` and:
 ```sh
 sh flash-nand.sh <PC> uImage.bin am335x-boneblack-bitmainer.dtb initramfs.bin.SD
 ```
-mtd0-5 не са пипани никога, така че това е пълно връщане (без съдържанието на /config, ако
-е изтрит). Не ползвай `runme.sh` от същата папка: той пише и u-boot (виж `legacy/README.md`).
+mtd0-5 are never touched, so this is a full restore (without the contents of /config, if it
+was erased). Do not use `runme.sh` from the same folder: it also writes u-boot (see `legacy/README.md`).
 
-## Платки със SYSBOOT 0x17 (само SD)
+## Boards with SYSBOOT 0x17 (SD only)
 
-ROM-ът на тези платки зарежда MLO и U-Boot от картата, а NAND изобщо не е в списъка.
-Без карта не тръгват. С провизиращата карта тръгва провизиращата система, както при другите.
+The ROM of these boards loads MLO and U-Boot from the card, and NAND is not in the list at all.
+They do not boot without a card. With the provisioning card the provisioning system boots, as on the others.
 
-За да работят от NAND системата, картата трябва да остане в слота, но без `uEnv.txt` (само
-`MLO` и `u-boot.img` на FAT дял 1): тогава U-Boot от картата не намира `uEnv.txt` и чете
-кернела от NAND. **Това не е тествано** на такава платка.
+To run the NAND system, the card must stay in the slot, but without `uEnv.txt` (only
+`MLO` and `u-boot.img` on FAT partition 1): then U-Boot from the card does not find `uEnv.txt` and reads
+the kernel from NAND. **This has not been tested** on such a board.
