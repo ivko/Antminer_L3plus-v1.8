@@ -30,7 +30,8 @@ $dtb = "am335x-antminer-$Profile.dtb"
 Remove-Item (Join-Path $out $dtb) -ErrorAction SilentlyContinue
 # dtc warnings go to stderr; merge inside bash so PowerShell's strict mode does not abort on them
 $ErrorActionPreference = "Continue"
-$r = wsl bash -c "cd /mnt/e/Antminer/repo/mainline/pinmux && bash build-dtb.sh boards/$Profile.yaml 2>&1" | Out-String
+$pinmuxWsl = (wsl wslpath -a ((Join-Path $main "pinmux") -replace '\\', '/') | Out-String).Trim() -replace "`0", ""
+$r = wsl bash -c "cd '$pinmuxWsl' && bash build-dtb.sh boards/$Profile.yaml 2>&1" | Out-String
 $ErrorActionPreference = "Stop"
 Write-Host (($r -replace $z, '') -split "`r?`n" | Where-Object { $_ -match 'wrote|dts:|dtb:|error' }) -Separator "`n"
 if (-not (Test-Path (Join-Path $out $dtb))) { throw "no $dtb in $out (generator or dtc failed, see above)" }

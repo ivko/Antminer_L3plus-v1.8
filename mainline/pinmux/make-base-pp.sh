@@ -13,7 +13,11 @@
 set -euo pipefail
 HERE=$(cd "$(dirname "$0")" && pwd)
 MAIN=$(cd "$HERE/.." && pwd)
-KSRC="${KSRC:-$HOME/antminer/linux}"
+# kernel tree: build-kernel.sh's clone, else the one the Yocto build unpacked
+if [ -z "${KSRC:-}" ]; then
+    KSRC=$HOME/antminer/linux
+    [ -d "$KSRC/arch/arm/boot/dts/ti/omap" ] || KSRC=$HOME/antminer/yocto/build/tmp/work-shared/antminer-bbb/kernel-source
+fi
 OUT="${1:-$MAIN/out/am335x-antminer-base.pp.dtsi}"
 DTSDIR="$KSRC/arch/arm/boot/dts/ti/omap"
 [ -f "$DTSDIR/am33xx.dtsi" ] || { echo "kernel tree not found at $KSRC (set KSRC)"; exit 1; }
