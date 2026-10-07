@@ -48,6 +48,7 @@ GND (P9.1) ───────────────────────
 | 5c | as 5b plus cpufreq governor `performance` (1 GHz fixed) | 6.12.112 (PREEMPT none) | 40.9 µs | 48.9 µs | 65.3 µs | 71.6 µs | 5.2 µs | `2026-10-07-linux-edge-perf.csv` (533 edges, 200 MHz) |
 | 6 | as 5c on a CONFIG_PREEMPT kernel (netbooted, same config otherwise) | 6.12.112 PREEMPT | 41.1 µs | 49.3 µs | 63.8 µs | 85.7 µs | 5.0 µs | `2026-10-07-linux-edge-preempt.csv` (534 edges, 200 MHz) |
 | 6L | as 6 under load: 2 CPU hogs, UBIFS write loop, 3000 UDP pkt/s (`latency-load.sh` + `latency-flood.py`) | 6.12.112 PREEMPT | 146 µs | 173 µs | 1.22 ms | 1.45 ms | 189 µs | `2026-10-07-linux-edge-preempt-load.csv` (534 edges, 200 MHz) |
+| 5cL | as 5c under the same load (plain kernel) | 6.12.112 (PREEMPT none) | 148 µs | 178 µs | 983 µs | 1.41 ms | 186 µs | `2026-10-07-linux-edge-load.csv` (534 edges, 200 MHz) |
 
 Reading variant 1: the distribution is flat from 1.9 to 51.8 ms, i.e. uniform over one 50 ms
 cycle (the edge arrives at a random phase of the cycle) plus a fixed ~1.9 ms for the cycle's own
@@ -100,7 +101,13 @@ compete with the user thread for the single core. Levers to test: raise the IRQ 
 priority above the user thread, PREEMPT_RT (softirqs become preemptible threads), or avoid the
 threaded path with a tiny in-kernel handler.
 
-Planned variants: 5cL = 5c under the same load (plain kernel); the same on a PREEMPT_RT
+Reading 5cL vs 6L: the same within noise (median 178 vs 173 us, max 1.41 vs 1.45 ms).
+CONFIG_PREEMPT buys nothing on this board, idle or loaded: the tail is work that full
+preemption does not interrupt either (softirqs for the 3000 pkt/s network RX, and the NAND
+driver, which polls the chip's ready/busy in the kernel during writes). The next captures
+isolate the two: load without NAND writes, and load with NAND writes only.
+
+Planned variants: 5cL-net (hogs + network only), 5cL-nand (NAND writes only); the same on a PREEMPT_RT
 kernel (needs the external 6.12-rt patches: 32-bit ARM has no ARCH_SUPPORTS_RT in 6.12); bare metal / RTOS on
 the A8 loaded by U-Boot (no Linux). The AM3352 has no PRU (verified: the PRU-ICSS address space
 gives a bus error and its PRCM module never leaves the disabled state), so a PRU variant is not
