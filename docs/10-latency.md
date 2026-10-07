@@ -41,6 +41,7 @@ GND (P9.1) ───────────────────────
 |---|---|---|---|---|---|---|---|---|
 | 1 | OpenPLC v3, `gpio-echo.st`, task interval 50 ms, Modbus idle | 6.12.112 (PREEMPT none) | 1.90 ms | 26.80 ms | 51.30 ms | 51.80 ms | 14.44 ms | `2026-10-07-openplc-50ms.csv` (1069 edges, 20 kHz) |
 | 2 | OpenPLC v3, `gpio-echo-1ms.st`, task interval 1 ms (CPU saturated, load 2.8) | 6.12.112 (PREEMPT none) | 1.28 ms | 1.97 ms | 2.61 ms | 2.78 ms | 0.38 ms | `2026-10-07-openplc-1ms.csv` (533 edges, 200 MHz) |
+| 3 | `latency-echo` busy poll, SCHED_FIFO 80, mlockall, OpenPLC stopped | 6.12.112 (PREEMPT none) | 2.70 µs | 5.01 µs | 7.11 µs | 9.22 µs | 1.34 µs | `2026-10-07-linux-busypoll.csv` (534 edges, 200 MHz) |
 
 Reading variant 1: the distribution is flat from 1.9 to 51.8 ms, i.e. uniform over one 50 ms
 cycle (the edge arrives at a random phase of the cycle) plus a fixed ~1.9 ms for the cycle's own
@@ -52,7 +53,13 @@ Reading variant 2: again uniform, but 1.3 ms wide starting at 1.28 ms: one OpenP
 ~1.3 ms of work on this CPU, so a 1 ms task interval just runs back to back (load average 2.8).
 The fixed part is the cycle work itself; the PLC runtime, not the kernel, sets the floor here.
 
-Planned variants: the same on a PREEMPT_RT kernel; a minimal C program with libgpiod and `SCHED_FIFO` (no PLC runtime); bare metal / RTOS on
+Reading variant 3: the Linux floor through libgpiod is ~2.7 µs (one GET_VALUES and one
+SET_VALUES ioctl) plus the poll loop period (~4.5 µs, uniform); no outlier above 10 µs in 50 s
+even on a non-RT kernel, with the system otherwise idle. Costs the whole CPU (the RT throttle
+leaves 5% for everything else).
+
+Planned variants: `latency-echo` periodic 1 ms and edge-event modes; the same on a PREEMPT_RT
+kernel (needs the external 6.12-rt patches: 32-bit ARM has no ARCH_SUPPORTS_RT in 6.12); bare metal / RTOS on
 the A8 loaded by U-Boot (no Linux). The AM3352 has no PRU (verified: the PRU-ICSS address space
 gives a bus error and its PRCM module never leaves the disabled state), so a PRU variant is not
 possible on this board.
