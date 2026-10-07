@@ -1,16 +1,16 @@
-# Ångström 3.8 етап (2025)
+# Ångström 3.8 stage (2025)
 
-Първоначалната работа беше върху оригиналната Bitmain система (Linux 3.8.13, Ångström
-2013.06, login `root` / `admin`): repack на initramfs, стари DTS, libmodbus, OpenPLC върху
-стария кернел. Файловете от този етап са в `legacy/` (описани в `legacy/README.md`), заедно с
-фабричния фърмуер за връщане (`legacy/bitmain-recovery/`).
+The initial work was on the original Bitmain system (Linux 3.8.13, Ångström
+2013.06, login `root` / `admin`): initramfs repack, old DTS, libmodbus, OpenPLC on
+the old kernel. The files from this stage are in `legacy/` (described in `legacy/README.md`), together with
+the factory firmware for reverting (`legacy/bitmain-recovery/`).
 
-`context-2026-08.md` в тази директория е бележка от август 2026, преди mainline порта.
-`device-dump/` съдържа логовете от тестовете на mainline порта (netboot, NAND boot, U-Boot
-сесии, дъмп на оригиналния NAND DTB); дневниците в `firmware/README.md` и
-`firmware/yocto/README.md` ги цитират като `device-dump/...`.
+`context-2026-08.md` in this directory is a note from August 2026, before the mainline port.
+`device-dump/` contains the logs from the mainline port tests (netboot, NAND boot, U-Boot
+sessions, dump of the original NAND DTB); the logs in `firmware/README.md` and
+`firmware/yocto/README.md` cite them as `device-dump/...`.
 
-## Предишният README на repo-то
+## The previous README of the repo
 
 ```
 # Antminer_L3plus-v1.8

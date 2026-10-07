@@ -1,82 +1,82 @@
-# 7. OpenPLC и Modbus
+# 7. OpenPLC and Modbus
 
-## Инсталиране и старт
+## Installation and start
 
-На платка с включен overlay (04-packages):
+On a board with the overlay enabled (04-packages):
 ```sh
 opkg update && opkg install openplc-runtime
-/etc/init.d/openplc start            # после тръгва сам при boot
+/etc/init.d/openplc start            # afterwards it starts by itself at boot
 ```
-Web интерфейсът е на `http://<ip>:8080`, `openplc` / `openplc`. Modbus TCP сървърът е на порт
-502, когато PLC-то е в RUN.
+The web interface is at `http://<ip>:8080`, `openplc` / `openplc`. The Modbus TCP server is on
+port 502 when the PLC is in RUN.
 
-Програмите се компилират на самата платка с gcc (~60 s). Затова пакетът носи компилатора и
-заема ~86 MB от data дяла.
+Programs are compiled on the board itself with gcc (~60 s). That is why the package includes the
+compiler and takes ~86 MB of the data partition.
 
-## Входове и изходи
+## Inputs and outputs
 
-Hardware layer-ът (`firmware/yocto/meta-antminer/recipes-openplc/openplc-runtime/files/antminer.cpp`)
-не знае нищо за конкретни пинове. При старт търси GPIO линии с имена `I<n>` и `Q<n>` във
-всички gpiochip-ове (включително I2C експандери) и ADC каналите:
+The hardware layer (`firmware/yocto/meta-antminer/recipes-openplc/openplc-runtime/files/antminer.cpp`)
+knows nothing about specific pins. At start it looks for GPIO lines named `I<n>` and `Q<n>` in
+all gpiochips (including I2C expanders), and for the ADC channels:
 
-| в Linux | в PLC програмата | Modbus |
+| in Linux | in the PLC program | Modbus |
 |---|---|---|
-| линия `I0`..`I127` | `%IX0.0`..`%IX15.7` (`In` = `%IX(n/8).(n%8)`) | discrete inputs 0.. (1x) |
-| линия `Q0`..`Q127` | `%QX0.0`..`%QX15.7` | coils 0.. (0x) |
+| line `I0`..`I127` | `%IX0.0`..`%IX15.7` (`In` = `%IX(n/8).(n%8)`) | discrete inputs 0.. (1x) |
+| line `Q0`..`Q127` | `%QX0.0`..`%QX15.7` | coils 0.. (0x) |
 | AIN0..AIN7 (`in_voltageN_raw`, 0..4095 = 0..1.8 V) | `%IW0`..`%IW7` | input registers 0.. (3x) |
 | | `%QW0`.. | holding registers 0.. (4x) |
 | | `%MW0`.. | holding registers 1024.. |
 
-Кои физически пинове са `I0`/`Q0` решава pinmux профилът (06-pinmux): преименуваш линия в
-редактора, флашваш DTB-то, рестартираш, и същата PLC програма ползва новия пин.
+Which physical pins are `I0`/`Q0` is decided by the pinmux profile (06-pinmux): you rename a line
+in the editor, flash the DTB, restart, and the same PLC program uses the new pin.
 
-Броят намерени линии се вижда в лога при старт на програмата:
+The number of lines found is shown in the log when the program starts:
 `antminer hardware layer: 8 inputs (I*), 8 outputs (Q*), 7 ADC channels`.
 
-Изходите се управляват всеки цикъл. Линия, заета от друг процес (например `gpioset`), не може
-да бъде взета от OpenPLC и обратно.
+The outputs are driven every cycle. A line held by another process (for example `gpioset`) cannot
+be taken by OpenPLC, and vice versa.
 
-**Внимание за Modbus:** сървърът на OpenPLC чете и пише буферите на runtime-а директно, не
-променливите на програмата. Всички намерени `I*`/`Q*`/ADC се виждат по Modbus, дори да не са
-декларирани в програмата, и запис на coil променя изхода, ако програмата не го презаписва.
+**Note on Modbus:** the OpenPLC server reads and writes the runtime buffers directly, not the
+program variables. All `I*`/`Q*`/ADC found are visible over Modbus, even if they are not declared
+in the program, and writing a coil changes the output if the program does not overwrite it.
 
-## Първа програма
+## First program
 
-Пример: `firmware/openplc/examples/gpio-echo.st` (Q0 = I0 или coil 8, Q1 мига на 1 Hz, AIN0 се
-копира в holding register 0).
+Example: `firmware/openplc/examples/gpio-echo.st` (Q0 = I0 or coil 8, Q1 blinks at 1 Hz, AIN0 is
+copied to holding register 0).
 
-През UI-а: Programs → Upload → Compile → Dashboard → Start PLC. Или от PC-то:
+Through the UI: Programs → Upload → Compile → Dashboard → Start PLC. Or from the PC:
 ```powershell
 python firmware\tools\openplc-test.py <ip> --program firmware\openplc\examples\gpio-echo.st
-python firmware\tools\openplc-test.py <ip> --autostart on --only-settings     # RUN след всеки boot
+python firmware\tools\openplc-test.py <ip> --autostart on --only-settings     # RUN after every boot
 python firmware\tools\openplc-test.py <ip> --no-compile --no-start --write-coil 8 1
 ```
-`openplc-test.py` влиза, качва, компилира, стартира и чете по Modbus TCP coils, discrete inputs,
-holding и input регистрите (само стандартна Python библиотека).
+`openplc-test.py` logs in, uploads, compiles, starts, and reads coils, discrete inputs, holding
+and input registers over Modbus TCP (standard Python library only).
 
-Особеност на компилатора (matiec): в един `VAR` блок не може да има едновременно променливи с
-`AT %...` и обикновени (таймери и т.н.); раздели ги в два блока.
+A quirk of the compiler (matiec): one `VAR` block cannot contain both variables with `AT %...`
+and ordinary ones (timers etc.); split them into two blocks.
 
-## Проверка без OpenPLC
+## Checking without OpenPLC
 
 ```sh
 gpioinfo | grep -E '"(I|Q)[0-9]+"'
 gpioset -t0 Q0=1 ; gpioget I0
 cat /sys/bus/iio/devices/iio:device0/in_voltage0_raw
 ```
-Спри OpenPLC (`/etc/init.d/openplc stop`), иначе линиите са заети.
+Stop OpenPLC (`/etc/init.d/openplc stop`), otherwise the lines are busy.
 
-Независима проверка на Modbus: всеки Modbus TCP клиент (ModScan, QModMaster, `pymodbus`) към
-`<ip>:502`, unit id без значение.
+Independent Modbus check: any Modbus TCP client (ModScan, QModMaster, `pymodbus`) to
+`<ip>:502`; the unit id does not matter.
 
 ## Modbus RTU
 
-UART-ите (`/dev/ttyS1`, `S2`, `S4`, `S5` в профила default) могат да се ползват от OpenPLC като
-Modbus slave устройства (Slave Devices в UI-а) или от собствени програми с libmodbus. За RS-485
-трябва линия за посоката (DE): в профила `breakout` това са `RS485_DE0/1`.
+The UARTs (`/dev/ttyS1`, `S2`, `S4`, `S5` in the default profile) can be used by OpenPLC as
+Modbus slave devices (Slave Devices in the UI) or by your own programs with libmodbus. RS-485
+needs a direction line (DE): in the `breakout` profile these are `RS485_DE0/1`.
 
-## Настройки на OpenPLC
+## OpenPLC settings
 
-Settings в UI-а: портове (Modbus 502, EtherNet/IP), „Start in RUN mode“. Базата е
-`/opt/openplc/webserver/openplc.db`, програмите са в `/opt/openplc/webserver/st_files/`
-(на overlay-а).
+Settings in the UI: ports (Modbus 502, EtherNet/IP), "Start in RUN mode". The database is
+`/opt/openplc/webserver/openplc.db`, the programs are in `/opt/openplc/webserver/st_files/`
+(on the overlay).

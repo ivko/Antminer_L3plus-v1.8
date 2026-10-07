@@ -1,95 +1,96 @@
-# 8. Проблеми и решения
+# 8. Problems and solutions
 
-## Конзола и PC
+## Console and PC
 
-**COM порт: „Access to the port is denied“.** Друга програма го държи (най-често PuTTY).
-Затвори я. Ако няма такава и всеки опит виси, драйверът на USB-serial адаптера (Prolific) е
-заклещен: извади адаптера от USB за няколко секунди. Симптом на същото: Task Manager не се
-отваря. Причина: принудително спрян процес, който е чакал на порта; не спирай такива процеси,
-остави ги да изтекат.
+**COM port: "Access to the port is denied".** Another program holds it (most often PuTTY).
+Close it. If there is no such program and every attempt hangs, the USB-serial adapter driver
+(Prolific) is stuck: unplug the adapter from USB for a few seconds. A symptom of the same thing:
+Task Manager does not open. Cause: a forcibly killed process that was waiting on the port; do not
+kill such processes, let them time out.
 
-**Нищо на конзолата.** 115200 8N1, без flow control. TX/RX кръстосани, общ GND, 3.3 V
-нива (не RS-232).
+**Nothing on the console.** 115200 8N1, no flow control. TX/RX crossed, common GND, 3.3 V
+levels (not RS-232).
 
-**netboot не тегли файлове.** Firewall за UDP 69; файловете трябва да са в `firmware/out/`
-(`antminer.py stage`); `PC_IP` (`antminer.py config`) трябва да е IP-то на PC-то в мрежата на
-платката, иначе го задай в `tools/site.local.conf`.
+**netboot does not download files.** Firewall for UDP 69; the files must be in `firmware/out/`
+(`antminer.py stage`); `PC_IP` (`antminer.py config`) must be the PC's IP on the board's network,
+otherwise set it in `tools/site.local.conf`.
 
-**antminer.py: „no answer on the serial console“.** Платката е изключена, портът е грешен
-(`SERIAL_PORT`) или TX/RX са разменени. **„pyserial is missing“**: `pip install pyserial`.
+**antminer.py: "no answer on the serial console".** The board is off, the port is wrong
+(`SERIAL_PORT`), or TX/RX are swapped. **"pyserial is missing"**: `pip install pyserial`.
 
 ## Boot
 
-**Платката винаги тръгва от SD картата.** Така е замислено: U-Boot първо търси `uEnv.txt` на
-картата. Изключи и извади картата за NAND boot.
+**The board always boots from the SD card.** This is by design: U-Boot first looks for `uEnv.txt`
+on the card. Power off and remove the card for a NAND boot.
 
-**Извадих картата, докато работи, и нищо не става.** Root-ът е бил на картата. В отворен shell:
-`echo b > /proc/sysrq-trigger`. Иначе изключи захранването.
+**I removed the card while it was running and nothing happens.** The root was on the card. In an
+open shell: `echo b > /proc/sysrq-trigger`. Otherwise cut the power.
 
-**U-Boot: „micro SD card found“, после „Unrecognized filesystem type“ / „No partition table“.**
-- Дял 1 трябва да е FAT32 (не exFAT) с MBR таблица. Записвай `.wic`, не копирай файлове.
-- Някои карти не работят в 4-bit режим в някои слотове (U-Boot „чете“ нули без грешка).
-  Пробвай друга карта. Диагностика от Linux: `dmesg | grep mmc` (`I/O error` = този проблем).
+**U-Boot: "micro SD card found", then "Unrecognized filesystem type" / "No partition table".**
+- Partition 1 must be FAT32 (not exFAT) with an MBR table. Write the `.wic`, do not copy files.
+- Some cards do not work in 4-bit mode in some slots (U-Boot "reads" zeros without an error).
+  Try another card. Diagnosis from Linux: `dmesg | grep mmc` (`I/O error` = this problem).
 
-**Платката се рестартира сама след ~60 s.** Hardware watchdog-ът не е захранен: системата е
-увиснала преди `antminer-early` (rcS S36) или нещо е спряло `watchdog` демона. Виж конзолата
-докъде стига boot-ът.
+**The board restarts by itself after ~60 s.** The hardware watchdog is not being fed: the system
+hung before `antminer-early` (rcS S36), or something stopped the `watchdog` daemon. Check on the
+console how far the boot gets.
 
-**Overlay-ът изчезна, всичко инсталирано го няма.** `antminer-data status`. След 3 поредни
-недовършени boot-а overlay-ът се изключва сам. Данните са на дяла: оправи причината,
-`antminer-data enable`, `reboot`.
+**The overlay disappeared, everything installed is gone.** `antminer-data status`. After 3
+consecutive incomplete boots, the overlay is disabled automatically. The data is still on the
+partition: fix the cause, `antminer-data enable`, `reboot`.
 
-**Банерът на SD системата е с удвоени букви.** Стара версия на картата (поправено 2026-10-07);
-запиши нов `.wic`.
+**The SD system banner has doubled letters.** Old version of the card (fixed 2026-10-07);
+write a new `.wic`.
 
-## Мрежа и пакети
+## Network and packages
 
-**`opkg update` не може да свали.** Feed сървърът пуснат ли е (`antminer.py feed status`), firewall
-за TCP 8000, правилен ли е IP-то в `/etc/opkg/base-feeds.conf` (04-packages).
+**`opkg update` cannot download.** Is the feed server running (`antminer.py feed status`),
+firewall for TCP 8000, is the IP in `/etc/opkg/base-feeds.conf` correct (04-packages).
 
-**opkg: няма място.** `df -h /data`. Изчисти списъците (`rm -rf /var/lib/opkg/lists/*`) и
-ненужни пакети; крайната мярка е `antminer-data wipe`.
+**opkg: no space.** `df -h /data`. Clear the lists (`rm -rf /var/lib/opkg/lists/*`) and
+unneeded packages; the last resort is `antminer-data wipe`.
 
-**Feed файл дава 404, а го има.** Symlink-овете в deploy директорията не се сервират през
-`\\wsl$`. Ползвай името с датата.
+**A feed file returns 404, but it exists.** Symlinks in the deploy directory are not served
+via `\\wsl$`. Use the name with the date.
 
-**Не знам IP-то на платката.** Конзола (`ip addr`), DHCP таблицата на рутера (hostname
-`antminer-xxxxxx`), или задай статичен IP в `/config/network`.
+**I do not know the board's IP.** Console (`ip addr`), the router's DHCP table (hostname
+`antminer-xxxxxx`), or set a static IP in `/config/network`.
 
-## Web UI и OpenPLC
+## Web UI and OpenPLC
 
-**Login в OpenPLC не прави нищо.** Часовникът на платката е грешен (няма батерия за RTC).
-`date`; задай NTP сървър в `/config/ntp-server` или временно `date -s "2026-10-07 12:00"`.
+**OpenPLC login does nothing.** The board's clock is wrong (no RTC battery).
+`date`; set an NTP server in `/config/ntp-server` or temporarily `date -s "2026-10-07 12:00"`.
 
-**Web UI-ът иска парола, която не помня.** Изтрий `/config/web-password` по SSH или конзолата.
+**The web UI asks for a password I do not remember.** Delete `/config/web-password` via SSH or the console.
 
-**OpenPLC не вижда входовете/изходите.** Линиите трябва да се казват точно `I<n>` / `Q<n>`
-(`gpioinfo`). Свободни ли са (`gpioinfo` показва consumer)? След смяна на профила е нужен рестарт.
+**OpenPLC does not see the inputs/outputs.** The lines must be named exactly `I<n>` / `Q<n>`
+(`gpioinfo`). Are they free (`gpioinfo` shows the consumer)? A restart is needed after changing the profile.
 
-**По Modbus се виждат регистри, които програмата не ползва.** Нормално за OpenPLC (07-openplc).
+**Modbus shows registers the program does not use.** Normal for OpenPLC (07-openplc).
 
-**ADC показва случайни стойности.** Входът е във въздуха. Свържи го (0..1.8 V!).
+**The ADC shows random values.** The input is floating. Connect it (0..1.8 V!).
 
-## Pinmux и I2C
+## Pinmux and I2C
 
-**Профилът не се компилира.** Грешките са по пин: „reserved for NAND“ = пинът е зает от
-системата; „not available“ = pad-ът няма тази функция; „already used“ = два пина с един pad.
+**The profile does not compile.** The errors are per pin: "reserved for NAND" = the pin is used
+by the system; "not available" = the pad does not have that function; "already used" = two pins
+with the same pad.
 
-**I2C устройството липсва.** Драйверът трябва да е в кернела; иначе устройството стои в
-`/sys/bus/i2c/devices/` без `driver`. `i2cdetect -y 2` показва дали чипът отговаря.
-`probe ... failed with error -121` = няма чип на този адрес.
+**The I2C device is missing.** The driver must be in the kernel; otherwise the device sits in
+`/sys/bus/i2c/devices/` without a `driver`. `i2cdetect -y 2` shows whether the chip responds.
+`probe ... failed with error -121` = no chip at this address.
 
-## Билд
+## Build
 
-**Bitbake: липсващи рецепти (python3-flask и др.).** `meta-python` липсва в
-`build/conf/bblayers.conf` (стари setup-и). Добави
+**Bitbake: missing recipes (python3-flask etc.).** `meta-python` is missing from
+`build/conf/bblayers.conf` (old setups). Add
 `~/antminer/yocto/meta-openembedded/meta-python`.
 
-**Билдът спира с „no space“.** Нужни са ~60 GB във WSL. `BB_DISKMON_DIRS` спира билда под 1 GB.
+**The build stops with "no space".** About 60 GB are needed in WSL. `BB_DISKMON_DIRS` stops the build below 1 GB.
 
-**ParseError: unparsed line.** Bitbake не допуска коментар на реда на присвояване
-(`X = "y"  # коментар`); коментарът трябва да е на отделен ред.
+**ParseError: unparsed line.** Bitbake does not allow a comment on an assignment line
+(`X = "y"  # comment`); the comment must be on a separate line.
 
-**Промяна в кернел конфига не влиза.** Единственият кернел конфиг е `firmware/kernel/defconfig`;
-промени го с `bash firmware/build-kernel.sh menuconfig` или `build.sh linux-antminer -c menuconfig`.
-Опции като модули (`=m`) не влизат в образа: всичко трябва да е `=y`.
+**A kernel config change does not take effect.** The only kernel config is `firmware/kernel/defconfig`;
+change it with `bash firmware/build-kernel.sh menuconfig` or `build.sh linux-antminer -c menuconfig`.
+Options built as modules (`=m`) do not get into the image: everything must be `=y`.
