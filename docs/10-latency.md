@@ -51,6 +51,7 @@ GND (P9.1) ───────────────────────
 | 5cL | as 5c under the same load (plain kernel) | 6.12.112 (PREEMPT none) | 148 µs | 178 µs | 983 µs | 1.41 ms | 186 µs | `2026-10-07-linux-edge-load.csv` (534 edges, 200 MHz) |
 | 5cL-net | as 5cL without the NAND writes (2 CPU hogs + 3000 UDP pkt/s) | 6.12.112 (PREEMPT none) | 61 µs | 77 µs | 539 µs | 817 µs | 91 µs | `2026-10-07-linux-edge-load-net.csv` (534 edges, 200 MHz) |
 | 5cL-nand | as 5c with only the UBIFS write loop (no hogs, no network) | 6.12.112 (PREEMPT none) | 149 µs | 213 µs | 310 µs | 325 µs (1.26 ms seen by the program outside the capture) | 31 µs | `2026-10-07-linux-edge-load-nand.csv` (533 edges, 200 MHz) |
+| 7 | **bare metal** (`firmware/baremetal/echo.c`): busy loop, no OS, MPU at 550 MHz as left by U-Boot | none | 285 ns | 560 ns | 840 ns | 850 ns | 162 ns | `2026-10-07-baremetal-busypoll.csv` (534 edges, 200 MHz) |
 
 Reading variant 1: the distribution is flat from 1.9 to 51.8 ms, i.e. uniform over one 50 ms
 cycle (the edge arrives at a random phase of the cycle) plus a fixed ~1.9 ms for the cycle's own
@@ -134,8 +135,15 @@ in progress, and UBIFS/dd keep writes going continuously.
    and rate-limit or isolate network traffic.
 5. For hard bounds below ~100 us under load, Linux on this single-core A8 is not enough;
    that is the case for the bare-metal / RTOS track.
+6. Bare metal (variant 7): 285-850 ns, uniform over one ~565 ns loop iteration; the fixed part
+   (~285 ns) is the input synchroniser plus one GPIO write over the L3/L4 interconnect. That is
+   9x below the Linux busy poll, ~90x below the Linux interrupt wake-up and ~3500x below the
+   OpenPLC 1 ms cycle, at 550 MHz instead of 1 GHz. The hardware is not the limit; the software
+   stack is.
 
-Planned variants: PREEMPT_RT kernel (6.12-rt) under the same loads; the same on a PREEMPT_RT
+Planned variants: bare metal with a GPIO interrupt instead of polling (the no-OS interrupt
+latency), bare metal while serving Modbus RTU on a UART (its 'under load'); PREEMPT_RT kernel
+(6.12-rt) under the same loads; the same on a PREEMPT_RT
 kernel (needs the external 6.12-rt patches: 32-bit ARM has no ARCH_SUPPORTS_RT in 6.12); bare metal / RTOS on
 the A8 loaded by U-Boot (no Linux). The AM3352 has no PRU (verified: the PRU-ICSS address space
 gives a bus error and its PRCM module never leaves the disabled state), so a PRU variant is not
