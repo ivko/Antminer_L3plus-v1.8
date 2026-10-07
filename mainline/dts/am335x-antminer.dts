@@ -18,9 +18,16 @@
  *   0x96c = 0x01  uart0_rtsn uart0_rtsn -> uart4_txd
  *   0x8c0 = 0x04  P8.37 lcd_data8 -> uart5_txd
  *   0x8c4 = 0x34  P8.38 lcd_data9 -> uart5_rxd
- *   0x978 = 0x33  P9.20 uart1_ctsn -> i2c2_sda
- *   0x97c = 0x33  P9.19 uart1_rtsn -> i2c2_scl
- *   0x994 = 0x01  P9.29 mcasp0_fsx -> ehrpwm0b
+ *   0x820 = 0x27  P8.19 gpmc_ad8 gpio0_22 RST3 out
+ *   0x824 = 0x27  P8.13 gpmc_ad9 gpio0_23 LED_GREEN out
+ *   0x828 = 0x37  P8.14 gpmc_ad10 gpio0_26 IP_SIG in
+ *   0x82c = 0x27  P8.17 gpmc_ad11 gpio0_27 RST2 out
+ *   0x830 = 0x27  P8.12 gpmc_ad12 gpio1_12 PLUG3 in
+ *   0x834 = 0x27  P8.11 gpmc_ad13 gpio1_13 LED_RED out
+ *   0x838 = 0x37  P8.16 gpmc_ad14 gpio1_14 RECOVERY in
+ *   0x83c = 0x27  P8.15 gpmc_ad15 gpio1_15 PLUG2 in
+ *   0x840 = 0x27  P9.15 gpmc_a0 gpio1_16 PLUG1 in
+ *   0x84c = 0x27  P9.16 gpmc_a3 gpio1_19 PLUG0 in
  *   0x8a0 = 0x27  P8.45 lcd_data0 gpio2_6 Q2 out
  *   0x8a4 = 0x27  P8.46 lcd_data1 gpio2_7 Q3 out
  *   0x8a8 = 0x27  P8.43 lcd_data2 gpio2_8 Q0 out
@@ -29,7 +36,14 @@
  *   0x8b4 = 0x37  P8.42 lcd_data5 gpio2_11 I3 in
  *   0x8b8 = 0x37  P8.39 lcd_data6 gpio2_12 I0 in
  *   0x8bc = 0x37  P8.40 lcd_data7 gpio2_13 I1 in
- *   + 41 unused free pads forced to GPIO input pull-down (0x27)
+ *   0x958 = 0x27  P9.18 spi0_d1 gpio0_4 RST1 out
+ *   0x95c = 0x27  P9.17 spi0_cs0 gpio0_5 RST0 out
+ *   0x990 = 0x27  P9.31 mcasp0_aclkx gpio3_14 FAN_SPEED1 in
+ *   0x998 = 0x27  P9.30 mcasp0_axr0 gpio3_16 FAN_SPEED0 in
+ *   0x994 = 0x01  P9.29 mcasp0_fsx -> ehrpwm0b
+ *   0x978 = 0x73  P9.20 uart1_ctsn -> i2c2_sda
+ *   0x97c = 0x73  P9.19 uart1_rtsn -> i2c2_scl
+ *   + 27 unused free pads forced to GPIO input pull-down (0x27)
  */
 
 &am33xx_pinmux {
@@ -64,10 +78,30 @@
 		>;
 	};
 
-	i2c2_pins: i2c2-pins {
+	board_gpio_pins: board-gpio-pins {
 		pinctrl-single,pins = <
-			AM33XX_IOPAD(0x978, 0x33)	/* P9.20 uart1_ctsn -> i2c2_sda */
-			AM33XX_IOPAD(0x97c, 0x33)	/* P9.19 uart1_rtsn -> i2c2_scl */
+			AM33XX_IOPAD(0x820, 0x27)	/* P8.19 gpmc_ad8 gpio0_22 RST3 out */
+			AM33XX_IOPAD(0x824, 0x27)	/* P8.13 gpmc_ad9 gpio0_23 LED_GREEN out */
+			AM33XX_IOPAD(0x828, 0x37)	/* P8.14 gpmc_ad10 gpio0_26 IP_SIG in */
+			AM33XX_IOPAD(0x82c, 0x27)	/* P8.17 gpmc_ad11 gpio0_27 RST2 out */
+			AM33XX_IOPAD(0x830, 0x27)	/* P8.12 gpmc_ad12 gpio1_12 PLUG3 in */
+			AM33XX_IOPAD(0x834, 0x27)	/* P8.11 gpmc_ad13 gpio1_13 LED_RED out */
+			AM33XX_IOPAD(0x838, 0x37)	/* P8.16 gpmc_ad14 gpio1_14 RECOVERY in */
+			AM33XX_IOPAD(0x83c, 0x27)	/* P8.15 gpmc_ad15 gpio1_15 PLUG2 in */
+			AM33XX_IOPAD(0x840, 0x27)	/* P9.15 gpmc_a0 gpio1_16 PLUG1 in */
+			AM33XX_IOPAD(0x84c, 0x27)	/* P9.16 gpmc_a3 gpio1_19 PLUG0 in */
+			AM33XX_IOPAD(0x8a0, 0x27)	/* P8.45 lcd_data0 gpio2_6 Q2 out */
+			AM33XX_IOPAD(0x8a4, 0x27)	/* P8.46 lcd_data1 gpio2_7 Q3 out */
+			AM33XX_IOPAD(0x8a8, 0x27)	/* P8.43 lcd_data2 gpio2_8 Q0 out */
+			AM33XX_IOPAD(0x8ac, 0x27)	/* P8.44 lcd_data3 gpio2_9 Q1 out */
+			AM33XX_IOPAD(0x8b0, 0x37)	/* P8.41 lcd_data4 gpio2_10 I2 in */
+			AM33XX_IOPAD(0x8b4, 0x37)	/* P8.42 lcd_data5 gpio2_11 I3 in */
+			AM33XX_IOPAD(0x8b8, 0x37)	/* P8.39 lcd_data6 gpio2_12 I0 in */
+			AM33XX_IOPAD(0x8bc, 0x37)	/* P8.40 lcd_data7 gpio2_13 I1 in */
+			AM33XX_IOPAD(0x958, 0x27)	/* P9.18 spi0_d1 gpio0_4 RST1 out */
+			AM33XX_IOPAD(0x95c, 0x27)	/* P9.17 spi0_cs0 gpio0_5 RST0 out */
+			AM33XX_IOPAD(0x990, 0x27)	/* P9.31 mcasp0_aclkx gpio3_14 FAN_SPEED1 in */
+			AM33XX_IOPAD(0x998, 0x27)	/* P9.30 mcasp0_axr0 gpio3_16 FAN_SPEED0 in */
 		>;
 	};
 
@@ -77,33 +111,17 @@
 		>;
 	};
 
-	board_gpio_pins: board-gpio-pins {
+	i2c2_pins: i2c2-pins {
 		pinctrl-single,pins = <
-			AM33XX_IOPAD(0x8a0, 0x27)	/* P8.45 lcd_data0 gpio2_6 Q2 out */
-			AM33XX_IOPAD(0x8a4, 0x27)	/* P8.46 lcd_data1 gpio2_7 Q3 out */
-			AM33XX_IOPAD(0x8a8, 0x27)	/* P8.43 lcd_data2 gpio2_8 Q0 out */
-			AM33XX_IOPAD(0x8ac, 0x27)	/* P8.44 lcd_data3 gpio2_9 Q1 out */
-			AM33XX_IOPAD(0x8b0, 0x37)	/* P8.41 lcd_data4 gpio2_10 I2 in */
-			AM33XX_IOPAD(0x8b4, 0x37)	/* P8.42 lcd_data5 gpio2_11 I3 in */
-			AM33XX_IOPAD(0x8b8, 0x37)	/* P8.39 lcd_data6 gpio2_12 I0 in */
-			AM33XX_IOPAD(0x8bc, 0x37)	/* P8.40 lcd_data7 gpio2_13 I1 in */
+			AM33XX_IOPAD(0x978, 0x73)	/* P9.20 uart1_ctsn -> i2c2_sda */
+			AM33XX_IOPAD(0x97c, 0x73)	/* P9.19 uart1_rtsn -> i2c2_scl */
 		>;
 	};
 
 	unused_pads_pins: unused-pads-pins {
 		pinctrl-single,pins = <
-			AM33XX_IOPAD(0x820, 0x27)	/* P8.19 gpmc_ad8 unused -> gpio in pulldown */
-			AM33XX_IOPAD(0x824, 0x27)	/* P8.13 gpmc_ad9 unused -> gpio in pulldown */
-			AM33XX_IOPAD(0x828, 0x27)	/* P8.14 gpmc_ad10 unused -> gpio in pulldown */
-			AM33XX_IOPAD(0x82c, 0x27)	/* P8.17 gpmc_ad11 unused -> gpio in pulldown */
-			AM33XX_IOPAD(0x830, 0x27)	/* P8.12 gpmc_ad12 unused -> gpio in pulldown */
-			AM33XX_IOPAD(0x834, 0x27)	/* P8.11 gpmc_ad13 unused -> gpio in pulldown */
-			AM33XX_IOPAD(0x838, 0x27)	/* P8.16 gpmc_ad14 unused -> gpio in pulldown */
-			AM33XX_IOPAD(0x83c, 0x27)	/* P8.15 gpmc_ad15 unused -> gpio in pulldown */
-			AM33XX_IOPAD(0x840, 0x27)	/* P9.15 gpmc_a0 unused -> gpio in pulldown */
 			AM33XX_IOPAD(0x844, 0x27)	/* P9.23 gpmc_a1 unused -> gpio in pulldown */
 			AM33XX_IOPAD(0x848, 0x27)	/* P9.14 gpmc_a2 unused -> gpio in pulldown */
-			AM33XX_IOPAD(0x84c, 0x27)	/* P9.16 gpmc_a3 unused -> gpio in pulldown */
 			AM33XX_IOPAD(0x850, 0x27)	/* gpmc_a4 gpmc_a4 unused -> gpio in pulldown */
 			AM33XX_IOPAD(0x878, 0x27)	/* P9.12 gpmc_ben1 unused -> gpio in pulldown */
 			AM33XX_IOPAD(0x880, 0x27)	/* P8.21 gpmc_csn1 unused -> gpio in pulldown */
@@ -121,11 +139,7 @@
 			AM33XX_IOPAD(0x8ec, 0x27)	/* P8.30 lcd_ac_bias_en unused -> gpio in pulldown */
 			AM33XX_IOPAD(0x908, 0x27)	/* mii1_col mii1_col unused -> gpio in pulldown */
 			AM33XX_IOPAD(0x90c, 0x27)	/* mii1_crs mii1_crs unused -> gpio in pulldown */
-			AM33XX_IOPAD(0x958, 0x27)	/* P9.18 spi0_d1 unused -> gpio in pulldown */
-			AM33XX_IOPAD(0x95c, 0x27)	/* P9.17 spi0_cs0 unused -> gpio in pulldown */
 			AM33XX_IOPAD(0x964, 0x27)	/* P9.42 ecap0_in_pwm0_out unused -> gpio in pulldown */
-			AM33XX_IOPAD(0x990, 0x27)	/* P9.31 mcasp0_aclkx unused -> gpio in pulldown */
-			AM33XX_IOPAD(0x998, 0x27)	/* P9.30 mcasp0_axr0 unused -> gpio in pulldown */
 			AM33XX_IOPAD(0x99c, 0x27)	/* P9.28 mcasp0_ahclkr unused -> gpio in pulldown */
 			AM33XX_IOPAD(0x9a0, 0x27)	/* mcasp0_aclkr mcasp0_aclkr unused -> gpio in pulldown */
 			AM33XX_IOPAD(0x9a4, 0x27)	/* P9.27 mcasp0_fsr unused -> gpio in pulldown */
@@ -186,11 +200,35 @@
 	};
 };
 
+&gpio0 {
+	gpio-line-names =
+		"", "", "", "", "RST1", "RST0", "", "",
+		"", "", "", "", "", "", "", "",
+		"", "", "", "", "", "", "RST3", "LED_GREEN",
+		"", "", "IP_SIG", "RST2", "", "", "", "";
+};
+
+&gpio1 {
+	gpio-line-names =
+		"", "", "", "", "", "", "", "",
+		"", "", "", "", "PLUG3", "LED_RED", "RECOVERY", "PLUG2",
+		"PLUG1", "", "", "PLUG0", "", "", "", "",
+		"", "", "", "", "", "", "", "";
+};
+
 &gpio2 {
 	gpio-line-names =
 		"", "", "", "", "", "", "Q2", "Q3",
 		"Q0", "Q1", "I2", "I3", "I0", "I1", "", "",
 		"", "", "", "", "", "", "", "",
+		"", "", "", "", "", "", "", "";
+};
+
+&gpio3 {
+	gpio-line-names =
+		"", "", "", "", "", "", "", "",
+		"", "", "", "", "", "", "FAN_SPEED1", "",
+		"FAN_SPEED0", "", "", "", "", "", "", "",
 		"", "", "", "", "", "", "", "";
 };
 

@@ -345,6 +345,16 @@ def _pad_rows():
         rows.append({"pin": pin, "name": e.get("name"), "pad": f"0x{offv:03x}", "modes": ", ".join(all_modes),
                      "gpio": e.get("gpio") or "", "state": why or "free", "funcs": funcs})
     rows.sort(key=lambda r: (r["pin"].split(".")[0], int(r["pin"].split(".")[1])))
+    # pads that are not on P8/P9 but are wired on the Bitmain carrier (gen-dts.py EXTRA_PADS)
+    for pad, e in getattr(g, "EXTRA_PADS", {}).items():
+        offv = e["offset"]
+        why = g.RESERVED.get(offv) if isinstance(g.RESERVED, dict) else None
+        all_modes = [m for m in (e.get("modes") or []) if m]
+        funcs = [m for m in all_modes if FUNC_RE.match(m)]
+        if e.get("gpio"):
+            funcs.append("gpio")
+        rows.append({"pin": pad, "name": pad, "pad": f"0x{offv:03x}", "modes": ", ".join(all_modes),
+                     "gpio": e.get("gpio") or "", "state": why or "free", "funcs": funcs, "extra": True})
     return rows
 
 

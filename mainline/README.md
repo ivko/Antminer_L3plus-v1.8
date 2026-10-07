@@ -216,6 +216,14 @@ Web UI (Flask, порт 80, `mainline/web/`): платка/SYSBOOT, NAND (съд
 data дял), pinmux (редактор на YAML, build, запис в mtd6, таблица на пиновете), услуги
 (hostname, NTP, статичен IP, SSH ключове в /config), лог. `antminer-config` вече чете
 `/config/network` (MODE=static ADDRESS NETMASK GATEWAY DNS) и линква `/config/ssh/authorized_keys`.
+Профилът `default` (от него се генерира `dts/am335x-antminer.dts`, вграденото DTB на образа)
+отразява разводката на оригиналната Bitmain платка, в която се монтира контролерът:
+4 UART-а към хеш платките, RST0..3 (изходи, 0 = в reset), PLUG0..3, LED_RED/LED_GREEN,
+RECOVERY, IP_SIG, fan PWM + FAN_SPEED0/1, I2C2, плюс Q0..3/I0..3 на LCD pad-овете. Източник:
+`dts/bitmain/am335x-boneblack-bitmainer.dts` (dtc на `nand/recover-nand/*.dtb`); всичките 25
+Bitmain pad-а са със същите регистрови стойности. Gpio-leds възелът на Bitmain има грешни номера
+на линиите (plug0, fan_speed0); авторитетни са pinmux групата и init скриптовете.
+
 Визуален редактор на пиновете (`/pinmux/<профил>/board`, Lit компонент
 `web/antminer_web/static/board-editor.js` с vendor-нат `lit-all.min.js`, без build стъпка): P9 и P8
 като физическите хедъри, плочки с цвят по категория (захранване, запазени, GPIO in/out, UART, I2C,
