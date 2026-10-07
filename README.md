@@ -18,6 +18,7 @@ mining is removed; from Bitmain only the bootloader in NAND (SPL/U-Boot) and the
 | run a PLC program and Modbus | [docs/07-openplc.md](docs/07-openplc.md) |
 | fix something that does not work | [docs/08-troubleshooting.md](docs/08-troubleshooting.md) |
 | change the code, the recipes or the UI | [docs/09-development.md](docs/09-development.md) |
+| see how fast the board reacts (latency measurements, method and results) | [docs/10-latency.md](docs/10-latency.md) |
 
 The shortest path to a working board:
 1. Build (WSL): `bash firmware/yocto/setup-yocto.sh` (the first time takes ~2-4 h).
