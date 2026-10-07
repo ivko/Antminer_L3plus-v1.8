@@ -40,6 +40,7 @@ GND (P9.1) ───────────────────────
 | # | variant | kernel | min | median | p99 | max | stdev | capture |
 |---|---|---|---|---|---|---|---|---|
 | 1 | OpenPLC v3, `gpio-echo.st`, task interval 50 ms, Modbus idle | 6.12.112 (PREEMPT none) | 1.90 ms | 26.80 ms | 51.30 ms | 51.80 ms | 14.44 ms | `2026-10-07-openplc-50ms.csv` (1069 edges, 20 kHz) |
+| 2 | OpenPLC v3, `gpio-echo-1ms.st`, task interval 1 ms (CPU saturated, load 2.8) | 6.12.112 (PREEMPT none) | 1.28 ms | 1.97 ms | 2.61 ms | 2.78 ms | 0.38 ms | `2026-10-07-openplc-1ms.csv` (533 edges, 200 MHz) |
 
 Reading variant 1: the distribution is flat from 1.9 to 51.8 ms, i.e. uniform over one 50 ms
 cycle (the edge arrives at a random phase of the cycle) plus a fixed ~1.9 ms for the cycle's own
@@ -47,8 +48,11 @@ work (reading inputs and the 8 ADC channels through sysfs, the program, writing 
 cycle-to-cycle jitter of plain Linux is visible in the phase-locked first attempt: stdev 59 µs,
 spread 220 µs over 100 cycles.
 
-Planned variants: OpenPLC with a 1 ms task (`gpio-echo-1ms.st`); the same on a PREEMPT_RT
-kernel; a minimal C program with libgpiod and `SCHED_FIFO` (no PLC runtime); bare metal / RTOS on
+Reading variant 2: again uniform, but 1.3 ms wide starting at 1.28 ms: one OpenPLC cycle takes
+~1.3 ms of work on this CPU, so a 1 ms task interval just runs back to back (load average 2.8).
+The fixed part is the cycle work itself; the PLC runtime, not the kernel, sets the floor here.
+
+Planned variants: the same on a PREEMPT_RT kernel; a minimal C program with libgpiod and `SCHED_FIFO` (no PLC runtime); bare metal / RTOS on
 the A8 loaded by U-Boot (no Linux). The AM3352 has no PRU (verified: the PRU-ICSS address space
 gives a bus error and its PRCM module never leaves the disabled state), so a PRU variant is not
 possible on this board.
