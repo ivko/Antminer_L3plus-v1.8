@@ -44,6 +44,7 @@ GND (P9.1) ───────────────────────
 | 3 | `latency-echo` busy poll, SCHED_FIFO 80, mlockall, OpenPLC stopped | 6.12.112 (PREEMPT none) | 2.70 µs | 5.01 µs | 7.11 µs | 9.22 µs | 1.34 µs | `2026-10-07-linux-busypoll.csv` (534 edges, 200 MHz) |
 | 4 | `latency-echo 1000`: 1 ms period via `clock_nanosleep`, SCHED_FIFO 80 | 6.12.112 (PREEMPT none) | 15.4 µs | 507 µs | 997 µs | 999 µs | 289 µs | `2026-10-07-linux-periodic-1ms.csv` (534 edges, 200 MHz) |
 | 5 | `latency-echo -e`: sleep in the kernel, wake on the I0 edge event, SCHED_FIFO 80 | 6.12.112 (PREEMPT none) | 122 µs | 128 µs | 174 µs | 284 µs | 11.7 µs | `2026-10-07-linux-edge.csv` (534 edges, 200 MHz) |
+| 5b | as 5, cpuidle state1 `mpu_gate` (130 µs exit latency) disabled | 6.12.112 (PREEMPT none) | 120 µs | 144 µs | 182 µs | 390 µs | 22 µs | `2026-10-07-linux-edge-noidle.csv` (534 edges; one 60-edge glitch burst filtered) |
 
 Reading variant 1: the distribution is flat from 1.9 to 51.8 ms, i.e. uniform over one 50 ms
 cycle (the edge arrives at a random phase of the cycle) plus a fixed ~1.9 ms for the cycle's own
@@ -69,7 +70,13 @@ above the ioctl cost seen in variant 3, so it is the wake-up path itself: GPIO i
 from the CPU idle state, gpiolib event, wake of the user thread, then the two ioctls. Variant 5b
 repeats it with the deeper cpuidle states disabled to separate idle-exit from the rest.
 
-Planned variants: the edge-event mode without cpuidle; the same on a PREEMPT_RT
+Reading variant 5b: disabling the deep idle state did not lower the floor (median 144 vs
+128 us), so the ~120 us is not idle exit. Candidates: the cpufreq `ondemand` governor (CPU at
+300 MHz when idle), the threaded GPIO IRQ path of gpiolib-cdev, GPIO bank runtime PM.
+`latency-echo -e` now prints the time from the edge's kernel timestamp (taken in the hard IRQ)
+to the thread running again, which splits the path in two.
+
+Planned variants: 5c = 5b with the `performance` governor; the same on a PREEMPT_RT
 kernel (needs the external 6.12-rt patches: 32-bit ARM has no ARCH_SUPPORTS_RT in 6.12); bare metal / RTOS on
 the A8 loaded by U-Boot (no Linux). The AM3352 has no PRU (verified: the PRU-ICSS address space
 gives a bus error and its PRCM module never leaves the disabled state), so a PRU variant is not

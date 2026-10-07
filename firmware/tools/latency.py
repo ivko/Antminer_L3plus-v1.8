@@ -52,16 +52,23 @@ def read_csv(path, rate):
     return times, cols
 
 
-def edges(times, col, kind):
-    """timestamps of the chosen edges of one channel"""
-    out = []
+def edges(times, col, kind, min_gap=1e-6):
+    """timestamps of the chosen edges of one channel; bursts of edges closer than min_gap
+    (electrical glitches, probe bounce) are dropped together with the edge that started them"""
+    raw = []
     for i in range(1, len(col)):
         if col[i] == col[i - 1]:
             continue
         rising = col[i] == 1
-        if kind == "both" or (kind == "rising") == rising:
-            out.append(times[i])
-    return out
+        raw.append((times[i], rising))
+    keep = [True] * len(raw)
+    for i in range(1, len(raw)):
+        if raw[i][0] - raw[i - 1][0] < min_gap:
+            keep[i] = keep[i - 1] = False
+    dropped = keep.count(False)
+    if dropped:
+        print(f"note: {dropped} edges in glitch bursts (< {min_gap * 1e6:g} us apart) ignored")
+    return [t for (t, rising), k in zip(raw, keep) if k and (kind == "both" or (kind == "rising") == rising)]
 
 
 def pair(stim, resp, max_delay):
