@@ -56,14 +56,14 @@ antminer-dtb flash /tmp/am335x-antminer-breakout.dtb    # mtd6, с провер�
 reboot
 ```
 
-На PC-то (WSL), с kernel tree в `~/antminer/linux` (или `KSRC=`):
+На PC-то (WSL/Linux; kernel tree-то се взима от Yocto билда или от `~/antminer/linux`, или `KSRC=`):
 ```sh
 cd /mnt/e/Antminer/repo/mainline/pinmux
 bash build-dtb.sh boards/breakout.yaml              # -> mainline/out/am335x-antminer-breakout.dtb
 ```
-```powershell
-powershell -File mainline\tools\deploy-dtb.ps1 -Profile breakout -NetbootOnly   # проба от RAM
-powershell -File mainline\tools\deploy-dtb.ps1 -Profile breakout                # запис в mtd6 + reboot
+```sh
+python mainline/tools/antminer.py deploy-dtb breakout --netboot-only   # проба от RAM
+python mainline/tools/antminer.py deploy-dtb breakout                  # запис в mtd6 + reboot
 ```
 
 Всички пътища дават едно и също DTB (проверено байт по байт).

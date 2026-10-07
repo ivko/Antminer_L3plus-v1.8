@@ -1,7 +1,7 @@
 # 2. Билд от нулата
 
 Всичко се билдва с Yocto (scarthgap) в WSL2 на Windows. На обикновен Linux (Ubuntu 22.04/24.04)
-работи по същия начин, само Windows инструментите (`*.ps1`) отпадат.
+работи по същия начин; `tools/antminer.py` работи и на двете, само `write-sd.ps1` е за Windows.
 
 ## Какво трябва на PC-то
 
@@ -14,14 +14,25 @@
 | Windows | Python 3 (за TFTP/HTTP сървърите и тестовете), Git; по желание PuTTY за конзолата |
 | хардуер | USB-serial адаптер 3.3 V към конзолата на платката (COM порт, 115200) |
 
-Repo-то се очаква в `E:\Antminer\repo` (във WSL `/mnt/e/Antminer/repo`). Ако е другаде,
-задай `REPO=/mnt/<буква>/<път>` при всички WSL команди по-долу.
+Repo-то може да е където и да е; скриптовете намират пътя сами. Примерите тук ползват
+`E:\Antminer\repo` (във WSL `/mnt/e/Antminer/repo`).
+
+## Настройки на PC-то: `mainline/tools/site.conf`
+
+IP-то на PC-то в мрежата на платките, серийният порт, портът на feed-а и пътят до Yocto
+дървото са на едно място. Не редактирай `site.conf`; създай до него `site.local.conf` (не е в
+git) само с това, което е различно:
+```
+PC_IP=192.168.1.20
+SERIAL_PORT=/dev/ttyUSB0
+```
+Празен `PC_IP` = автоматично. Проверка: `python mainline/tools/antminer.py config`.
+`antminer.py` иска Python 3.8+ и `pip install pyserial`.
 
 ## Първи билд
 
 ```sh
 # във WSL
-export FEED_HOST=192.168.200.104:8000     # IP на PC-то, от което платките ще теглят пакети
 bash /mnt/e/Antminer/repo/mainline/yocto/setup-yocto.sh
 ```
 
@@ -32,7 +43,8 @@ bash /mnt/e/Antminer/repo/mainline/yocto/setup-yocto.sh
 4. пише `build/conf/local.conf` и `bblayers.conf` (само ако ги няма);
 5. пуска пълния билд във фон.
 
-`FEED_HOST` влиза в `/etc/opkg/base-feeds.conf` на всички образи. Ако PC-то е с друг IP по-късно,
+Адресът на feed-а (`PC_IP:FEED_PORT` от `site.conf`, или `FEED_HOST=ip:порт` пред командата)
+влиза в `/etc/opkg/base-feeds.conf` на всички образи. Ако PC-то е с друг IP по-късно,
 виж [04-packages.md](04-packages.md#feed-адресът).
 
 Първият билд отнема 2-4 часа. Следене:
@@ -74,7 +86,7 @@ bash /mnt/e/Antminer/repo/mainline/yocto/build.sh antminer-provision-image   # �
 symlink-овете често не се отварят; ползвай файла с датата или копирай с:
 
 ```sh
-bash /mnt/e/Antminer/repo/mainline/tools/stage-out.sh
+python mainline/tools/antminer.py stage        # или във WSL: bash mainline/tools/stage-out.sh
 ```
 
 Той слага последните резултати в `mainline/out/` под постоянни имена (`uImage-yocto.bin`,
@@ -88,8 +100,9 @@ bash /mnt/e/Antminer/repo/mainline/tools/stage-out.sh
   2026-10 е с poky `3a3d07f625ae` и meta-openembedded `0f00f8b9a219`. Ако нова версия
   счупи нещо, `git checkout` на тези commit-и в `~/antminer/yocto/poky` и `meta-openembedded`.
 - OpenPLC е фиксиран по commit (`SRCREV` в `openplc-runtime_git.bb`).
-- `~/antminer/yocto/downloads` съдържа всички сорсове. Пази го (или го архивирай): с него
-  билдът минава без интернет и без риск upstream да е изчезнал.
+- `~/antminer/yocto/downloads` съдържа всички сорсове (~2 GB). С него билдът минава без интернет
+  и без риск upstream да е изчезнал. `bash mainline/yocto/backup-downloads.sh` го копира до repo-то
+  (`E:\Antminer\backup\yocto-downloads`); на нова машина `... restore` преди `setup-yocto.sh`.
 
 ## Почистване
 

@@ -30,13 +30,15 @@ antminer-data status        # трябва: "root: overlay on ubi0:data"
 
 Feed-ът е `~/antminer/yocto/build/tmp/deploy/` във WSL, сервиран по HTTP на порт 8000.
 
-```powershell
-powershell -File E:\Antminer\repo\mainline\tools\feed-server-start.ps1    # пуска във фон, връща веднага
-powershell -File E:\Antminer\repo\mainline\tools\feed-server-stop.ps1
+```sh
+python mainline/tools/antminer.py feed start     # във фон, връща веднага
+python mainline/tools/antminer.py feed status
+python mainline/tools/antminer.py feed stop
+python mainline/tools/antminer.py feed serve     # на преден план, Ctrl-C спира
 ```
 
-`serve-feed.ps1` прави същото, но на преден план (Ctrl-C за спиране). Windows Firewall трябва
-да пуска TCP 8000:
+Работи и на Windows (чете feed-а от WSL през `\\wsl$`), и на Linux. Портът е `FEED_PORT` от
+`site.conf`. Windows Firewall трябва да пуска TCP 8000:
 ```powershell
 netsh advfirewall firewall add rule name="opkg feed" dir=in action=allow protocol=TCP localport=8000
 ```

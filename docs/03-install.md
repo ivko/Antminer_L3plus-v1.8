@@ -21,8 +21,8 @@
 
 **Windows** (картата в четец):
 ```powershell
-wsl bash /mnt/e/Antminer/repo/mainline/tools/stage-out.sh     # слага .wic в mainline\out
-powershell -File E:\Antminer\repo\mainline\tools\write-sd.ps1
+python mainline\tools\antminer.py stage       # слага .wic в mainline\out
+powershell -File mainline\tools\write-sd.ps1
 ```
 Скриптът показва USB дисковете между 1 и 64 GB, пита кой е картата и иска `YES`. Пуска се
 като администратор (UAC прозорец), изтрива таблицата на картата, пише образа и проверява
@@ -93,16 +93,16 @@ PC-то пуска TFTP сървър, скриптът рестартира пл
 кернел, DTB и initramfs в RAM и ги стартира. Добро за проба на нов кернел или профил.
 
 ```powershell
-wsl bash /mnt/e/Antminer/repo/mainline/tools/stage-out.sh
-powershell -File E:\Antminer\repo\mainline\tools\netboot.ps1 -ServerIp 192.168.200.104 `
-    -Kernel uImage-yocto.bin -Dtb am335x-antminer-yocto.dtb -Initrd antminer-image.cpio.gz.u-boot `
-    -BootArgs "console=ttyS0,115200n8"
+python mainline\tools\antminer.py stage
+python mainline\tools\antminer.py netboot                                    # кернел, default DTB, initramfs
+python mainline\tools\antminer.py netboot --dtb am335x-antminer-breakout.dtb --log boot.log
 ```
 
-- Изисква COM3 свободен (затвори PuTTY) и Windows Firewall да пуска UDP 69 за python
-  (`netsh advfirewall firewall add rule name="TFTP in" dir=in action=allow protocol=UDP localport=69`).
-- Файловете се търсят в `mainline\out\`. `-Port COMx` ако адаптерът е на друг порт.
-- Платката трябва вече да е в Linux или да рестартира сама: скриптът праща `reboot` по конзолата.
+- Изисква серийният порт да е свободен (затвори PuTTY) и firewall-ът да пуска UDP 69 за python
+  (Windows: `netsh advfirewall firewall add rule name="TFTP in" dir=in action=allow protocol=UDP localport=69`).
+- Файловете се търсят в `mainline/out/`; портът и IP-то са от `site.conf` (`--port` за друг порт).
+- Платката трябва да е включена; инструментът праща `reboot` по конзолата и спира U-Boot.
+- `antminer.py uboot "printenv" --then boot` изпълнява произволни U-Boot команди по същия начин.
 
 ## C. Флаш от работеща платка по TFTP
 
@@ -113,15 +113,15 @@ tftp -g -r flash-nand.sh <PC>
 sh flash-nand.sh [--wipe-config] <PC> uImage-yocto.bin am335x-antminer-yocto.dtb antminer-image.cpio.gz.u-boot
 reboot
 ```
-TFTP сървърът на PC-то: `python E:\Antminer\repo\mainline\tools\tftp-server.py --root E:\Antminer\repo\mainline\out`
-(или го пуска netboot.ps1). Скриптът отказва, ако дяловете не са на очакваните места, ако
+TFTP сървърът на PC-то: `python mainline/tools/antminer.py tftp` (сервира `mainline/out/`;
+netboot и deploy-dtb го пускат сами). Скриптът отказва, ако дяловете не са на очакваните места, ако
 файл не се събира, или ако DTB-то не е DTB.
 
 ## D. Само DTB (друг pinmux профил)
 
 - от web UI-а: Pinmux → профил → **Save + flash to mtd6**;
 - на платката: `antminer-dtb build <профил> && antminer-dtb flash /tmp/am335x-antminer-<профил>.dtb`;
-- от PC-то: `powershell -File mainline\tools\deploy-dtb.ps1 -Profile <профил>` (`-NetbootOnly` за проба от RAM).
+- от PC-то: `python mainline/tools/antminer.py deploy-dtb <профил>` (`--netboot-only` за проба от RAM).
 
 Подробно в [06-pinmux.md](06-pinmux.md). Ефект след рестарт.
 

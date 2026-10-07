@@ -48,14 +48,12 @@
 
 | | къде | какво |
 |---|---|---|
-| `stage-out.sh` | WSL | копира резултатите от билда в `out/` под постоянни имена |
-| `write-sd.ps1` | Windows | записва `.wic` на SD карта |
-| `netboot.ps1` | Windows | boot по TFTP през конзолата, без запис |
-| `deploy-dtb.ps1` | Windows | генерира DTB от профил и го пише в mtd6 (или netboot) |
-| `uboot-cmd.ps1` | Windows | спира U-Boot и изпълнява команди |
-| `serial.ps1` | Windows | една команда по конзолата |
-| `tftp-server.py` | Windows | TFTP сървър (ползва се от netboot) |
-| `feed-server-start/stop.ps1`, `serve-feed.ps1` | Windows | HTTP feed на порт 8000 |
+| `antminer.py` | Windows, Linux | всичко с платката от PC-то: `config`, `console`, `uboot`, `netboot`, `deploy-dtb`, `feed`, `tftp`, `stage` |
+| `site.conf` (+ `site.local.conf`) | | настройките на PC-то: IP, сериен порт, feed порт, Yocto път |
+| `stage-out.sh` | WSL/Linux | копира резултатите от билда в `out/` (`antminer.py stage` го вика) |
+| `write-sd.ps1` | Windows | записва `.wic` на SD карта (на Linux: `dd`) |
+| `tftp-server.py` | | TFTP сървърът, който `antminer.py` ползва (може и самостоятелно) |
+| `*.ps1` (netboot, deploy-dtb, uboot-cmd, serial, feed-server-*, serve-feed) | Windows | предишните версии на `antminer.py`; ще отпаднат |
 | `flash-nand.sh` | платката | флаш на mtd6/7/8 от TFTP или локална директория (= `antminer-flash-nand`) |
 | `openplc-test.py` | PC | качва/компилира/стартира OpenPLC програма, чете Modbus |
 
