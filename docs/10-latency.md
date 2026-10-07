@@ -45,6 +45,7 @@ GND (P9.1) ───────────────────────
 | 4 | `latency-echo 1000`: 1 ms period via `clock_nanosleep`, SCHED_FIFO 80 | 6.12.112 (PREEMPT none) | 15.4 µs | 507 µs | 997 µs | 999 µs | 289 µs | `2026-10-07-linux-periodic-1ms.csv` (534 edges, 200 MHz) |
 | 5 | `latency-echo -e`: sleep in the kernel, wake on the I0 edge event, SCHED_FIFO 80 | 6.12.112 (PREEMPT none) | 122 µs | 128 µs | 174 µs | 284 µs | 11.7 µs | `2026-10-07-linux-edge.csv` (534 edges, 200 MHz) |
 | 5b | as 5, cpuidle state1 `mpu_gate` (130 µs exit latency) disabled | 6.12.112 (PREEMPT none) | 120 µs | 144 µs | 182 µs | 390 µs | 22 µs | `2026-10-07-linux-edge-noidle.csv` (534 edges; one 60-edge glitch burst filtered) |
+| 5c | as 5b plus cpufreq governor `performance` (1 GHz fixed) | 6.12.112 (PREEMPT none) | 40.9 µs | 48.9 µs | 65.3 µs | 71.6 µs | 5.2 µs | `2026-10-07-linux-edge-perf.csv` (533 edges, 200 MHz) |
 
 Reading variant 1: the distribution is flat from 1.9 to 51.8 ms, i.e. uniform over one 50 ms
 cycle (the edge arrives at a random phase of the cycle) plus a fixed ~1.9 ms for the cycle's own
@@ -76,7 +77,17 @@ Reading variant 5b: disabling the deep idle state did not lower the floor (media
 `latency-echo -e` now prints the time from the edge's kernel timestamp (taken in the hard IRQ)
 to the thread running again, which splits the path in two.
 
-Planned variants: 5c = 5b with the `performance` governor; the same on a PREEMPT_RT
+Reading variant 5c: the `ondemand` governor was the ~100 us: with the system idle the CPU sits
+at 300 MHz and the whole wake-up path runs 3x slower, plus the frequency ramp. With a fixed
+1 GHz the edge-to-output latency is 41-72 us. `latency-echo` itself reports edge timestamp
+(hard IRQ) to thread running: min 27, mean 34, max 139 us over 2085 events. So of the ~49 us
+median about 34 us are the gpiolib threaded-IRQ path and the scheduler (two wake-ups on a
+kernel without preemption), ~2 us the two ioctls, and ~13 us input synchronisation and IRQ entry.
+A fleet image should therefore ship `performance` (or a fixed OPP) and keep `mpu_gate`;
+the next lever is kernel preemption.
+
+Planned variants: 6 = 5c on a CONFIG_PREEMPT kernel (in-tree full preemption; PREEMPT_RT needs
+the external 6.12-rt patches on 32-bit ARM); the same on a PREEMPT_RT
 kernel (needs the external 6.12-rt patches: 32-bit ARM has no ARCH_SUPPORTS_RT in 6.12); bare metal / RTOS on
 the A8 loaded by U-Boot (no Linux). The AM3352 has no PRU (verified: the PRU-ICSS address space
 gives a bus error and its PRCM module never leaves the disabled state), so a PRU variant is not
