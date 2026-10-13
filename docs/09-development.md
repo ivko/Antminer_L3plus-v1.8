@@ -73,15 +73,65 @@ onto the card.
 **Changing the fixed part of the DTB.** `dts/am335x-antminer-base.dtsi`. If you take a new pad,
 add it to `RESERVED` in `gen-dts.py`, so the generator does not give it to the profiles.
 
-**Web UI.** Developed on the PC against the files in the repo:
+**Web UI.** See [The web UI test server on the PC](#the-web-ui-test-server-on-the-pc) below.
+
+## The web UI test server on the PC
+
+The web UI (`firmware/web/`) runs in WSL against the files in the repo, without a board and
+without a build. Use it for the pin editor, the page layout and the profile YAML.
+
+Once, in WSL: `sudo apt install python3-flask python3-yaml`.
+
+Start it from PowerShell (the window stays busy, Ctrl+C stops it):
+```powershell
+wsl -e bash -c "cd /mnt/e/Antminer/repo/firmware/web && mkdir -p /tmp/cfg-dev && ANTMINER_PINMUX=/mnt/e/Antminer/repo/firmware/pinmux ANTMINER_CONFIG=/tmp/cfg-dev python3 run.py --port 5000 --debug"
+```
+or in a WSL shell:
 ```sh
 cd /mnt/e/Antminer/repo/firmware/web
-ANTMINER_PINMUX=../pinmux ANTMINER_CONFIG=/tmp/cfg ANTMINER_PAYLOAD=../out/sdcard python3 run.py --port 8088
-python3 test_smoke.py          # all pages + YAML round-trip conversion of the profiles
+mkdir -p /tmp/cfg-dev
+ANTMINER_PINMUX=../pinmux ANTMINER_CONFIG=/tmp/cfg-dev ANTMINER_PAYLOAD=../out/sdcard python3 run.py --port 5000 --debug
 ```
-`python3-flask` and `python3-yaml` are needed in WSL. The NAND pages and profile build require
-`antminer-dtb`/`mtd` and only work on the board. Quick upload to a board without a rebuild:
-`scp` the files to `/usr/share/antminer/web/antminer_web/` and `/etc/init.d/antminer-web restart`.
+
+Then open in the browser of the PC:
+
+| URL | what |
+|---|---|
+| `http://localhost:5000/` | the start page (board facts are empty on the PC) |
+| `http://localhost:5000/pinmux` | the profile list |
+| `http://localhost:5000/pinmux/default/board` | the visual pin editor for profile `default` (or `breakout`, `example-modbus-rtu`, a new name) |
+
+The environment variables:
+
+| variable | on the board | for the test server |
+|---|---|---|
+| `ANTMINER_PINMUX` | `/usr/share/antminer/pinmux` | `firmware/pinmux` of the repo: the shipped profiles, `gen-dts.py`, the pad database |
+| `ANTMINER_CONFIG` | `/config` | a scratch directory: **Save** writes `<dir>/pinmux/<name>.yaml` there, never into the repo |
+| `ANTMINER_PAYLOAD` | `/boot` | optional: the files the NAND page offers for flashing |
+
+`--debug` reloads the Python code on every change; after a change in `static/board-editor.js`
+or the templates, reloading the page is enough. `--port 80` (the default) needs root, so use a free
+port above 1024.
+
+What does **not** work on the PC, because the tools exist only on the board:
+- **Validate & build** and **Save + flash** (`/usr/sbin/antminer-dtb`), the NAND page (`mtd`,
+  `nanddump`), the data partition, Reboot;
+- the board facts: no `devmem`, so the SYSBOOT card in the editor says "Board value not available"
+  and flags every boot-relevant SYSBOOT pin in red. With the real strap levels this happens only on the board.
+
+To check a profile on the PC, build it with the generator instead:
+`python3 ../pinmux/gen-dts.py ../pinmux/boards/breakout.yaml -o /tmp/t.dts --json /tmp/t.json`
+(the same errors and warnings the editor shows after Validate).
+
+Before a commit: `python3 test_smoke.py` (all pages + YAML round-trip conversion of the profiles).
+
+**On a board, without a rebuild:** copy the changed files and restart the service:
+```sh
+scp -r firmware/web/antminer_web root@<ip>:/usr/share/antminer/web/
+ssh root@<ip> /etc/init.d/antminer-web restart
+```
+The UI is then on `http://<ip>/` with everything working. If gen-dts.py changed too, copy it
+to `/usr/share/antminer/pinmux/`, because the UI on the board loads the generator from there.
 
 ## Checks before commit
 

@@ -25,6 +25,9 @@ function partners(func) {
   if ((m = func.match(/^(dcan\d)_(rx|tx)$/))) return [`${m[1]}_rx`, `${m[1]}_tx`].filter(f => f !== func);
   return [];
 }
+// does the pin listen (input-like) or drive (output-like) once configured
+const INPUT_FUNC = /_(rxd|ctsn|rx|sda|scl|d0|d1|sclk)$|^eqep/;
+const isInput = (spec) => spec.func === "gpio" ? spec.dir !== "out" : INPUT_FUNC.test(spec.func);
 const same = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 // I2C devices whose drivers are built into the image's kernel (gpio-pcf857x, hwmon lm75)
 const I2C_KNOWN = [
@@ -43,7 +46,7 @@ class AntminerBoard extends LitElement {
     profile: { type: String },
     pads: { state: true }, headers: { state: true }, model: { state: true }, original: { state: true },
     sel: { state: true }, draft: { state: true }, result: { state: true }, busy: { state: true }, msg: { state: true },
-    newPad: { state: true },
+    newPad: { state: true }, sysboot: { state: true },
   };
 
   static styles = css`
@@ -81,6 +84,13 @@ class AntminerBoard extends LitElement {
     .tile.bad { border-color: var(--err); box-shadow: 0 0 0 1px var(--err) inset; }
     .tile.partial { border-color: var(--warn); }
     .tile.hog .name::after { content:" 🔒"; font-size: 12px; }
+    .tile .sb { position:absolute; top:19px; right:4px; font-size: 10px; font-weight:700; padding: 0 3px; border-radius: 3px;
+                background:#0003; color:inherit; }
+    .tile.free .sb { background:#eef0f3; color:#555; }
+    .tile .sb.risk { background: var(--err); color:#fff; }
+    .sbnote { margin-top: 10px; padding: 8px 10px; border-radius: 5px; font-size: 13.5px; line-height: 1.4; background:#f6f7f8; border-left: 4px solid var(--mute); }
+    .sbnote.warn { border-left-color: var(--warn); background:#fff8e6; } .sbnote.risk { border-left-color: var(--err); background:#fdeceb; }
+    tr.sbrow { cursor:pointer; } tr.sbrow:hover td { background:#f6f7f8; }
     .mid { display:flex; flex-direction:column; gap: 12px; }
     .card { background:#fff; border:1px solid var(--line); border-radius: 6px; padding: 12px 14px; }
     .card h4 { margin: 0 0 8px; font-size: 16px; }
@@ -110,7 +120,7 @@ class AntminerBoard extends LitElement {
   constructor() {
     super();
     this.pads = []; this.headers = {}; this.model = null; this.original = null; this.sel = null; this.draft = null;
-    this.result = null; this.busy = false; this.msg = ""; this.newPad = "";
+    this.result = null; this.busy = false; this.msg = ""; this.newPad = ""; this.sysboot = null;
   }
 
   connectedCallback() { super.connectedCallback(); this.load(); }
@@ -118,7 +128,7 @@ class AntminerBoard extends LitElement {
   async load() {
     try {
       const [p, m] = await Promise.all([fetch("/api/pads").then(r => r.json()), fetch(`/api/profiles/${this.profile}`).then(r => r.json())]);
-      this.pads = p.pads; this.headers = p.headers;
+      this.pads = p.pads; this.headers = p.headers; this.sysboot = p.sysboot;
       if (m.error) { this.msg = m.error; return; }
       this.model = m; this.original = JSON.parse(JSON.stringify(m));
       this.msg = `${m.origin} profile, ${Object.keys(m.pins).length} pins configured`;
@@ -143,6 +153,31 @@ class AntminerBoard extends LitElement {
   partial(spec) { if (!spec || spec.func === "gpio") return false; const used = this.funcsInUse(); return partners(spec.func).some(f => !used.has(f)); }
   errorsFor(pin) { return (this.result?.errors ?? []).filter(e => e.pin === pin); }
   names() { const m = {}; for (const [k, p] of Object.entries(this.model?.pins ?? {})) if (p.func === "gpio" && p.name) (m[p.name] ??= []).push(k); return m; }
+
+  // ---- SYSBOOT (lcd_data0..15): latched by the ROM at power-on, see docs/06-pinmux.md -------
+  // returns null for other pads, else {bit, level: info|warn|risk, text}
+  sbAdvice(pin, spec) {
+    const sb = this.pad(pin)?.sysboot;
+    if (!sb) return null;
+    const L = this.sysboot?.bits?.[sb.bit];
+    const known = L === 0 || L === 1;
+    const strap = known ? (L ? "1 (strap pull-up)" : "0 (strap pull-down)") : "unknown here (devmem not available)";
+    const head = `SYSBOOT${sb.bit}, ${sb.field}: ${sb.text}. Latched once at power-on (PWRONRSTn, not on reboot/watchdog); this board: ${strap}.`;
+    if (!spec?.func) return { bit: sb.bit, level: "info", text: head };
+    let advice, risk = false;
+    const other = known ? (L ? "low" : "high") : "away from the strap level";
+    if (isInput(spec)) {
+      advice = `Input: the circuit feeding this pin must not pull it ${other} while the board powers up.`;
+      if (L === 1) { advice += " A contact, DIP switch or optocoupler to GND that is closed at power-on flips the bit."; risk = true; }
+      if (L === 0) { advice += " Contacts/optocouplers to GND are harmless here; a source driving high (PNP sensor, a UART TX idling high) is not.";
+                     risk = /_(rxd|rx)$/.test(spec.func); }
+    } else {
+      advice = `Output: during power-on the pad is still an input, so only the load is seen. A pull-${known ? (L ? "down" : "up") : "up/down"} in the load (MOSFET gate resistor, LED, biased driver input) works against the strap: keep it much weaker than the strap resistor (measure it) or isolate it until SYS_RESETn is high.`;
+      risk = L === 1;   // typical loads (gate pull-down, LED to GND) pull low
+    }
+    const level = !sb.critical ? "info" : (risk || !known ? "risk" : "warn");
+    return { bit: sb.bit, level, text: `${head} ${advice}` + (sb.critical ? "" : " A wrong level here does not stop the boot.") };
+  }
 
   setPin(pin, spec) {
     const pins = { ...this.model.pins };
@@ -240,12 +275,33 @@ class AntminerBoard extends LitElement {
       return html`<div class="tile reserved" title="${pin} ${pad.pad}: reserved for ${pad.state}"><span class="n">${pin.includes(".") ? pin.split(".")[1] : ""}</span><div class="name">${pad.name}</div><div class="sub">${pad.state}</div><span class="ic">${ICON.reserved}</span></div>`;
     }
     const cat = category(spec);
+    const sb = this.sbAdvice(pin, spec);
     const cls = [cat, this.modified(pin) ? "mod" : "", this.errorsFor(pin).length ? "bad" : "", this.partial(spec) ? "partial" : "", spec?.hog ? "hog" : ""].join(" ");
-    const title = `${pin} · ${pad?.pad ?? ""} · ${pad?.gpio ? "gpio" + pad.gpio.join("_") : ""}` + (spec?.comment ? `\n${spec.comment}` : "") + (this.errorsFor(pin).map(e => "\n! " + e.text).join(""));
+    const title = `${pin} · ${pad?.pad ?? ""} · ${pad?.gpio ? "gpio" + pad.gpio.join("_") : ""}` + (spec?.comment ? `\n${spec.comment}` : "") + (this.errorsFor(pin).map(e => "\n! " + e.text).join(""))
+                + (sb ? `\n${sb.level === "info" ? "" : "⚠ "}${sb.text}` : "");
     const name = spec ? (spec.func === "gpio" ? (spec.name || "gpio") : spec.func) : (pad?.name ?? "");
     const sub = spec ? (spec.func === "gpio" ? `${spec.dir === "out" ? "out, init " + (spec.init ?? 0) : "in"}${spec.pull ? ", pull " + spec.pull : ""}` : "") : (pad?.gpio ? "gpio" + pad.gpio.join("_") : "");
     return html`<div class="tile ${cls}" title="${title}" @click=${() => this.open(pin)}>
-      <span class="n">${pin.includes(".") ? pin.split(".")[1] : ""}</span><div class="name">${name}</div><div class="sub">${sub}</div><span class="ic">${ICON[cat] ?? ""}</span></div>`;
+      <span class="n">${pin.includes(".") ? pin.split(".")[1] : ""}</span>${sb ? html`<span class="sb ${spec && sb.level === "risk" ? "risk" : ""}">SB${sb.bit}</span>` : nothing}<div class="name">${name}</div><div class="sub">${sub}</div><span class="ic">${ICON[cat] ?? ""}</span></div>`;
+  }
+
+  sysbootCard() {
+    const s = this.sysboot;
+    const rows = this.pads.filter(p => p.sysboot).sort((a, b) => a.sysboot.bit - b.sysboot.bit);
+    return html`<div class="card"><h4>SYSBOOT pins (boot configuration)</h4>
+      <p class="hint" style="margin-top:0">lcd_data0..15 = SYSBOOT[15:0]. The ROM reads them once, when power is applied, and decides the boot order,
+        crystal and NAND settings. Whatever is wired to these pins must not pull them away from the board's strap level until SYS_RESETn goes high.
+        Changing a strap needs a power cycle; reboot and watchdog do not re-read them. See docs/06-pinmux.md.</p>
+      ${s ? html`<p style="margin:4px 0 8px">This board: <b>${s.raw}</b> → boot order ${s.seq_bits} = <b>${s.order}</b>, crystal ${s.crystal}, NAND ECC ${s.nand_ecc}</p>`
+          : html`<p class="warn">Board value not available (devmem failed): levels unknown, every critical pin is flagged.</p>`}
+      <table><tr><th>bit</th><th>pin</th><th>field</th><th>strap</th><th>profile</th><th></th></tr>
+        ${rows.map(p => {
+          const spec = this.spec(p.pin), a = this.sbAdvice(p.pin, spec), L = s?.bits?.[p.sysboot.bit];
+          const use = spec ? (spec.func === "gpio" ? `${spec.name || "gpio"} ${spec.dir === "out" ? "out" : "in"}` : spec.func) : "-";
+          return html`<tr class="sbrow" title=${a.text} @click=${() => this.open(p.pin)}><td>${p.sysboot.bit}</td><td>${p.pin}</td>
+            <td>${p.sysboot.field}${p.sysboot.critical ? "" : html` <span class="hint">(no effect on boot)</span>`}</td><td>${L ?? "?"}</td><td>${use}</td>
+            <td>${spec && a.level === "risk" ? html`<span class="err">⚠ check</span>` : spec && a.level === "warn" ? html`<span class="warn">note</span>` : ""}</td></tr>`;
+        })}</table></div>`;
   }
 
   header(hdr) {
@@ -359,6 +415,7 @@ class AntminerBoard extends LitElement {
         <label><input type="checkbox" ?checked=${!!d.hog} @change=${upd("hog")}> hog: the kernel owns the line at this level (userspace cannot change it)</label>
       ` : nothing}
       ${miss.length ? html`<div class="partners">this peripheral also needs <b>${miss.join(", ")}</b> on another pin</div>` : nothing}
+      ${(() => { const a = this.sbAdvice(pin, d.func ? d : null); return a ? html`<div class="sbnote ${a.level}">${a.text}</div>` : nothing; })()}
       <label>comment</label>
       <input type="text" .value=${d.comment ?? ""} @input=${upd("comment")} placeholder="what is connected here">
       <div class="actions">
@@ -387,11 +444,13 @@ class AntminerBoard extends LitElement {
         <div class="mid">
           <div class="card"><h4>${this.model.name} <span style="color:var(--mute);font-weight:normal">(${this.model.origin})</span></h4>
             <div class="legend">${legend.map(([c, t]) => html`<span><i style="background:${c === "free" ? "#fff" : `var(--${c})`}"></i>${t}</span>`)}
-              <span><i style="border:2px solid #ffd54f"></i>modified</span><span><i style="border:2px solid var(--err)"></i>error</span><span><i style="border:2px solid var(--warn)"></i>peripheral incomplete</span></div>
+              <span><i style="border:2px solid #ffd54f"></i>modified</span><span><i style="border:2px solid var(--err)"></i>error</span><span><i style="border:2px solid var(--warn)"></i>peripheral incomplete</span>
+              <span><i style="background:var(--err)"></i>SBn = SYSBOOT pin to check</span></div>
             <p style="color:var(--mute);margin:8px 0 0">Click a pin to configure it. Analog pins toggle AIN channels. Yellow dot = differs from the saved profile.</p></div>
           <div class="card"><h4>ADC (1.8 V, 12 bit)</h4><div class="adc">${[0, 1, 2, 3, 4, 5, 6].map(ch => html`<label class=${this.model.adc.includes(ch) ? "on" : ""}><input type="checkbox" .checked=${this.model.adc.includes(ch)} @change=${() => this.toggleAdc(ch)} hidden> AIN${ch}</label>`)}</div></div>
           ${this.extraPads()}
           ${this.i2cCard()}
+          ${this.sysbootCard()}
           ${this.result ? html`<div class="card"><h4>${this.result.ok ? "Build OK" : "Build errors"}</h4>
             ${(this.result.errors ?? []).map(e => html`<div class="err">${e.pin ? e.pin + ": " : ""}${e.text}</div>`)}
             ${(this.result.warnings ?? []).map(w => html`<div class="warn">${w.pin ? w.pin + ": " : ""}${w.text}</div>`)}

@@ -12,13 +12,47 @@ PAYLOAD_DIR = os.environ.get("ANTMINER_PAYLOAD", "/boot")
 CONFIG_DIR = os.environ.get("ANTMINER_CONFIG", "/config")
 PINMUX_DIR = os.environ.get("ANTMINER_PINMUX", "/usr/share/antminer/pinmux")   # host dev: repo/firmware/pinmux
 
-# TRM table 26-7 (AM335x), the rows we have met
+# SYSBOOT[4:0] -> ROM boot device list, TRM spruh73q table 26-7 (MUX1/MUX2 = XIP pin group)
 SYSBOOT_SEQ = {
-    0b10011: "NAND, NANDI2C, MMC0, UART0",
-    0b10111: "MMC0, SPI0, UART0, USB0",
-    0b11100: "MMC1, MMC0, UART0, USB0",
-    0b11000: "SPI0, MMC0, USB0, UART0",
+    0b00000: "reserved", 0b00001: "UART0, XIP w/WAIT (MUX2), MMC0, SPI0",
+    0b00010: "UART0, SPI0, NAND, NANDI2C", 0b00011: "UART0, SPI0, XIP (MUX2), MMC0",
+    0b00100: "UART0, XIP w/WAIT (MUX1), MMC0, NAND", 0b00101: "UART0, XIP (MUX1), SPI0, NANDI2C",
+    0b00110: "EMAC1, SPI0, NAND, NANDI2C", 0b00111: "EMAC1, MMC0, XIP w/WAIT (MUX2), NAND",
+    0b01000: "EMAC1, MMC0, XIP (MUX2), NANDI2C", 0b01001: "EMAC1, XIP w/WAIT (MUX1), NAND, MMC0",
+    0b01010: "EMAC1, XIP (MUX1), SPI0, NANDI2C", 0b01011: "USB0, NAND, SPI0, MMC0",
+    0b01100: "USB0, NAND, XIP (MUX2), NANDI2C", 0b01101: "USB0, NAND, XIP (MUX1), SPI0",
+    0b01110: "reserved", 0b01111: "UART0, EMAC1",
+    0b10000: "XIP (MUX1), UART0, EMAC1, MMC0", 0b10001: "XIP w/WAIT (MUX1), UART0, EMAC1, MMC0",
+    0b10010: "NAND, NANDI2C, USB0, UART0", 0b10011: "NAND, NANDI2C, MMC0, UART0",
+    0b10100: "NAND, NANDI2C, SPI0, EMAC1", 0b10101: "NANDI2C, MMC0, EMAC1, UART0",
+    0b10110: "SPI0, MMC0, UART0, EMAC1", 0b10111: "MMC0, SPI0, UART0, USB0",
+    0b11000: "SPI0, MMC0, USB0, UART0", 0b11001: "SPI0, MMC0, EMAC1, UART0",
+    0b11010: "XIP (MUX2), UART0, SPI0, MMC0", 0b11011: "XIP w/WAIT (MUX2), UART0, SPI0, MMC0",
+    0b11100: "MMC1, MMC0, UART0, USB0", 0b11101: "reserved",
+    0b11110: "reserved", 0b11111: "fast external boot, EMAC1, UART0",
 }
+CRYSTAL = {0: "19.2 MHz", 1: "24 MHz", 2: "25 MHz", 3: "26 MHz"}
+
+
+def decode_sysboot(status):
+    """CONTROL_STATUS (0x44E10040) -> SYSBOOT[15:0] and its fields. The register is not SYSBOOT
+    itself: [7:0] = SYSBOOT[7:0], [10:8] = DEVTYPE, [16] = SYSBOOT[8], [17] = [9],
+    [19:18] = [11:10], [21:20] = [13:12], [23:22] = [15:14] (TRM table 26-7)."""
+    sb = (status & 0xFF) | ((status >> 16) & 0xFF) << 8
+    seq = sb & 0x1F
+    return {
+        "status": f"0x{status:08x}", "raw": f"0x{sb:04x}", "bits": [(sb >> i) & 1 for i in range(16)],
+        "seq_bits": f"{seq:05b}", "order": SYSBOOT_SEQ[seq],
+        "crystal": CRYSTAL[sb >> 14 & 3], "nand_ecc": "by the NAND" if sb >> 9 & 1 else "by the ROM",
+        "clkout1": bool(sb >> 5 & 1), "devtype": {3: "GP", 2: "HS", 1: "EMU", 0: "test"}.get(status >> 8 & 7, "?"),
+    }
+
+
+def sysboot():
+    rc, out = run_quick(["devmem", "0x44E10040"])
+    if rc == 0 and out.strip().startswith("0x"):
+        return decode_sysboot(int(out.strip(), 16))
+    return None
 
 
 def read(path, default=""):
@@ -41,13 +75,6 @@ def identity():
     else:
         root = "NAND: plain initramfs"
     up = float(read("/proc/uptime", "0 0").split()[0])
-    rc, out = run_quick(["devmem", "0x44E10040"])
-    sysboot = None
-    if rc == 0 and out.strip().startswith("0x"):
-        val = int(out.strip(), 16) & 0xFFFF
-        seq = val & 0x1F
-        sysboot = {"raw": f"0x{val:04x}", "seq_bits": f"{seq:05b}",
-                   "order": SYSBOOT_SEQ.get(seq, "see TRM table 26-7")}
     ip = ""
     rc, out = run_quick(["ip", "-4", "-o", "addr", "show", "eth0"])
     if rc == 0:
@@ -57,7 +84,7 @@ def identity():
         "mac": mac, "hostname": read("/etc/hostname") or os.uname().nodename,
         "ip": ip, "model": model, "profile": m.group(1) if m else "?", "root": root,
         "kernel": os.uname().release, "uptime": f"{int(up // 3600)}h {int(up % 3600 // 60)}m",
-        "sysboot": sysboot, "time": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+        "sysboot": sysboot(), "time": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
     }
 
 

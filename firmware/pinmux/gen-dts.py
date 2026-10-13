@@ -132,6 +132,36 @@ def periph_of(func):
     return None
 
 
+# SYSBOOT[15:0] = the lcd_data15..0 pads, latched by the ROM on the rising edge of PWRONRSTn
+# (power-on only; a warm reset/watchdog does not re-latch). TRM spruh73q table 26-7.
+# bit -> (field, critical, what it selects). critical = a different level at power-on changes
+# where/whether the board boots on the boards we have (sequences 10011 NAND.. and 10111 MMC0..).
+SYSBOOT_BITS = {
+    0: ("boot order [4:0]", True, "SYSBOOT[4:0] selects the ROM boot device list"),
+    1: ("boot order [4:0]", True, "SYSBOOT[4:0] selects the ROM boot device list"),
+    2: ("boot order [4:0]", True, "SYSBOOT[4:0] selects the ROM boot device list; 10011 (NAND first) vs 10111 (SD first) differ only here"),
+    3: ("boot order [4:0]", True, "SYSBOOT[4:0] selects the ROM boot device list"),
+    4: ("boot order [4:0]", True, "SYSBOOT[4:0] selects the ROM boot device list"),
+    5: ("CLKOUT1", False, "1 = the ROM drives CLKOUT1 on xdma_event_intr0 during boot"),
+    6: ("EMAC PHY mode [7:6]", False, "only for EMAC boot (00 MII, 01 RMII, 11 RGMII); don't care for our sequences"),
+    7: ("EMAC PHY mode [7:6]", False, "only for EMAC boot (00 MII, 01 RMII, 11 RGMII); don't care for our sequences"),
+    8: ("GPMC bus width", False, "XIP/NAND bus width (0 = 8 bit); don't care for the ROM in 10011/10111"),
+    9: ("NAND ECC", True, "NAND boot: 0 = ECC done by the ROM, 1 = ECC handled by the NAND"),
+    10: ("GPMC addr/data mux [11:10]", True, "NAND boot: must be 00"),
+    11: ("GPMC addr/data mux [11:10]", True, "NAND boot: must be 00"),
+    12: ("reserved [13:12]", True, "must be 00 for normal operation"),
+    13: ("reserved [13:12]", True, "must be 00 for normal operation"),
+    14: ("crystal [15:14]", True, "crystal frequency: 00 19.2, 01 24, 10 25, 11 26 MHz; wrong value = wrong clocks in the ROM"),
+    15: ("crystal [15:14]", True, "crystal frequency: 00 19.2, 01 24, 10 25, 11 26 MHz; wrong value = wrong clocks in the ROM"),
+}
+
+
+def sysboot_bit(pad):
+    """SYSBOOT bit number of a pad name (lcd_data0..15), else None"""
+    m = re.match(r"lcd_data(\d+)$", pad or "")
+    return int(m.group(1)) if m and int(m.group(1)) <= 15 else None
+
+
 FORBIDDEN_FUNC = re.compile(r"^(pr1_|mcasp|mmc|gpmc|g?mii|rg?mii|mdio|lcd_|emu|clkout|tclkin|xdma)")
 
 
@@ -214,6 +244,13 @@ class Gen:
         info = {"key": key, "label": label, "pad": e["pad"], "offset": off, "value": value, "func": func,
                 "gpio": f"gpio{e['gpio'][0]}_{e['gpio'][1]}" if e["gpio"] else None,
                 "comment": spec.get("comment")}
+        sb = sysboot_bit(e["pad"])
+        if sb is not None:
+            field, critical, _ = SYSBOOT_BITS[sb]
+            info["sysboot"] = sb
+            if critical:
+                self.warnings.append(f"{key}: SYSBOOT{sb} ({field}): the circuit here must not pull the pad "
+                                     "away from the strap level until SYS_RESETn is high (docs/06-pinmux.md)")
         if func == "gpio":
             b, l = e["gpio"]
             name = str(spec.get("name", f"{label.replace('.', '_')}"))
