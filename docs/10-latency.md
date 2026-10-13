@@ -35,6 +35,50 @@ GND (P9.1) ───────────────────────
   next response edge and prints min / median / mean / p99 / p99.9 / max, jitter, stdev and a
   histogram. Raw captures are kept in `docs/latency/`.
 
+## Sources
+
+| file | variant | what |
+|---|---|---|
+| `firmware/openplc/examples/gpio-echo.st`, `gpio-echo-1ms.st` | 1, 2 | the OpenPLC programs (I0 → Q0, task interval 50 ms / 1 ms); upload with `tools/openplc-test.py` |
+| `firmware/tools/latency-echo.c` | 3-6 | the Linux echo through libgpiod v2: busy poll, periodic (`<us>`), edge wake-up (`-e`) |
+| `firmware/tools/latency-load.sh` | *L | the background load on the board: `cpu` (2 busy shells), `nand` (UBIFS write loop on /data), `net` (UDP receiver on port 9) |
+| `firmware/tools/latency-flood.py` | *L | the UDP sender on the PC (3000 pkt/s by default) |
+| `firmware/baremetal/echo.c`, `start.S`, `link.ld`, `build.sh` | 7 | the bare-metal echo (sets up the pads, GPIO2 and the eHRPWM0 stimulus itself) |
+| `firmware/tools/latency.py` | all | the analysis of a KingstVIS CSV |
+| `docs/latency/<date>-<variant>.csv` / `.txt` | all | the raw capture and the output of `latency.py` for it |
+
+Building and running:
+
+```sh
+# Linux echo, on the board (gcc and libgpiod-dev from the feed); stop OpenPLC first, it holds the lines
+opkg install gcc libgpiod-dev
+gcc -O2 -o latency-echo latency-echo.c -lgpiod
+/etc/init.d/openplc stop
+./latency-echo          # 3: busy poll, SCHED_FIFO 80, mlockall
+./latency-echo 1000     # 4: every 1000 us (clock_nanosleep)
+./latency-echo -e       # 5/6: wake on the I0 edge; prints edge timestamp -> thread running
+
+# variants 5c/6: fixed CPU frequency
+echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
+# load variants (*L): on the board, then the sender on the PC
+sh latency-load.sh start [cpu] [nand] [net]   # default: all three; 'stop' / 'status'
+python firmware/tools/latency-flood.py <board-ip> [--pps 3000] [--seconds 120]
+```
+
+```sh
+# bare metal, WSL (crossbuild-essential-armhf) -> firmware/out/bm-echo.bin (+ .elf, .lst)
+bash firmware/baremetal/build.sh
+```
+```powershell
+# loads it over TFTP and starts it with U-Boot 'go'; 'r' on the console = warm reset back to U-Boot
+python firmware\tools\antminer.py run bm-echo.bin
+```
+
+```powershell
+python firmware\tools\latency.py docs\latency\<capture>.csv
+```
+
 ## Results
 
 | # | variant | kernel | min | median | p99 | max | stdev | capture |
