@@ -23,6 +23,12 @@ otherwise set it in `tools/site.local.conf`.
 **The board always boots from the SD card.** This is by design: U-Boot first looks for `uEnv.txt`
 on the card. Power off and remove the card for a NAND boot.
 
+**With the cape (or wiring) connected the board does not boot, or boots differently; without it, it does.**
+The circuit on the P8 LCD pins changes SYSBOOT at power-on. Compare `devmem 0x44E10040` with and
+without it (power-cycle each time) and see 06-pinmux, SYSBOOT pins: typical causes are an input
+pulled to GND on SYSBOOT4/14 (P8.41, P8.31), gate pull-downs on Q2/Q3 (P8.45/46), a loopback jumper
+P8.37↔P8.38. A `reboot` does not re-read SYSBOOT, so the problem shows up only after a power cut.
+
 **I removed the card while it was running and nothing happens.** The root was on the card. In an
 open shell: `echo b > /proc/sysrq-trigger`. Otherwise cut the power.
 

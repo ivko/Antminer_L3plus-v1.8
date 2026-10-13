@@ -26,10 +26,16 @@ reboot. That is why the hardware watchdog is always enabled (see 05-configure).
 AM3352 ROM ─► SPL (MLO) ─► U-Boot 2013.04 (Bitmain) ─► kernel + DTB + initramfs ─► /init ─► busybox init
 ```
 
-1. **ROM**. The order of boot sources is fixed by resistors (SYSBOOT). Most boards are
+1. **ROM**. The order of boot sources comes from the SYSBOOT pins (= the LCD data pins on P8),
+   which resistors on the board pull high or low and the ROM reads once, at power-on. Most boards are
    `0x…13` = NAND, NANDI2C, MMC0, UART0. Some are `0x…17` = MMC0, SPI0, UART0, USB0: these
-   boot **only** from an SD card, NAND is not in their list. The value is shown in the first line of
-   the console (`Control_status {00420313}`) and on the start page of the web UI.
+   boot **only** from an SD card, NAND is not in their list. The two differ in one resistor
+   (SYSBOOT2 = P8.43). The value is shown in the first line of the console
+   (`Control_status {00420313}`) and on the start page of the web UI.
+   The resistors are only the default: holding a SYSBOOT pin at the other level during power-on
+   changes the order (that is what the Boot button of a BeagleBone Black does). The same applies the
+   other way: a cape that loads these pins can change the boot unintentionally. Details, the meaning
+   of all 16 bits and the rules for circuits on these pins: [06-pinmux, SYSBOOT pins](06-pinmux.md#sysboot-pins-boot-configuration).
 2. **U-Boot** from NAND (or from the card with `0x17`) first looks for an SD card. If partition 1 has
    `uEnv.txt`, it runs it. Otherwise it reads from NAND:
 

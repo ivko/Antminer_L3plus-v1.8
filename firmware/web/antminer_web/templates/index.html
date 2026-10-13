@@ -9,7 +9,8 @@
 <tr><th>Device tree</th><td>{{ b.model }}</td></tr>
 <tr><th>Kernel</th><td>{{ b.kernel }}, up {{ b.uptime }}, clock {{ b.time }}</td></tr>
 {% if b.sysboot %}
-<tr><th>SYSBOOT</th><td>{{ b.sysboot.raw }} &rarr; sequence {{ b.sysboot.seq_bits }} = <b>{{ b.sysboot.order }}</b></td></tr>
+<tr><th>SYSBOOT</th><td>{{ b.sysboot.raw }} (CONTROL_STATUS {{ b.sysboot.status }}, latched at power-on) &rarr; boot order {{ b.sysboot.seq_bits }} = <b>{{ b.sysboot.order }}</b>;
+  crystal {{ b.sysboot.crystal }}, NAND ECC {{ b.sysboot.nand_ecc }}{% if b.sysboot.clkout1 %}, CLKOUT1 on{% endif %}, {{ b.sysboot.devtype }} device</td></tr>
 {% endif %}
 {% if sd %}
 <tr><th>SD card</th><td>{{ sd.name }}, {{ "%.1f"|format(sd.size_gb) }} GB, partitions: {{ sd.parts|join(", ") or "none" }}</td></tr>

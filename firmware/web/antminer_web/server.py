@@ -163,7 +163,7 @@ def create_app():
 
     @app.route("/api/pads")
     def api_pads():
-        return jsonify({"pads": _pad_rows(), "headers": _header_layout()})
+        return jsonify({"pads": _pad_rows(), "headers": _header_layout(), "sysboot": board.sysboot()})
 
     @app.route("/api/profiles")
     def api_profiles():
@@ -342,8 +342,13 @@ def _pad_rows():
         funcs = [m for m in all_modes if FUNC_RE.match(m)]
         if any(m.startswith("gpio") for m in all_modes):
             funcs.append("gpio")
-        rows.append({"pin": pin, "name": e.get("name"), "pad": f"0x{offv:03x}", "modes": ", ".join(all_modes),
-                     "gpio": e.get("gpio") or "", "state": why or "free", "funcs": funcs})
+        row = {"pin": pin, "name": e.get("name"), "pad": f"0x{offv:03x}", "modes": ", ".join(all_modes),
+               "gpio": e.get("gpio") or "", "state": why or "free", "funcs": funcs}
+        sb = g.sysboot_bit(all_modes[0] if all_modes else None)
+        if sb is not None:
+            field, critical, text = g.SYSBOOT_BITS[sb]
+            row["sysboot"] = {"bit": sb, "field": field, "critical": critical, "text": text}
+        rows.append(row)
     rows.sort(key=lambda r: (r["pin"].split(".")[0], int(r["pin"].split(".")[1])))
     # pads that are not on P8/P9 but are wired on the Bitmain carrier (gen-dts.py EXTRA_PADS)
     for pad, e in getattr(g, "EXTRA_PADS", {}).items():

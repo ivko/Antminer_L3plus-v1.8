@@ -38,6 +38,10 @@ Which profile is active: `antminer-dtb current`, or "active on this board" in th
   with address and line names.
 - Yellow dot = changed, red = validation error, orange = incomplete peripheral
   (for example a UART with TX only).
+- `SBn` on a tile = the pin is SYSBOOT bit n (see [SYSBOOT pins](#sysboot-pins-boot-configuration)).
+  Red `SBn` = with this function and this board's strap level, the external circuit can change
+  the boot configuration; the pin dialog says what to check. The "SYSBOOT pins" card lists all 16
+  bits with the board's latched value and what the profile puts on each one.
 - **Validate & build** generates and compiles the DTB on the board itself (~2 s) and shows the
   errors per pin. **Save** writes to `/config/pinmux/`. **Save + flash to mtd6** writes the DTB to
   NAND; it takes effect from the next restart. **Export YAML** downloads the profile.
@@ -106,6 +110,120 @@ ls /dev/ttyS* /dev/i2c-*
 i2cdetect -y 2
 cat /sys/kernel/debug/pinctrl/44e10800.pinmux-pinctrl-single/pins | grep 8a8   # the actual register
 ```
+
+## SYSBOOT pins (boot configuration)
+
+The 16 LCD data pads on P8 are also the SoC's boot configuration inputs SYSBOOT[15:0]
+(lcd_dataN = SYSBOOT[N]). Resistors on the board pull each one high or low. The ROM latches them
+**once, on the rising edge of PWRONRSTn**, i.e. when power is applied; a `reboot`, the watchdog or
+SYS_RESETn do not read them again. The latched value stays in CONTROL_STATUS and is shown on the
+start page of the web UI, on the console banner of the SD system and in the pin editor.
+
+After the latch the pads are ordinary pins: the profile can make them GPIO, UART5 etc., and the
+pinmux/pull set in the profile has no effect on the boot. What matters is **what is connected to
+the pin while the board powers up**.
+
+### The bits
+
+TRM spruh73q, table 26-7. "Test board" = the latched value `0x4213` (CONTROL_STATUS `0x00420313`).
+
+| bit | pin | pad | meaning | test board | effect of a wrong level |
+|---|---|---|---|---|---|
+| 0 | P8.45 | lcd_data0 | boot order [4:0] | 1 | different boot device list |
+| 1 | P8.46 | lcd_data1 | boot order | 1 | " |
+| 2 | P8.43 | lcd_data2 | boot order | 0 (1 on SD-only boards) | `10011` NAND first ↔ `10111` SD first |
+| 3 | P8.44 | lcd_data3 | boot order | 0 | different boot device list |
+| 4 | P8.41 | lcd_data4 | boot order | 1 | e.g. `00011` = UART0, SPI0, XIP, MMC0: no NAND |
+| 5 | P8.42 | lcd_data5 | CLKOUT1 enable | 0 | 1 = the ROM outputs CLKOUT1 on xdma_event_intr0; boots |
+| 6, 7 | P8.39, P8.40 | lcd_data6/7 | EMAC PHY mode (00 MII, 01 RMII, 11 RGMII) | 00 | only for EMAC boot: none |
+| 8 | P8.37 | lcd_data8 | GPMC bus width (0 = 8 bit) | 0 | don't care for the ROM in our sequences |
+| 9 | P8.38 | lcd_data9 | NAND ECC: 0 = by the ROM, 1 = by the NAND | 1 | NAND boot reads the SPL with the wrong ECC |
+| 10, 11 | P8.36, P8.34 | lcd_data10/11 | GPMC addr/data mux, **00 for NAND** | 00 | NAND boot fails |
+| 12, 13 | P8.35, P8.33 | lcd_data12/13 | reserved, **must be 00** | 00 | undefined |
+| 14, 15 | P8.31, P8.32 | lcd_data14/15 | crystal: 00 19.2, **01 24**, 10 25, 11 26 MHz | 01 | the ROM sets up its clocks for the wrong crystal |
+
+CONTROL_STATUS (`devmem 0x44E10040`) is not SYSBOOT itself: bits [7:0] = SYSBOOT[7:0],
+[10:8] = device type (3 = GP), [16] = SYSBOOT8, [17] = SYSBOOT9, [19:18] = [11:10],
+[21:20] = [13:12], [23:22] = [15:14]. `0x00420313` → SYSBOOT `0x4213`; `0x00420317` → `0x4217`.
+
+The boot orders that matter here (the full 32-row table is in `firmware/web/antminer_web/board.py`):
+
+| [4:0] | order | where |
+|---|---|---|
+| `10011` | NAND, NANDI2C, MMC0, UART0 | most boards |
+| `10111` | MMC0, SPI0, UART0, USB0 | the SD-only boards (03-install) |
+| `10010` | NAND, NANDI2C, USB0, UART0 | |
+| `11000` | SPI0, MMC0, USB0, UART0 | BeagleBone Black with the Boot button pressed |
+| `11100` | MMC1, MMC0, UART0, USB0 | BeagleBone Black default (eMMC; this board has none) |
+
+The ROM goes down the list until one device has a valid image; if all fail, it waits for the
+watchdog. Each device it tries drives its own pins: with `10111` and no card, the ROM tries SPI0,
+i.e. P9.17/18/21/22, which `default` uses as RST0, RST1 and UART2.
+
+### The boot order can be changed
+
+The order is set by resistors, but it is **not** fixed: anything that holds a SYSBOOT pin at the
+other level during power-on overrides the strap. That is exactly how the Boot button of the
+BeagleBone Black works (it pulls SYSBOOT2 low). On our boards the two variants differ only in
+SYSBOOT2 = P8.43:
+
+- a `10011` board (NAND first) holding P8.43 **high** at power-on boots `10111`: **SD first**;
+- a `10111` board (SD only) holding P8.43 **low** at power-on boots `10011`: **NAND first**,
+  without a card in the slot.
+
+How:
+- The override must win clearly against the strap resistor, whose value is unknown on this
+  board: **measure it first** (board unpowered: resistance P8.43 to GND and to 3.3 V, P9.3).
+  A jumper/resistor ~10x lower than the strap is enough as a test.
+- In a final design gate it with reset, as TI and BeagleBoard recommend: a buffer
+  (e.g. 74LVC1G125) that drives the level only while SYS_RESETn (P9.10) is low and is high-Z
+  afterwards, so the pin is free as Q0 after the boot.
+- Only a power cycle applies the change. Check the result with `devmem 0x44E10040`.
+- **Not tested yet** on our boards.
+
+Nothing else about the boot changes: U-Boot from NAND still looks for `uEnv.txt` on the card first
+(01-overview), so "SD first" only matters on a board whose NAND SPL/U-Boot is broken.
+
+### Rules for circuits on these pins
+
+1. At power-on the pad is a high-impedance input (with the SoC's weak reset pull), so only
+   **the load** is seen, whatever the profile says.
+2. **Inputs** (I0.., UART RX): the source must not pull the pin to the other level while the board
+   powers up. On a pin with strap 1, a contact/DIP switch/optocoupler to GND that is closed at
+   power-on flips the bit. A UART RX on a strap-0 pin is wrong (TX idles high).
+3. **Outputs** (Q0..): a pull resistor in the load (MOSFET gate pull-down, LED to GND, a driver
+   input with bias) works against a strap of the other level. Keep it much weaker than the strap or
+   buffer the pin.
+4. Do not link two SYSBOOT pins with different strap levels (e.g. a loopback jumper TX↔RX).
+5. Bits 5-8 do not affect our boot; prefer them (P8.37, P8.39, P8.40, P8.42) and the non-SYSBOOT
+   pins P8.27-30 for inputs that may be active at power-on.
+
+**Check with real hardware**: connect the cape, put every input in its worst state (switches
+closed, sensors active), power-cycle, read `devmem 0x44E10040` and compare with the value without
+the cape.
+
+### What the current profiles and the breakout cape do
+
+From `boards/*.yaml` and the `hardware/breakout` schematics, against the test board's straps:
+
+| pin | bit / strap | profile | circuit on the cape | risk |
+|---|---|---|---|---|
+| P8.45, P8.46 | 0, 1 / 1 | Q2, Q3 | 100k gate pull-down | **fights the pull-up**: verify |
+| P8.43 | 2 / 0 | Q0 | 100k gate pull-down | none here; **on a `10111` board it fights the pull-up** |
+| P8.44 | 3 / 0 | Q1 | 100k gate pull-down | none |
+| P8.41 | 4 / 1 | I2 | DIP switch / PC817 to GND | **closed at power-on → `00011`, no NAND in the list** |
+| P8.31 | 14 / 1 | I4 | DIP / PC817 / push button to GND | **active at power-on → crystal read as 19.2 MHz** |
+| P8.32, P8.33, P8.34 | 15, 13, 11 / 0 | I5, I6, I7 | to GND | none (already 0) |
+| P8.39, P8.40, P8.42 | 6, 7, 5 / 0 | I0, I1, I3 | to GND | none |
+| P8.37 ↔ P8.38 | 8 / 0 ↔ 9 / 1 | UART5 | loopback jumper | **the jumper ties a 0 strap to a 1 strap (bit 9 = NAND ECC)**: remove it for power-on |
+| P8.38 | 9 / 1 | UART5 RX (`default`) | hash board TX, idles high | none while the hash board is powered |
+
+The `default` and `example-modbus-rtu` profiles use the same LCD pins for Q0-3/I0-3; the risk
+depends on what is wired to them. A revision of the breakout should move I2 and I4 off
+SYSBOOT4/14, and use weaker gate pull-downs (or the non-SYSBOOT P8.27-30) for Q2/Q3.
+
+`gen-dts.py` prints a warning for every pin of a profile on a boot-relevant SYSBOOT bit
+(0-4, 9-15); the editor additionally knows the board's strap levels and flags the risky ones.
 
 ## Pitfalls
 

@@ -11,6 +11,8 @@ Four ways, from the most convenient to the lowest level:
 
 First of all: read the board's SYSBOOT (first line on the console, `Control_status`).
 `…13` = boots from NAND (the normal case). `…17` = boots **only** from an SD card, see the end.
+The value is latched at power-on: if it differs from what you expect, check what is connected to
+the P8 LCD pins (06-pinmux, SYSBOOT pins).
 
 ## A. Provisioning SD card
 
@@ -143,3 +145,7 @@ They do not boot without a card. With the provisioning card the provisioning sys
 To run the NAND system, the card must stay in the slot, but without `uEnv.txt` (only
 `MLO` and `u-boot.img` on FAT partition 1): then U-Boot from the card does not find `uEnv.txt` and reads
 the kernel from NAND. **This has not been tested** on such a board.
+
+The alternative without a card: hold P8.43 (SYSBOOT2) low during power-on. The board then latches
+`…13` and boots from NAND like the others (06-pinmux, "The boot order can be changed"). Also not
+tested yet.
