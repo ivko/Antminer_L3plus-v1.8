@@ -1,6 +1,6 @@
 ## uEnv.txt of the PROVISIONING microSD card (FAT32 partition 1, built by Yocto wic).
-## Read by the Bitmain U-Boot 2013.04 (from NAND on SYSBOOT=10011 boards, from this card's
-## MLO/u-boot.img on SYSBOOT=10111 boards). Loads our kernel, the default-profile DTB and the
+## Read by the Bitmain U-Boot 2013.04 (from NAND in the normal SYSBOOT=10011 boot, from this
+## card's MLO/u-boot.img when P8.43 was held high at power-on = 10111). Loads our kernel, the default-profile DTB and the
 ## standard initramfs; "antminer.root=sd" makes /init switch to the ext4 rootfs on partition 2
 ## (antminer-provision-image: web UI, dtc, pinmux generator, NAND payload). NAND is untouched.
 

@@ -186,9 +186,12 @@ The per-board hostname comes from the MAC, override in /config/hostname; SSH key
 The SYSBOOT pins are read from CONTROL_STATUS (`devmem 0x44E10040`). The test board gives
 `0x00420313` → SYSBOOT[4:0] = 10011 = **NAND, NANDI2C, MMC0, UART0**: as long as the SPL in NAND is
 valid, the ROM never gets to the SD card; U-Boot from NAND, however, tries SD first (`bootcmd`).
-The board from `logs/nand-write-1kom.txt` is `0x00420317` → 10111 = **MMC0, SPI0, UART0, USB0**
-(SD only, NAND is not in the list) – a hardware difference in the SYSBOOT2 resistor (= lcd_data2 =
-P8.43). I.e. "insert an SD card and it boots from it" applies to the boards with 0x17, not to this one.
+The board from `logs/nand-write-1kom.txt` shows `0x00420317` → 10111 = **MMC0, SPI0, UART0, USB0**.
+Originally read as a hardware difference in the SYSBOOT2 resistor ("SD-only boards").
+**Correction 2026-10-18:** it was not; during that power-on P8.43 (= lcd_data2 = SYSBOOT2) was held
+at 3.3 V by hand. All boards are 10011, and the P8.43 override to 10111 is confirmed to work
+(docs/03-install, "Booting from the SD card through the ROM"). I.e. "insert an SD card and it boots
+from it" never applies by itself; the ROM only reaches the card with the pin held high.
 
 The microSD slot: with one particular card (DDINC 16 GB, the old Bitmain card) the test board
 reads only in 1-bit mode, and in 4-bit (even at 400 kHz) every read gives `I/O error`; the same
@@ -203,8 +206,8 @@ a 4-bit problem.
 
 ## Provisioning microSD card (step 6), 2026-10-06
 
-One card for both board types: FAT partition 1 carries the Bitmain MLO + u-boot.img (for the boards with
-SYSBOOT 10111 the ROM starts from them), `uEnv.txt`, our uImage, DTB and initramfs; ext4 partition 2 is
+One card for both boot paths: FAT partition 1 carries the Bitmain MLO + u-boot.img (the ROM starts
+from them when P8.43 is held high at power-on), `uEnv.txt`, our uImage, DTB and initramfs; ext4 partition 2 is
 `antminer-provision-image` (web UI, dtc, the DTS generator). `uEnv.txt` passes
 `antminer.root=sd` and `/init` does `switch_root` into partition 2 instead of an overlay on NAND. The
 files on partition 1 themselves are also the payload for NAND. The image of the whole card is a `.wic`

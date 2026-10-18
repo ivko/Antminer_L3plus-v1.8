@@ -10,9 +10,10 @@ Four ways, from the most convenient to the lowest level:
 | D. DTB only | changing the pinmux profile | mtd6 only |
 
 First of all: read the board's SYSBOOT (first line on the console, `Control_status`).
-`…13` = boots from NAND (the normal case). `…17` = boots **only** from an SD card, see the end.
-The value is latched at power-on: if it differs from what you expect, check what is connected to
-the P8 LCD pins (06-pinmux, SYSBOOT pins).
+`…13` = boots from NAND (the normal case, all boards). `…17` = the ROM boots from the SD card;
+you get it by holding P8.43 at 3.3 V during power-on, see the end. The value is latched at
+power-on: if it differs from what you expect, check what is connected to the P8 LCD pins
+(06-pinmux, SYSBOOT pins).
 
 ## A. Provisioning SD card
 
@@ -137,15 +138,22 @@ sh flash-nand.sh <PC> uImage.bin am335x-boneblack-bitmainer.dtb initramfs.bin.SD
 mtd0-5 are never touched, so this is a full restore (without the contents of /config, if it
 was erased). Do not use `runme.sh` from the same folder: it also writes u-boot (see `legacy/README.md`).
 
-## Boards with SYSBOOT 0x17 (SD only)
+## Booting from the SD card through the ROM (P8.43 high at power-on)
 
-The ROM of these boards loads MLO and U-Boot from the card, and NAND is not in the list at all.
-They do not boot without a card. With the provisioning card the provisioning system boots, as on the others.
+Normally the ROM never reads the card: NAND comes first in the `…13` order and the Bitmain SPL in
+NAND is valid. To make the ROM itself start from the card, hold **P8.43 (SYSBOOT2 = lcd_data2) at
+3.3 V (P9.3/P9.4) while the power is applied**. The ROM then latches `…17` = MMC0 first and loads
+`MLO` and `u-boot.img` from FAT partition 1 of the card. The provisioning card carries the Bitmain
+ones, so the rest of the boot is identical to the normal case. Verified on a board: the
+`Control_status {00420317}` in `logs/nand-write-1kom.txt` is this.
 
-To run the NAND system, the card must stay in the slot, but without `uEnv.txt` (only
-`MLO` and `u-boot.img` on FAT partition 1): then U-Boot from the card does not find `uEnv.txt` and reads
-the kernel from NAND. **This has not been tested** on such a board.
+Notes:
+- A direct wire to 3.3 V was enough; a resistor of a few kΩ is safer against a wrong pin. Remove it
+  after the boot: in the `default` profile P8.43 is Q0, and the level must not be there when the
+  profile drives the pin (06-pinmux, "The boot order can be changed", for a buffered version).
+- Only a power cycle applies it; `reboot` does not re-read SYSBOOT.
+- NAND is not touched. This is the recovery path if the SPL/U-Boot in NAND is ever broken, and the
+  way to try a new SPL/U-Boot from the card without writing mtd0-4.
 
-The alternative without a card: hold P8.43 (SYSBOOT2) low during power-on. The board then latches
-`…13` and boots from NAND like the others (06-pinmux, "The boot order can be changed"). Also not
-tested yet.
+The older note about "SD-only boards with a different SYSBOOT2 resistor" was wrong: that reading
+came from a board with P8.43 held high, not from a different board. Correction 2026-10-18.

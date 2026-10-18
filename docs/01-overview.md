@@ -27,16 +27,16 @@ AM3352 ROM ─► SPL (MLO) ─► U-Boot 2013.04 (Bitmain) ─► kernel + DTB 
 ```
 
 1. **ROM**. The order of boot sources comes from the SYSBOOT pins (= the LCD data pins on P8),
-   which resistors on the board pull high or low and the ROM reads once, at power-on. Most boards are
-   `0x…13` = NAND, NANDI2C, MMC0, UART0. Some are `0x…17` = MMC0, SPI0, UART0, USB0: these
-   boot **only** from an SD card, NAND is not in their list. The two differ in one resistor
-   (SYSBOOT2 = P8.43). The value is shown in the first line of the console
-   (`Control_status {00420313}`) and on the start page of the web UI.
-   The resistors are only the default: holding a SYSBOOT pin at the other level during power-on
-   changes the order (that is what the Boot button of a BeagleBone Black does). The same applies the
-   other way: a cape that loads these pins can change the boot unintentionally. Details, the meaning
-   of all 16 bits and the rules for circuits on these pins: [06-pinmux, SYSBOOT pins](06-pinmux.md#sysboot-pins-boot-configuration).
-2. **U-Boot** from NAND (or from the card with `0x17`) first looks for an SD card. If partition 1 has
+   which resistors on the board pull high or low and the ROM reads once, at power-on. All boards
+   seen so far are `0x…13` = NAND, NANDI2C, MMC0, UART0: as long as NAND holds a valid SPL, the
+   ROM never looks at the card. Holding **P8.43 (SYSBOOT2) at 3.3 V while the power is applied**
+   makes the ROM latch `0x…17` = MMC0, SPI0, UART0, USB0 and load MLO + U-Boot from the SD card
+   instead (verified; this is the same trick as the Boot button of a BeagleBone Black). The value
+   is shown in the first line of the console (`Control_status {00420313}`) and on the start page of
+   the web UI. The same applies the other way: a cape that loads these pins can change the boot
+   unintentionally. Details, the meaning of all 16 bits and the rules for circuits on these pins:
+   [06-pinmux, SYSBOOT pins](06-pinmux.md#sysboot-pins-boot-configuration).
+2. **U-Boot** from NAND (or from the card, when P8.43 was held high at power-on) first looks for an SD card. If partition 1 has
    `uEnv.txt`, it runs it. Otherwise it reads from NAND:
 
    | what | from | RAM address |

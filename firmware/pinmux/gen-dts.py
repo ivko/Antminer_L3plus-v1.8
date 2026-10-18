@@ -135,11 +135,12 @@ def periph_of(func):
 # SYSBOOT[15:0] = the lcd_data15..0 pads, latched by the ROM on the rising edge of PWRONRSTn
 # (power-on only; a warm reset/watchdog does not re-latch). TRM spruh73q table 26-7.
 # bit -> (field, critical, what it selects). critical = a different level at power-on changes
-# where/whether the board boots on the boards we have (sequences 10011 NAND.. and 10111 MMC0..).
+# where/whether the board boots (strap 10011 NAND first; 10111 MMC0 first when P8.43 is held high
+# at power-on, the SD-boot override).
 SYSBOOT_BITS = {
     0: ("boot order [4:0]", True, "SYSBOOT[4:0] selects the ROM boot device list"),
     1: ("boot order [4:0]", True, "SYSBOOT[4:0] selects the ROM boot device list"),
-    2: ("boot order [4:0]", True, "SYSBOOT[4:0] selects the ROM boot device list; 10011 (NAND first) vs 10111 (SD first) differ only here"),
+    2: ("boot order [4:0]", True, "SYSBOOT[4:0] selects the ROM boot device list; 10011 (NAND first) vs 10111 (SD first, P8.43 held high at power-on) differ only here"),
     3: ("boot order [4:0]", True, "SYSBOOT[4:0] selects the ROM boot device list"),
     4: ("boot order [4:0]", True, "SYSBOOT[4:0] selects the ROM boot device list"),
     5: ("CLKOUT1", False, "1 = the ROM drives CLKOUT1 on xdma_event_intr0 during boot"),

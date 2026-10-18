@@ -131,7 +131,7 @@ TRM spruh73q, table 26-7. "Test board" = the latched value `0x4213` (CONTROL_STA
 |---|---|---|---|---|---|
 | 0 | P8.45 | lcd_data0 | boot order [4:0] | 1 | different boot device list |
 | 1 | P8.46 | lcd_data1 | boot order | 1 | " |
-| 2 | P8.43 | lcd_data2 | boot order | 0 (1 on SD-only boards) | `10011` NAND first ↔ `10111` SD first |
+| 2 | P8.43 | lcd_data2 | boot order | 0 (1 when P8.43 is held at 3.3 V at power-on) | `10011` NAND first ↔ `10111` SD first |
 | 3 | P8.44 | lcd_data3 | boot order | 0 | different boot device list |
 | 4 | P8.41 | lcd_data4 | boot order | 1 | e.g. `00011` = UART0, SPI0, XIP, MMC0: no NAND |
 | 5 | P8.42 | lcd_data5 | CLKOUT1 enable | 0 | 1 = the ROM outputs CLKOUT1 on xdma_event_intr0; boots |
@@ -151,7 +151,7 @@ The boot orders that matter here (the full 32-row table is in `firmware/web/antm
 | [4:0] | order | where |
 |---|---|---|
 | `10011` | NAND, NANDI2C, MMC0, UART0 | most boards |
-| `10111` | MMC0, SPI0, UART0, USB0 | the SD-only boards (03-install) |
+| `10111` | MMC0, SPI0, UART0, USB0 | P8.43 held high at power-on: ROM boots from the SD card (03-install) |
 | `10010` | NAND, NANDI2C, USB0, UART0 | |
 | `11000` | SPI0, MMC0, USB0, UART0 | BeagleBone Black with the Boot button pressed |
 | `11100` | MMC1, MMC0, UART0, USB0 | BeagleBone Black default (eMMC; this board has none) |
@@ -164,25 +164,26 @@ i.e. P9.17/18/21/22, which `default` uses as RST0, RST1 and UART2.
 
 The order is set by resistors, but it is **not** fixed: anything that holds a SYSBOOT pin at the
 other level during power-on overrides the strap. That is exactly how the Boot button of the
-BeagleBone Black works (it pulls SYSBOOT2 low). On our boards the two variants differ only in
-SYSBOOT2 = P8.43:
-
-- a `10011` board (NAND first) holding P8.43 **high** at power-on boots `10111`: **SD first**;
-- a `10111` board (SD only) holding P8.43 **low** at power-on boots `10011`: **NAND first**,
-  without a card in the slot.
+BeagleBone Black works (it pulls SYSBOOT2 low). Our boards strap SYSBOOT2 = P8.43 low (`10011`,
+NAND first); holding P8.43 **at 3.3 V** while the power is applied latches `10111`: **SD first**,
+the ROM loads MLO and U-Boot from the card. **Verified** on a board with a direct wire from
+P8.43 to 3.3 V: that is the `Control_status {00420317}` in `logs/nand-write-1kom.txt`. (Earlier
+versions of these docs took that reading for a second board variant with a different resistor;
+there is no such variant.)
 
 How:
-- The override must win clearly against the strap resistor, whose value is unknown on this
-  board: **measure it first** (board unpowered: resistance P8.43 to GND and to 3.3 V, P9.3).
-  A jumper/resistor ~10x lower than the strap is enough as a test.
+- A direct connection to 3.3 V (P9.3/P9.4) works; a resistor of a few kΩ in series protects
+  against a wrong pin. The strap resistor's value is still unknown: measure it (board unpowered,
+  P8.43 to GND) if you want to size the override instead of shorting it.
 - In a final design gate it with reset, as TI and BeagleBoard recommend: a buffer
   (e.g. 74LVC1G125) that drives the level only while SYS_RESETn (P9.10) is low and is high-Z
   afterwards, so the pin is free as Q0 after the boot.
-- Only a power cycle applies the change. Check the result with `devmem 0x44E10040`.
-- **Not tested yet** on our boards.
+- Only a power cycle applies the change. Check the result with `devmem 0x44E10040` or the first
+  console line.
 
-Nothing else about the boot changes: U-Boot from NAND still looks for `uEnv.txt` on the card first
-(01-overview), so "SD first" only matters on a board whose NAND SPL/U-Boot is broken.
+Nothing else about the boot changes: U-Boot from NAND already looks for `uEnv.txt` on the card
+first (01-overview), so the override matters in two cases: a board whose NAND SPL/U-Boot is
+broken (recovery), and trying a new SPL/U-Boot from the card without writing mtd0-4 (03-install).
 
 ### Rules for circuits on these pins
 
@@ -209,7 +210,7 @@ From `boards/*.yaml` and the `hardware/breakout` schematics, against the test bo
 | pin | bit / strap | profile | circuit on the cape | risk |
 |---|---|---|---|---|
 | P8.45, P8.46 | 0, 1 / 1 | Q2, Q3 | 100k gate pull-down | **fights the pull-up**: verify |
-| P8.43 | 2 / 0 | Q0 | 100k gate pull-down | none here; **on a `10111` board it fights the pull-up** |
+| P8.43 | 2 / 0 | Q0 | 100k gate pull-down | none (strap is 0 too); a wire to 3.3 V for the SD-boot override still wins over 100k |
 | P8.44 | 3 / 0 | Q1 | 100k gate pull-down | none |
 | P8.41 | 4 / 1 | I2 | DIP switch / PC817 to GND | **closed at power-on → `00011`, no NAND in the list** |
 | P8.31 | 14 / 1 | I4 | DIP / PC817 / push button to GND | **active at power-on → crystal read as 19.2 MHz** |
