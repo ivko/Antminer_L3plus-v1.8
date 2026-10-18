@@ -51,6 +51,7 @@ and the recipes take files from `firmware/` via `ANTMINER_FIRMWARE_DIR`: there a
 | `antminer.py` | Windows, Linux | everything with the board from the PC: `config`, `console`, `uboot`, `netboot`, `deploy-dtb`, `feed`, `tftp`, `stage` |
 | `site.conf` (+ `site.local.conf`) | | the PC settings: IP, serial port, feed port, Yocto path |
 | `stage-out.sh` | WSL/Linux | copies the build results into `out/` (called by `antminer.py stage`) |
+| `pack-feed.sh` | WSL/Linux | packs the opkg feed into `out/antminer-feed-<date>.tar.gz` (called by `antminer.py feed pack`) |
 | `write-sd.ps1` | Windows | writes a `.wic` to an SD card (on Linux: `dd`) |
 | `tftp-server.py` | | the TFTP server that `antminer.py` uses (can also run standalone) |
 | `*.ps1` (netboot, deploy-dtb, uboot-cmd, serial, feed-server-*, serve-feed) | Windows | the previous versions of `antminer.py`; will be removed |

@@ -59,6 +59,23 @@ src/gz uri-antminer_bbb-0 http://192.168.200.104:8000/ipk/antminer_bbb
 If the PC has a different IP: edit the file on the board (with the overlay the change persists), or
 change `PACKAGE_FEED_URIS` in `~/antminer/yocto/build/conf/local.conf` and rebuild the images.
 
+### The feed on another server
+
+```sh
+python firmware/tools/antminer.py feed pack          # -> firmware/out/antminer-feed-<date>.tar.gz (+ .sha256)
+python firmware/tools/antminer.py feed pack --full   # also the -dbg/-src packages (~1.5 GB instead of ~0.26 GB)
+```
+The archive contains `ipk/<arch>/` with the packages and their indexes (`Packages`, `Packages.gz`).
+Unpack it into the web root of any HTTP server, e.g. for `ipk.example.com`:
+```sh
+scp firmware/out/antminer-feed-<date>.tar.gz user@ipk.example.com:/tmp/
+ssh user@ipk.example.com 'cd /var/www/ipk.example.com && rm -rf ipk && tar -xzf /tmp/antminer-feed-<date>.tar.gz'
+```
+Check: `http://ipk.example.com/ipk/all/Packages.gz` downloads. Then point the boards at it: in
+`/etc/opkg/base-feeds.conf` on the board replace `http://<PC>:8000` with `http://ipk.example.com`, or for
+new images set `PACKAGE_FEED_URIS = "http://ipk.example.com"` in `~/antminer/yocto/build/conf/local.conf`
+and rebuild.
+
 ## Installing
 
 ```sh
@@ -78,6 +95,8 @@ Useful packages from the feed:
 | `antminer-pinmux` | `antminer-dtb` and the DTB generator (comes with antminer-web) |
 | `libmodbus-dev`, `libgpiod-dev`, `gcc`, `g++`, `make` | for your own C programs on the board |
 | `python3`, `python3-pymodbus` | Python and Modbus |
+| `nano`, `mc` | text editor, Midnight Commander |
+| `nodejs`, `nodejs-npm` | Node.js 20 and npm |
 | `i2c-tools`, `libgpiod-tools`, `mtd-utils` | already in the image |
 
 The full list of packages that the build guarantees in the feed is in

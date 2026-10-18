@@ -9,6 +9,7 @@
     python antminer.py deploy-dtb breakout            # build the profile's DTB, write it to mtd6, reboot
     python antminer.py deploy-dtb breakout --netboot-only
     python antminer.py feed start|stop|status|serve   # opkg feed (HTTP) from the Yocto deploy directory
+    python antminer.py feed pack [--full]             # feed as out/antminer-feed-<date>.tar.gz for another server
     python antminer.py tftp                           # TFTP server for firmware/out in the foreground
     python antminer.py stage                          # copy build results into firmware/out (tools/stage-out.sh)
 
@@ -502,6 +503,11 @@ def cmd_feed(cfg, args):
             pass
         os.unlink(_pidfile())
         print(f"[feed] stopped (pid {pid})")
+    elif args.action == "pack":
+        script = unix_path(os.path.join(TOOLS, "pack-feed.sh"))
+        print("[feed] packing into firmware/out (takes a minute)")
+        _rc, out = run_unix(f"Y={cfg['YOCTO_DIR']} bash '{script}'{' --full' if args.full else ''}")
+        print(out)
     else:
         with socket.socket() as s:
             up = s.connect_ex(("127.0.0.1", port)) == 0
@@ -574,7 +580,8 @@ def main():
     p.set_defaults(fn=cmd_deploy_dtb)
 
     p = sub.add_parser("feed", help="opkg feed HTTP server")
-    p.add_argument("action", choices=("start", "stop", "status", "serve"))
+    p.add_argument("action", choices=("start", "stop", "status", "serve", "pack"))
+    p.add_argument("--full", action="store_true", help="pack: also the -dbg and -src packages")
     p.set_defaults(fn=cmd_feed)
 
     p = sub.add_parser("tftp", help="TFTP server (foreground)")
