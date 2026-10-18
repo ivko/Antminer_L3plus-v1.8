@@ -1,6 +1,6 @@
 SUMMARY = "Packages built for the opkg feed but not installed in the base initramfs"
 DESCRIPTION = "Heavier software for boards that use the UBIFS data overlay: OpenPLC runtime \
-with the on-target toolchain it needs, Python, debugging tools. 'bitbake antminer-feed-extras' \
+with the on-target toolchain it needs, Python, debugging tools, editors, Node.js + npm. 'bitbake antminer-feed-extras' \
 builds them all into tmp/deploy/ipk."
 LICENSE = "MIT"
 
@@ -19,4 +19,6 @@ RDEPENDS:${PN} = " \
     libmodbus-dev libgpiod-dev \
     bash \
     strace ldd \
+    nano mc \
+    nodejs nodejs-npm \
     "
