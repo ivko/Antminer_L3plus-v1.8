@@ -19,6 +19,7 @@ mining is removed; from Bitmain only the bootloader in NAND (SPL/U-Boot) and the
 | fix something that does not work | [docs/08-troubleshooting.md](docs/08-troubleshooting.md) |
 | change the code, the recipes or the UI | [docs/09-development.md](docs/09-development.md) |
 | see how fast the board reacts (latency measurements, method and results) | [docs/10-latency.md](docs/10-latency.md) |
+| know whether the board can be emulated in QEMU (feasibility study, what it would take) | [docs/11-qemu-emulation.md](docs/11-qemu-emulation.md) |
 
 The shortest path to a working board:
 1. Build (WSL): `bash firmware/yocto/setup-yocto.sh` (the first time takes ~2-4 h).
