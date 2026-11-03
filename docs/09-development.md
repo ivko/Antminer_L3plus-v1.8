@@ -5,7 +5,7 @@
 | path | role |
 |---|---|
 | `kernel/defconfig` | the **only** kernel config: used by both Yocto and `build-kernel.sh` |
-| `build-kernel.sh` | fast kernel + DTB without Yocto (clones linux-6.12.y into `~/antminer/linux`); `menuconfig` mode for changing the defconfig |
+| `build-kernel.sh` | fast kernel + DTB without Yocto (clones linux-6.12.y into `~/antminer/linux`); `menuconfig` mode for changing the defconfig. Builds the fleet PREEMPT_RT kernel in `~/antminer/linux-rt` (same tag + the external 6.12-rt patch) as `out/uImage.bin`; `RT=0` builds the plain kernel as `out/uImage-plain.bin` for comparisons |
 | `dts/am335x-antminer-base.dtsi` | the fixed part of the DTB: NAND and partitions, Ethernet, console, PMIC, SD, LEDs, disabled blocks |
 | `dts/am335x-antminer.dts` | **generated** from `pinmux/boards/default.yaml`; do not edit by hand |
 | `dts/bitmain/` | dump of the original Bitmain DTB, reference for the wiring |
@@ -28,7 +28,7 @@
 |---|---|
 | `conf/machine/antminer-bbb.conf` | cortexa8hf-neon, uImage at 0x80008000, DTB, initramfs format |
 | `conf/distro/antminer.conf` | poky + busybox init/mdev, glibc, ipk, `sysvinit` in DISTRO_FEATURES |
-| `recipes-kernel/linux/linux-antminer_6.12.bb` | kernel from tarball + `kernel/defconfig` + the DTS files from the repo |
+| `recipes-kernel/linux/linux-antminer_6.12.bb` | kernel from tarball + PREEMPT_RT patch + `kernel/defconfig` + the DTS files from the repo |
 | `recipes-core/images/antminer-image.bb` | the NAND image (checks the 20 MB limit) |
 | `recipes-core/images/antminer-provision-image.bb` + `wic/antminer-sd.wks` | the SD card |
 | `recipes-core/images/antminer-feed-image.bb` | dummy image, makes bitbake write the ipk files of the feed packages |

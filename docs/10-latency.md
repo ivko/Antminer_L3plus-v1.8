@@ -31,6 +31,18 @@ GND (P9.1) ───────────────────────
   smallest latency of interest (20 kHz for a 50 ms cycle, ≥ 1 MHz for 1 ms cycles, 10–100 MHz for
   bare metal). Capture ≥ 100 s (≈ 1000 edges). Export CSV (KingstVIS: `Time[s], Channel 0, Channel 1`,
   one row per change).
+- Since 2026-11-03 the same LA2016 is driven from the PC with **sigrok** (`E:\tools\sigrok-cli`,
+  `E:\tools\pulseview`; driver `kingst-la2016`, WinUSB via Zadig, firmware extracted from the
+  Linux KingstVIS with `sigrok-fwextract-kingst-la2016` into `%LOCALAPPDATA%\sigrok-firmware`),
+  so a capture is one command and needs nobody at the GUI:
+  ```
+  sigrok-cli -d kingst-la2016 -C CH0,CH1 -c samplerate=2m:voltage_threshold=1.4-1.4 --time 100000 -o capture.sr
+  python firmware/tools/latency.py capture.sr
+  ```
+  CH0 = stimulus, CH1 = response, 1.4 V threshold (the LA2016 has no 3.3 V setting; 1.4 V is
+  fine for 3.3 V logic). 2 MHz gives 0.5 µs resolution; 10 MHz for 100 s was unreliable over
+  USB. `latency.py` reads the `.sr` directly. Do not export with `-O csv:dedup=true`: its time
+  column is the row number.
 - Analysis: `python firmware/tools/latency.py capture.csv` pairs every stimulus edge with the
   next response edge and prints min / median / mean / p99 / p99.9 / max, jitter, stdev and a
   histogram. Raw captures are kept in `docs/latency/`.
@@ -44,6 +56,8 @@ GND (P9.1) ───────────────────────
 | `firmware/tools/latency-load.sh` | *L | the background load on the board: `cpu` (2 busy shells), `nand` (UBIFS write loop on /data), `net` (UDP receiver on port 9) |
 | `firmware/tools/latency-flood.py` | *L | the UDP sender on the PC (3000 pkt/s by default) |
 | `firmware/baremetal/echo.c`, `start.S`, `link.ld`, `build.sh` | 7 | the bare-metal echo (sets up the pads, GPIO2 and the eHRPWM0 stimulus itself) |
+| `firmware/tools/latency-timer.c` | RT | timer wake-up latency (cyclictest-style, no wiring): 1 ms `clock_nanosleep`, SCHED_FIFO 80, min/mean/p99/p99.9/max + histogram |
+| `cyclictest` (package `rt-tests`, in the feed) | RT | the reference tool for the same measurement: `cyclictest -m -p80 -i1000 -l60000 -q -h 2000` |
 | `firmware/tools/latency.py` | all | the analysis of a KingstVIS CSV |
 | `docs/latency/<date>-<variant>.csv` / `.txt` | all | the raw capture and the output of `latency.py` for it |
 
@@ -57,6 +71,10 @@ gcc -O2 -o latency-echo latency-echo.c -lgpiod
 ./latency-echo          # 3: busy poll, SCHED_FIFO 80, mlockall
 ./latency-echo 1000     # 4: every 1000 us (clock_nanosleep)
 ./latency-echo -e       # 5/6: wake on the I0 edge; prints edge timestamp -> thread running
+
+# timer wake-up latency (no wiring needed), 60 s at 1 ms; cyclictest gives the same numbers
+gcc -O2 -o latency-timer latency-timer.c && ./latency-timer 60 1000
+opkg install rt-tests && cyclictest -m -p80 -i1000 -l60000 -q -h 2000
 
 # variants 5c/6: fixed CPU frequency
 echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
@@ -163,6 +181,104 @@ raise the whole floor by ~130 us (compact distribution shifted from 49 to 213 us
 NAND driver keeps the CPU in non-preemptible sections of about that length while a write is
 in progress, and UBIFS/dd keep writes going continuously.
 
+## PREEMPT_RT (2026-11-03)
+
+Mainline 6.12 has no `ARCH_SUPPORTS_RT` for 32-bit ARM, so `CONFIG_PREEMPT_RT` cannot be
+selected from the plain tree. The external patch `patch-6.12.111-rt21` (53 files, 2268 lines)
+adds it and applies cleanly on 6.12.112. For these measurements `build-kernel.sh` kept a second
+worktree (`~/antminer/linux-rt`) with the patch applied, built the same `kernel/defconfig` with
+only the preemption model changed (`PREEMPT_RT=y`), and wrote `firmware/out/uImage-rt.bin`
+(2.77 MiB, fits the NAND kernel partition). The kernel was netbooted with the normal initramfs
+and the overlay from NAND: boots in the same time, all services start, threaded IRQs
+(`irq/NN-...` kernel threads) are visible in `ps`.
+
+Measured first without wiring: the timer wake-up latency of a SCHED_FIFO 80 thread with a
+1 ms period (the "cycle jitter" a PLC runtime would see), with `latency-timer.c` and
+`cyclictest` side by side, 60 000 wake-ups per run, `performance` governor, OpenPLC stopped.
+Load = `latency-load.sh start cpu nand net` + `latency-flood.py` at 3000 pkt/s. Raw output:
+`docs/latency/2026-11-03-timer-rt-vs-plain.txt`.
+
+| kernel | state | tool | min | mean | p99 | p99.9 | max |
+|---|---|---|---|---|---|---|---|
+| 6.12.112 (PREEMPT none) | idle | latency-timer | 15 µs | 23.7 µs | 95 µs | 267 µs | 378 µs |
+| 6.12.112 (PREEMPT none) | idle | cyclictest | 14 µs | 18 µs | | | 179 µs |
+| 6.12.112 (PREEMPT none) | load cpu+nand+net | latency-timer | 23 µs | 54.9 µs | 200 µs | 276 µs | 351 µs |
+| 6.12.112 (PREEMPT none) | load cpu+nand+net | cyclictest | 18 µs | 53 µs | | | 347 µs |
+| **6.12.112-rt21 PREEMPT_RT** | idle | latency-timer | 13 µs | 13.9 µs | 15 µs | 23 µs | **53 µs** |
+| 6.12.112-rt21 PREEMPT_RT | idle | cyclictest | 12 µs | 15 µs | | | 69 µs |
+| **6.12.112-rt21 PREEMPT_RT** | load cpu+nand+net | latency-timer | 18 µs | 35.6 µs | 58 µs | 67 µs | **82 µs** |
+| 6.12.112-rt21 PREEMPT_RT | load cpu+nand+net | cyclictest | 17 µs | 35 µs | | | 79 µs |
+| 6.12.112-rt21 PREEMPT_RT | load cpu+nand only | latency-timer | 21 µs | 39.8 µs | 72 µs | 76 µs | 84 µs |
+
+Reading: the two tools agree within a few µs, so `latency-timer.c` can be used where the feed
+is not reachable. On the plain kernel even an idle system has a tail to ~380 µs (p99.9 267 µs):
+the periodic housekeeping of the kernel (timers, RCU, the network stack for the few packets of
+SSH/DHCP, NAND background work) runs in non-preemptible context and delays the wake-up. Under
+load the plain kernel's p99 is 200 µs and the max ~350 µs, the same order as the 1.4 ms tail of
+the interrupt echo in 5cL/6L (that one also contains the gpiolib IRQ thread, which the timer
+path does not). PREEMPT_RT removes the tail: idle max 53 µs with p99.9 at 23 µs, and under the
+full load max 82 µs with p99 58 µs, i.e. the loaded RT kernel has a smaller tail than the idle
+plain kernel. The mean under load (35 µs) is the cost of sharing one core with the hogs and the
+threaded softirqs; the floor (13 µs idle) is unchanged, it is the timer IRQ + wake-up itself.
+The NAND writes that cost +130 µs per event on the plain kernel (5cL-nand) no longer show as
+a floor shift: the NAND driver's polling now runs in a preemptible IRQ thread below
+SCHED_FIFO 80.
+
+### The I0 -> Q0 interrupt echo on PREEMPT_RT (same day, same wiring, sigrok captures)
+
+Variants 5c (idle) and 6L (cpu + nand + 3000 pkt/s) repeated on both kernels within one hour,
+`latency-echo -e`, SCHED_FIFO 80, `performance`, 100 s at 2 MHz, 1068 edges each. The plain
+kernel was measured again the same way so that the comparison does not depend on the October
+captures (which were taken with KingstVIS at 200 kHz). Raw data: `docs/latency/2026-11-03-*.sr`
+with the `latency.py` report next to each as `.txt`.
+
+| kernel | state | min | median | p99 | p99.9 | max | `latency-echo` IRQ -> thread (min / mean / max) |
+|---|---|---|---|---|---|---|---|
+| 6.12.112 (PREEMPT none) | idle | 39.5 µs | 42.5 µs | 58 µs | 65 µs | 84 µs | 27 / 31 / 137 µs |
+| 6.12.112 (PREEMPT none) | load cpu+nand+net | 146.5 µs | 203 µs | 346.5 µs | 398.5 µs | 422.5 µs | 100 / 157 / 349 µs |
+| 6.12.112-rt21 PREEMPT_RT | idle | 56 µs | 59.5 µs | 81 µs | 107.5 µs | 108.5 µs | 37 / 42 / 111 µs |
+| 6.12.112-rt21 PREEMPT_RT | load cpu+nand+net | 166.5 µs | 187 µs | 304.5 µs | 324 µs | 330.5 µs | 98 / 120 / 242 µs |
+| 6.12.112-rt21 PREEMPT_RT | load, repeat | 167.5 µs | 187 µs | 316 µs | 355.5 µs | 361 µs | 97 / 121 / 278 µs |
+| 6.12.112-rt21 PREEMPT_RT | load, GPIO bank IRQ thread at FIFO 90 | 165 µs | 187 µs | 308 µs | 327 µs | 327.5 µs | 99 / 120 / 281 µs |
+
+Reading: on the interrupt path PREEMPT_RT costs ~17 µs on the median of an idle system (59.5
+vs 42.5 µs): the hard IRQ now only wakes the gpiolib IRQ thread, which wakes the user thread,
+i.e. one more full context switch, and every spinlock on the way is a sleeping lock. Under load
+the RT kernel's median is lower (187 vs 203 µs), its p99 lower (305 vs 347 µs) and its maximum
+lower (330 vs 422 µs), but the gain is much smaller than on the timer path (table above: 82 vs
+351 µs max), and both kernels have the same ~150-165 µs floor under load. So the tail of the
+echo under load is not non-preemptible kernel work any more (RT removed that, as the timer test
+shows); what remains is the wake-up chain itself competing for one core with the load (the CPU
+hogs evict the caches, the network IRQ thread and the NAND path run at their own priorities)
+and whatever the GPIO path does with interrupts disabled. Raising the GPIO bank's IRQ thread to
+SCHED_FIFO 90 (above the user thread) changes nothing, so the IRQ thread is not what waits.
+Note that today's plain-kernel load capture (max 422 µs) is far below the October one (6L: max
+1.45 ms); the October system had other things running (OpenPLC web server, no `performance`
+pinning of the IRQ affinity...) and the LA sampled at 200 kHz; the same-day pair is the one to
+trust for the kernel comparison.
+
+What this means: for a periodic PLC cycle (timer-driven, the way OpenPLC and any runtime of
+our own work) PREEMPT_RT is a clear win: 1 ms cycles with < 100 µs jitter under full load
+instead of 350 µs. For reacting to a single input edge from user space the kernel choice
+matters less than the design: no flash writes and no network floods during control, or
+move the edge handling into the kernel (a small driver) or out of Linux (bare metal, 560 ns).
+The fleet kernel can become PREEMPT_RT at no cost in boot time or image size; the cost is
+~17 µs on an idle edge response and the external patch to carry with each kernel update.
+Decision (2026-11-03): the fleet kernel is PREEMPT_RT (`linux-antminer_6.12.bb`,
+`kernel/defconfig`).
+
+**Pitfall found when switching (2026-11-03): a saturating RT task freezes the RT kernel.**
+OpenPLC runs its cycle thread at SCHED_FIFO 30. With a 1 ms task (`gpio-echo-1ms.st`, ~1.3 ms of
+work per cycle) the thread never sleeps. On the plain kernel softirqs and timers run in interrupt
+context, so the board stays usable (load ~5). On PREEMPT_RT the timer softirq runs in the kernel
+thread `ktimers/0` at SCHED_FIFO 1, RCU callbacks in `rcuc/0`/`rcub/0` (FIFO 1) and the rest in
+`ksoftirqd/0`: all below OpenPLC, so they starve, timers stop firing and the board froze ~95 s
+after every boot until the hardware watchdog reset it into the NAND kernel. Raising these four
+threads to SCHED_FIFO 40 (above OpenPLC, below the IRQ threads at 50) fixed it: the same program
+ran for 5 minutes with load comparable to the plain kernel. `antminer-early` (init, S36) now does
+this on every boot when `/sys/kernel/realtime` is 1 (busybox `chrt`). Rule for anything new:
+a real-time task that can run back to back must use a priority below 40.
+
 ## Summary (2026-10-07)
 
 Same board, same wiring, same stimulus; only the software changes. "x bare metal" is the median
@@ -220,9 +336,9 @@ What this means for the project:
    stack is.
 
 Planned variants: bare metal with a GPIO interrupt instead of polling (the no-OS interrupt
-latency), bare metal while serving Modbus RTU on a UART (its 'under load'); PREEMPT_RT kernel
-(6.12-rt) under the same loads; the same on a PREEMPT_RT
-kernel (needs the external 6.12-rt patches: 32-bit ARM has no ARCH_SUPPORTS_RT in 6.12); bare metal / RTOS on
-the A8 loaded by U-Boot (no Linux). The AM3352 has no PRU (verified: the PRU-ICSS address space
+latency), bare metal while serving Modbus RTU on a UART (its 'under load'); the echo with a
+small in-kernel handler instead of the gpiolib threaded path (on both kernels); bare
+metal / RTOS on the A8 loaded by U-Boot (no Linux). Done on 2026-11-03: PREEMPT_RT, timer
+path and interrupt echo, idle and loaded (see the PREEMPT_RT section). The AM3352 has no PRU (verified: the PRU-ICSS address space
 gives a bus error and its PRCM module never leaves the disabled state), so a PRU variant is not
 possible on this board.

@@ -6,8 +6,8 @@
 
 The `meta-antminer` layer describes the board as a Yocto machine and builds:
 
-- `uImage` of linux-stable 6.12 from `../kernel/defconfig` and `../dts/am335x-antminer.dts` (the very
-  same files as build-kernel.sh, there is no second copy);
+- `uImage` of linux-stable 6.12 with the PREEMPT_RT patch, from `../kernel/defconfig` and
+  `../dts/am335x-antminer.dts` (the very same files as build-kernel.sh, there is no second copy);
 - `antminer-image`: initramfs for the NAND root partition (20 MB), busybox init + mdev, glibc, dropbear,
   libgpiod, libmodbus, mtd-utils, i2c-tools, opkg;
 - ipk feed in `tmp/deploy/ipk` for the boards with more software.

@@ -1,7 +1,7 @@
 # Antminer BB-Black V1.8 as a Modbus / OpenPLC I/O module
 
 The controller board from the Antminer L3+ (TI AM3352, 256 MB RAM, 256 MB NAND, Ethernet) is
-turned into a cheap industrial I/O module: modern Linux (6.12), configurable pins,
+turned into a cheap industrial I/O module: modern Linux (6.12, PREEMPT_RT), configurable pins,
 Modbus TCP/RTU, OpenPLC, a web interface for provisioning and configuration. Everything related to
 mining is removed; from Bitmain only the bootloader in NAND (SPL/U-Boot) and the board wiring remain.
 

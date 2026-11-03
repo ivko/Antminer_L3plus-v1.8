@@ -1,0 +1,33 @@
+Timer wake-up latency (firmware/tools/latency-timer.c and cyclictest from rt-tests 2.6), 2026-11-03.
+Board antminer-731c92, cpufreq performance (1 GHz), OpenPLC stopped, SCHED_FIFO 80, 1 ms period,
+60000 wake-ups per run. Load = latency-load.sh start cpu nand net + latency-flood.py 3000 pkt/s.
+PREEMPT_RT kernel = 6.12.112 + patch-6.12.111-rt21 (RT=1 bash firmware/build-kernel.sh), netbooted.
+Plain kernel = 6.12.112 from NAND (same defconfig, PREEMPT none).
+
+=== PREEMPT_RT, idle
+latency-timer: period 1000 us, 60000 wake-ups: min 13 us, mean 13.9 us, p99 15 us, p99.9 23 us, max 53 us
+histogram (us: count): 10-20:59804 20-30:189 30-50:5 50-75:2
+cyclictest -m -p80 -i1000 -l60000 -q -h 200: Min 12  Avg 15  Max 69 us, overflows 0
+
+=== PREEMPT_RT, load cpu+nand (network flood not running in this run)
+latency-timer: period 1000 us, 60000 wake-ups: min 21 us, mean 39.8 us, p99 72 us, p99.9 76 us, max 84 us
+histogram (us: count): 20-30:15968 30-50:28911 50-75:14921 75-100:200
+
+=== PREEMPT_RT, load cpu+nand+net (rx 180k packets during the run)
+latency-timer: period 1000 us, 60000 wake-ups: min 18 us, mean 35.6 us, p99 58 us, p99.9 67 us, max 82 us
+histogram (us: count): 10-20:34 20-30:12798 30-50:44518 50-75:2644 75-100:6
+cyclictest -m -p80 -i1000 -l60000 -q -h 2000 (rx 181k packets): Min 17  Avg 35  Max 79 us, overflows 0
+
+=== plain 6.12.112 (PREEMPT none), idle
+latency-timer: period 1000 us, 60000 wake-ups: min 15 us, mean 23.7 us, p99 95 us, p99.9 267 us, max 378 us
+histogram (us: count): 10-20:39578 20-30:13987 30-50:2395 50-75:3213 75-100:250 100-150:238 150-200:135 200-300:174 300-500:30
+cyclictest -m -p80 -i1000 -l60000 -q -h 2000: Min 14  Avg 18  Max 179 us, overflows 0
+
+=== plain 6.12.112 (PREEMPT none), load cpu+nand+net (rx 360k packets during the two runs)
+latency-timer: period 1000 us, 60000 wake-ups: min 23 us, mean 54.9 us, p99 200 us, p99.9 276 us, max 351 us
+histogram (us: count): 20-30:6764 30-50:31973 50-75:9819 75-100:5348 100-150:3547 150-200:1932 200-300:603 300-500:14
+cyclictest -m -p80 -i1000 -l60000 -q -h 2000: Min 18  Avg 53  Max 347 us, overflows 0
+
+Not measured this time: the I0 -> Q0 echo (latency-echo -e / logic analyzer). The eHRPWM stimulus
+was running (debugfs: pwm-1 requested enabled, period 187370000 ns) but I0 stayed at 1: the jumper
+P9.29 -> P8.39 was not connected.

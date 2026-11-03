@@ -19,6 +19,7 @@ RDEPENDS:${PN} = " \
     libmodbus-dev libgpiod-dev \
     bash \
     strace ldd \
+    rt-tests util-linux-chrt \
     nano mc \
     nodejs nodejs-npm \
     "

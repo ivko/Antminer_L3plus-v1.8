@@ -27,12 +27,20 @@ $ESC = [char]27
 $tftpProc = $null
 $outDir = Join-Path (Split-Path $PSScriptRoot -Parent) "out"
 if (-not (Get-NetUDPEndpoint -LocalPort 69 -ErrorAction SilentlyContinue)) {
-    $srv = Join-Path $PSScriptRoot "tftp-server.py"
-    $tftpProc = Start-Process python -ArgumentList "`"$srv`" --root `"$outDir`" --bind 0.0.0.0 --port 69" `
-        -PassThru -WindowStyle Hidden
+    # python (tftp-server.py) if installed, otherwise the pure PowerShell tftp-server.ps1
+    $py = Get-Command python -ErrorAction SilentlyContinue
+    if ($py -and $py.Source -notmatch 'WindowsApps\\python\.exe$') {
+        $srv = Join-Path $PSScriptRoot "tftp-server.py"
+        $tftpProc = Start-Process $py.Source -ArgumentList "`"$srv`" --root `"$outDir`" --bind 0.0.0.0 --port 69" `
+            -PassThru -WindowStyle Hidden
+    } else {
+        $srv = Join-Path $PSScriptRoot "tftp-server.ps1"
+        $tftpProc = Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$srv`" -Root `"$outDir`" -Bind 0.0.0.0 -Port 69" `
+            -PassThru -WindowStyle Hidden
+    }
     Start-Sleep -Seconds 2
-    if ($tftpProc.HasExited) { throw "tftp-server.py failed to start (python missing? port 69 blocked?)" }
-    Write-Host "[netboot] started tftp-server.py (pid $($tftpProc.Id)) serving $outDir"
+    if ($tftpProc.HasExited) { throw "$(Split-Path $srv -Leaf) failed to start (port 69 blocked?)" }
+    Write-Host "[netboot] started $(Split-Path $srv -Leaf) (pid $($tftpProc.Id)) serving $outDir"
 } else {
     Write-Host "[netboot] something already listens on UDP 69, using it"
 }

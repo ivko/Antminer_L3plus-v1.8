@@ -96,6 +96,7 @@ Useful packages from the feed:
 | `libmodbus-dev`, `libgpiod-dev`, `gcc`, `g++`, `make` | for your own C programs on the board |
 | `python3`, `python3-pymodbus` | Python and Modbus |
 | `nano`, `mc` | text editor, Midnight Commander |
+| `rt-tests` | `cyclictest` and friends for latency measurements (docs/10-latency.md); pulls in `numactl` |
 | `nodejs`, `nodejs-npm` | Node.js 20 and npm |
 | `i2c-tools`, `libgpiod-tools`, `mtd-utils` | already in the image |
 

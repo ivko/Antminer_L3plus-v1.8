@@ -39,7 +39,7 @@ bash /mnt/e/Antminer/repo/firmware/yocto/setup-yocto.sh
 The script:
 1. installs the host packages for Yocto (asks for `sudo` once);
 2. clones `poky` and `meta-openembedded` (branch scarthgap) into `~/antminer/yocto`;
-3. downloads kernel 6.12.112 and checks its sha256;
+3. downloads kernel 6.12.112 and the PREEMPT_RT patch `patch-6.12.111-rt21` and checks their sha256;
 4. writes `build/conf/local.conf` and `bblayers.conf` (only if they do not exist);
 5. starts the full build in the background.
 
@@ -95,7 +95,10 @@ It puts the latest results in `firmware/out/` under fixed names (`uImage-yocto.b
 
 ## Reproducibility
 
-- The kernel is pinned: 6.12.112, sha256 in `linux-antminer_6.12.bb`.
+- The kernel is pinned: 6.12.112 + `patch-6.12.111-rt21` (PREEMPT_RT), both sha256 in
+  `linux-antminer_6.12.bb`. A kernel update needs the matching rt patch from
+  `cdn.kernel.org/pub/linux/kernel/projects/rt/6.12/`; the recipe fails the build if
+  `CONFIG_PREEMPT_RT` does not end up in the config.
 - `poky` and `meta-openembedded` are cloned as the latest of branch scarthgap. The build from
   2026-10 uses poky `3a3d07f625ae` and meta-openembedded `0f00f8b9a219`. If a new version
   breaks something, `git checkout` these commits in `~/antminer/yocto/poky` and `meta-openembedded`.

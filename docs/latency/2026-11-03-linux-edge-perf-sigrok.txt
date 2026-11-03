@@ -1,0 +1,33 @@
+sigrok .sr: 200003396 samples at 2 MHz, channels ['CH0', 'CH1']
+capture       99.99 s, 2137 rows
+pairs      1068   (stimulus edges 1068, unanswered 0)
+min           39.50 us
+median        42.50 us
+mean          44.03 us
+p99           58.00 us
+p99.9         65.00 us
+max           84.00 us
+jitter        44.50 us   (max - min)
+stdev          4.01 us
+
+histogram
+   39.50 us  ######################################## 400
+   41.72 us  #############################            297
+   43.95 us  ##########                               105
+   46.17 us  #########                                96
+   48.40 us  ##########                               104
+   50.63 us  ###                                      36
+   52.85 us  #                                        10
+   55.08 us                                           9
+   57.30 us                                           4
+   59.53 us                                           4
+   61.75 us                                           0
+   63.98 us                                           2
+   66.20 us                                           0
+   68.43 us                                           0
+   70.65 us                                           0
+   72.88 us                                           0
+   75.10 us                                           0
+   77.33 us                                           0
+   79.55 us                                           0
+   81.78 us                                           1

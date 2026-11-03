@@ -254,3 +254,13 @@ from the shell (builtin echo) reboots; verified 2026-10-06.
   (root without password) is still in the image.
 - Modbus TCP slave daemon on top of libgpiod/libmodbus as a lighter replacement for OpenPLC in the initramfs.
 - The OpenPLC web UI shows the layer as "Blank Linux"; own entry in the list of hardware layers.
+- PREEMPT_RT (2026-11-03, done): the fleet kernel is 6.12.112 + `patch-6.12.111-rt21` (the
+  external patch adds `ARCH_SUPPORTS_RT` for 32-bit ARM), `CONFIG_PREEMPT_RT=y` in
+  `kernel/defconfig`, the patch in the SRC_URI of `linux-antminer_6.12.bb`; `build-kernel.sh`
+  builds the same by default (`RT=0` = plain kernel for comparisons). Timer wake-up jitter under
+  load drops from max ~350 µs to ~80 µs; the I0 -> Q0 interrupt echo gains little (max 330 vs
+  422 µs under load, +17 µs idle median), see docs/10-latency.md, PREEMPT_RT section. Lost:
+  `LEDS_TRIGGER_CPU` (not available with RT, unused). Pitfall: OpenPLC with a 1 ms task
+  (SCHED_FIFO 30, never sleeps) starved `ktimers`/`rcuc` and froze the board; `antminer-early`
+  now raises those kernel threads to FIFO 40 on RT kernels. The logic analyzer is now driven from the
+  PC with sigrok-cli (E:\tools), see docs/10.

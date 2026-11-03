@@ -16,6 +16,24 @@ case "$1" in
         echo "Starting hardware watchdog (60 s)"
         /sbin/watchdog -T 60 -t 10 /dev/watchdog
     fi
+
+    # PREEMPT_RT: timers (ktimers), RCU callbacks (rcuc/rcub) and the remaining softirqs
+    # (ksoftirqd) run in kernel threads at SCHED_FIFO 1 or SCHED_OTHER. A real-time task that
+    # saturates the CPU (OpenPLC runs its cycle at SCHED_FIFO 30; a 1 ms task takes ~1.3 ms
+    # on this CPU) starves them, timers stop firing and the board freezes until the watchdog
+    # resets it (seen 2026-11-03, ~95 s after boot). Put them above the application RT tasks
+    # and below the IRQ threads (FIFO 50). RT tasks that may run back to back must stay
+    # below this priority. On the plain kernel (no /sys/kernel/realtime) nothing is changed.
+    if [ "$(cat /sys/kernel/realtime 2>/dev/null)" = "1" ]; then
+        prio=${ANTMINER_KTHREAD_PRIO:-40}
+        for d in /proc/[0-9]*; do
+            read -r name < "$d/comm" 2>/dev/null || continue
+            case "$name" in
+                ktimers/*|rcuc/*|rcub/*|ksoftirqd/*) chrt -f -p "$prio" "${d#/proc/}" >/dev/null 2>&1 ;;
+            esac
+        done
+        echo "PREEMPT_RT: ktimers/rcuc/rcub/ksoftirqd at SCHED_FIFO $prio"
+    fi
     ;;
   stop)
     echo "watchdog: cannot be stopped on this hardware (board would reboot); leaving it running"

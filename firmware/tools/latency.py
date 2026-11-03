@@ -9,11 +9,16 @@ should be followed by one edge on B; the delay between them is the latency of th
     python latency.py capture.csv --stim 2 --resp 5 --edge rising
     python latency.py capture.csv --rate 100e6           # export without a time column: sample index / rate
     python latency.py --selftest
+    python latency.py capture.sr                         # sigrok session file (sigrok-cli -o capture.sr)
 
 CSV formats handled: a header row naming the columns, optional comment lines starting with ';' or
 '#', first column = time (s, ms, us or ns, taken from the header) or a sample number; then one
 column per channel with 0/1. Rows are only the samples where something changed (KingstVIS,
 PulseView) or every sample: both work.
+
+sigrok: capture with `sigrok-cli -d kingst-la2016 -C CH0,CH1 -c samplerate=2m --time 100000 -o x.sr`
+and analyse the .sr directly (needs numpy for speed). Do not use `-O csv:dedup=true`: its time
+column is the row number, not the time.
 """
 import argparse
 import csv
@@ -36,10 +41,15 @@ def read_csv(path, rate):
             cell = row[0].strip()
             if header is None and not re.match(r"^-?[\d.]+(e[-+]?\d+)?$", cell, re.I):
                 header = [c.strip().lower() for c in row]
-                m = re.search(r"[\[(]\s*(s|sec|ms|us|µs|ns)\s*[\])]|\b(ms|us|µs|ns)\b", header[0])
-                unit = (m.group(1) or m.group(2)) if m else "s"
+                # KingstVIS: "Time[s]"; sigrok-cli (-O csv:time=true): "microseconds", "seconds"...
+                m = re.search(r"[\[(]\s*(s|sec|ms|us|µs|ns)\s*[\])]|\b(ms|us|µs|ns)\b"
+                              r"|(milli|micro|nano)?seconds", header[0])
+                unit = (m.group(1) or m.group(2) or {"milli": "ms", "micro": "us", "nano": "ns",
+                                                      None: "s"}[m.group(3)]) if m else "s"
                 scale = UNIT.get(unit, 1.0)
                 continue
+            if not re.match(r"^-?[\d.]+(e[-+]?\d+)?$", cell, re.I):
+                continue                # sigrok-cli: "FRAME-END" markers, repeated header lines
             vals = [c.strip() for c in row]
             if cols is None:
                 cols = [[] for _ in vals[1:]]
@@ -49,6 +59,53 @@ def read_csv(path, rate):
                 cols[i].append(1 if v in ("1", "1.0", "true", "high") else 0)
     if not times:
         sys.exit("no samples in the file")
+    return times, cols
+
+
+def read_sr(path):
+    """sigrok session (.sr = zip: 'metadata' ini + 'logic-1-N' raw samples, unitsize bytes each)
+    -> (times of the samples where any channel changed, channel columns), like read_csv"""
+    import configparser
+    import zipfile
+    try:
+        import numpy as np
+    except ImportError:
+        sys.exit("reading .sr needs numpy: python -m pip install numpy")
+    with zipfile.ZipFile(path) as z:
+        meta = configparser.ConfigParser()
+        meta.read_string(z.read("metadata").decode())
+        dev = meta["device 1"]
+        m = re.match(r"([\d.]+)\s*([kMG]?)Hz", dev["samplerate"])
+        rate = float(m.group(1)) * {"": 1, "k": 1e3, "M": 1e6, "G": 1e9}[m.group(2)]
+        unitsize = int(dev.get("unitsize", 1))
+        nprobes = int(dev.get("total probes", 8 * unitsize))
+        probes = [dev.get(f"probe{i + 1}") for i in range(nprobes)]
+        used = [i for i, p in enumerate(probes) if p]          # enabled channels, bit i = probeN
+        prefix = dev.get("capturefile", "logic-1") + "-"
+        chunks = sorted((n for n in z.namelist() if n.startswith(prefix)),
+                        key=lambda n: int(n[len(prefix):]))
+        dtype = {1: "u1", 2: "<u2", 4: "<u4", 8: "<u8"}[unitsize]
+        mask = sum(1 << i for i in used)
+        idx_all, val_all, base, prev = [], [], 0, None
+        for name in chunks:
+            arr = np.frombuffer(z.read(name), dtype=dtype) & mask
+            if arr.size == 0:
+                continue
+            if prev is None:
+                change = np.concatenate(([0], np.flatnonzero(arr[1:] != arr[:-1]) + 1))
+            else:
+                change = np.flatnonzero(arr != np.concatenate(([prev], arr[:-1])))
+            idx_all.append(change + base)
+            val_all.append(arr[change])
+            prev = arr[-1]
+            base += arr.size
+    if not idx_all:
+        sys.exit("no samples in the file")
+    idx = np.concatenate(idx_all)
+    val = np.concatenate(val_all)
+    times = (idx / rate).tolist()
+    cols = [((val >> i) & 1).astype(int).tolist() for i in used]
+    print(f"sigrok .sr: {base} samples at {rate / 1e6:g} MHz, channels {[probes[i] for i in used]}")
     return times, cols
 
 
@@ -147,7 +204,7 @@ def main():
         return selftest()
     if not a.csv:
         ap.error("csv file required")
-    times, cols = read_csv(a.csv, a.rate)
+    times, cols = read_sr(a.csv) if a.csv.lower().endswith(".sr") else read_csv(a.csv, a.rate)
     if max(a.stim, a.resp) >= len(cols):
         sys.exit(f"the file has {len(cols)} channel columns")
     stim = edges(times, cols[a.stim], a.edge)
